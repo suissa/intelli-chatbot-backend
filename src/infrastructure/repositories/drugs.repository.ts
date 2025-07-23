@@ -3,15 +3,19 @@ import { Repository, Like, Raw } from 'typeorm';
 import { Remedio } from '../../domain/entities/remedio.entity';
 import { AppDataSource } from '../database/typeorm.config';
 
-export interface DrugsRepository {
+export interface IDrugsRepository {
   getAllDrugs(): Promise<Remedio[]>;
   getDrugById(id: number): Promise<Remedio | null>;
   searchDrugs(term: string): Promise<Remedio[]>;
   getActiveDrugs(): Promise<Remedio[]>;
+  updateCorrelatedProducts(
+    remedios: Remedio[],
+    correlacionados: Array<{ name: string; category: string; price: number }>
+  ): Promise<void>;
 }
 
 @injectable()
-export class DrugsRepositoryImpl implements DrugsRepository {
+export class DrugsRepository implements IDrugsRepository {
   private repository: Repository<Remedio>;
 
   constructor() {
@@ -31,6 +35,14 @@ export class DrugsRepositoryImpl implements DrugsRepository {
       console.error('Erro ao buscar todos os remédios:', error);
       throw new Error('Erro na conexão com o banco de dados');
     }
+  }
+  
+  async getDrugByName(name: string): Promise<Remedio[]> {
+    const remedios = await this.repository.find({
+      where: { nome: Raw(alias => `LOWER(${alias}) LIKE LOWER(:t)`, { t: `%${name.toLowerCase()}%` }) },
+      order: { nome: 'ASC' }
+    });
+    return remedios || [];
   }
 
   async getDrugById(id: number): Promise<Remedio | null> {
@@ -71,6 +83,22 @@ export class DrugsRepositoryImpl implements DrugsRepository {
       console.error('Erro ao buscar remédios:', error);
       throw new Error('Erro na conexão com o banco de dados');
     }
+  }
+
+  
+  async updateCorrelatedProducts(
+    remedios: Remedio[],
+    correlacionados: Array<{ name: string; category: string; price: number }>
+  ): Promise<void> {
+    if (remedios.length === 0) {
+      throw new Error('Nenhum remédio encontrado');
+    }
+    remedios.forEach(async (remedio) => {
+      await this.repository.update(remedio.id, {
+        produtosCorrelacionados: correlacionados
+      });
+    });
+    console.log(`✅ Remédios atualizados com ${correlacionados.length} correlacionados`);
   }
 
   async getActiveDrugs(): Promise<Remedio[]> {

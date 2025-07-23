@@ -1,5 +1,5 @@
 import { Atendimento, TipoAtendimento, StatusAtendimento } from '../../domain/entities';
-export interface AttendanceRepository {
+export interface IAttendanceRepository {
     getAllAttendances(): Promise<Atendimento[]>;
     getAttendanceById(id: string): Promise<Atendimento | null>;
     getAttendancesByPharmacy(pharmacyId: string): Promise<Atendimento[]>;
@@ -17,7 +17,7 @@ export interface AttendanceRepository {
     completeAttendance(id: string, response?: string): Promise<boolean>;
     cancelAttendance(id: string): Promise<boolean>;
 }
-export declare class AttendanceRepository implements AttendanceRepository {
+export declare class AttendanceRepository implements IAttendanceRepository {
     private repository;
     constructor();
     getAllAttendances(): Promise<Atendimento[]>;

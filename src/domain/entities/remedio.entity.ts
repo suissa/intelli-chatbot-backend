@@ -14,6 +14,12 @@ export class Remedio {
   @Column({ type: 'boolean', default: true })
   ativo!: boolean;
 
+  @Column('json', { name: 'produtos_correlacionados', nullable: true })
+      produtosCorrelacionados!: Array<{
+    name: string;
+    category: string;
+    price: number;
+  }>;
   // Métodos de negócio
   isAtivo(): boolean {
     return this.ativo;

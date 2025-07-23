@@ -1,1 +1,1 @@
-{"version":3,"file":"ocr.d.ts","sourceRoot":"","sources":["../../../src/domain/services/ocr.ts"],"names":[],"mappings":"AAKA,qBACa,UAAU;IACf,eAAe,CAAC,aAAa,EAAE,MAAM,GAAG,OAAO,CAAC,MAAM,CAAC;IAevD,yBAAyB,CAAC,WAAW,EAAE,MAAM,GAAG,OAAO,CAAC,MAAM,CAAC;YAevD,kBAAkB;YAKlB,4BAA4B;CAa3C"}
+{"version":3,"file":"ocr.d.ts","sourceRoot":"","sources":["../../../src/domain/services/ocr.ts"],"names":[],"mappings":"AAMA,qBACa,UAAU;IACf,eAAe,CAAC,aAAa,EAAE,MAAM,GAAG,OAAO,CAAC,MAAM,CAAC;IAevD,yBAAyB,CAAC,WAAW,EAAE,MAAM,GAAG,OAAO,CAAC,MAAM,CAAC;YAevD,kBAAkB;YAKlB,4BAA4B;CAmB3C"}

@@ -16,11 +16,14 @@ exports.AttendanceControllerImpl = void 0;
 const inversify_1 = require("inversify");
 const types_1 = require("../../shared/types");
 const entities_1 = require("../../domain/entities");
+const openai_service_1 = require("../../domain/services/openai.service");
 let AttendanceControllerImpl = class AttendanceControllerImpl {
-    constructor(attendanceRepository, drugImageProcessorService, textProcessorService) {
+    constructor(attendanceRepository, drugImageProcessorService, textProcessorService, drugsRepository, openaiService) {
         this.attendanceRepository = attendanceRepository;
         this.drugImageProcessorService = drugImageProcessorService;
         this.textProcessorService = textProcessorService;
+        this.drugsRepository = drugsRepository;
+        this.openaiService = openaiService;
     }
     async getAllAttendances(request, reply) {
         try {
@@ -444,6 +447,44 @@ let AttendanceControllerImpl = class AttendanceControllerImpl {
             });
         }
     }
+    async searchProductAndCorrelations(request, reply) {
+        try {
+            const { productName } = request.query;
+            if (!productName || productName.trim().length < 2) {
+                reply.status(400).send({
+                    success: false,
+                    error: 'Nome do produto é obrigatório e deve ter pelo menos 2 caracteres',
+                    message: 'Please provide a valid product name'
+                });
+                return;
+            }
+            console.log('🔍 Pesquisando produto e correlações:', productName);
+            const analysis = await this.openaiService.searchProductAndCorrelations(productName);
+            const textoDeVenda = analysis.textoDeVenda;
+            console.log('✅ Análise de produto e correlações gerada com sucesso');
+            console.log('🔍 Características do produto:', analysis.caracteristicasDoProduto);
+            console.log('🔍 Produtos correlacionados:', analysis.produtosCorrelacionados);
+            console.log('🔍 Texto de venda:', textoDeVenda);
+            reply.send({
+                success: true,
+                data: {
+                    product: productName,
+                    caractheristics: analysis.caracteristicasDoProduto,
+                    correlacionados: analysis.produtosCorrelacionados,
+                    textoDeVenda: textoDeVenda
+                },
+                message: 'Product analysis and correlations generated successfully'
+            });
+        }
+        catch (error) {
+            console.error('❌ Erro ao pesquisar produto e correlações:', error);
+            reply.status(500).send({
+                success: false,
+                error: 'Internal server error',
+                message: `Erro interno: ${error instanceof Error ? error.message : 'Erro desconhecido'}`
+            });
+        }
+    }
     async processDrugImage(request, reply) {
         try {
             console.log('📸 Processando imagem de remédio...');
@@ -504,6 +545,8 @@ exports.AttendanceControllerImpl = AttendanceControllerImpl = __decorate([
     __param(0, (0, inversify_1.inject)(types_1.TYPES.AttendanceRepository)),
     __param(1, (0, inversify_1.inject)(types_1.TYPES.DrugImageProcessorService)),
     __param(2, (0, inversify_1.inject)(types_1.TYPES.TextProcessorService)),
-    __metadata("design:paramtypes", [Object, Object, Object])
+    __param(3, (0, inversify_1.inject)(types_1.TYPES.DrugsRepository)),
+    __param(4, (0, inversify_1.inject)(types_1.TYPES.OpenAIService)),
+    __metadata("design:paramtypes", [Object, Object, Object, Object, openai_service_1.OpenAIService])
 ], AttendanceControllerImpl);
 //# sourceMappingURL=attendance.controller.js.map

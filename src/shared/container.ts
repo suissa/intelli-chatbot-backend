@@ -7,10 +7,10 @@ import { environment } from './config/environment';
 import { AppDataSource } from '../infrastructure/database/typeorm.config';
 
 // Repositories
-import { DrugsRepository, DrugsRepositoryImpl } from '../infrastructure/repositories/drugs.repository';
-import { AttendantRepository, AttendantRepository } from '../infrastructure/repositories/attendant.repository';
-import { PharmacyRepository, PharmacyRepository } from '../infrastructure/repositories/pharmacy.repository';
-import { AttendanceRepository, AttendanceRepository } from '../infrastructure/repositories/attendance.repository';
+import { DrugsRepository, DrugsRepository } from '../infrastructure/repositories/drugs.repository';
+import { IAttendantRepository, AttendantRepository } from '../infrastructure/repositories/attendant.repository';
+import { IPharmacyRepository, PharmacyRepository } from '../infrastructure/repositories/pharmacy.repository';
+import { IAttendanceRepository, AttendanceRepository } from '../infrastructure/repositories/attendance.repository';
 
 // Controllers
 import { DrugsController, DrugsControllerImpl } from '../application/controllers/drugs.controller';
@@ -31,10 +31,10 @@ container.bind(TYPES.Environment).toConstantValue(environment);
 container.bind(TYPES.DataSource).toConstantValue(AppDataSource);
 
 // Repositories
-container.bind<DrugsRepository>(TYPES.DrugsRepository).to(DrugsRepositoryImpl);
-container.bind<AttendantRepository>(TYPES.AttendantRepository).to(AttendantRepository);
-container.bind<PharmacyRepository>(TYPES.PharmacyRepository).to(PharmacyRepository);
-container.bind<AttendanceRepository>(TYPES.AttendanceRepository).to(AttendanceRepository);
+container.bind<DrugsRepository>(TYPES.DrugsRepository).to(DrugsRepository);
+container.bind<IAttendantRepository>(TYPES.AttendantRepository).to(AttendantRepository);
+container.bind<IPharmacyRepository>(TYPES.PharmacyRepository).to(PharmacyRepository);
+container.bind<IAttendanceRepository>(TYPES.AttendanceRepository).to(AttendanceRepository);
 
 // Controllers
 container.bind<DrugsController>(TYPES.DrugsController).to(DrugsControllerImpl);

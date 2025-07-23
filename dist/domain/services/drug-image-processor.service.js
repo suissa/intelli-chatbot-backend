@@ -77,27 +77,37 @@ let DrugImageProcessorServiceImpl = class DrugImageProcessorServiceImpl {
                     error: 'Não foi possível extrair texto suficiente da imagem'
                 };
             }
-            const drugs = await this.drugsRepository.searchDrugs(extractedText);
+            console.log('🤖 Enviando texto para extração de informações com OpenAI...');
+            const drugsInformation = await this.openaiService.extractDrugInformation(extractedText);
+            if (!drugsInformation) {
+                return {
+                    success: false,
+                    error: 'Não foi possível extrair informações do remédio'
+                };
+            }
+            console.log('💊 Informações extraídas:', drugsInformation);
+            const nomeComercial = (drugsInformation.match(/\*\*Nome Comercial:\*\*\s*([^\r\n]+)/i) || [, ''])[1].trim();
+            const nomeGenerico = (drugsInformation.match(/\*\*Nome Genérico:\*\*\s*([^\r\n]+)/i) || [, ''])[1].trim();
+            let nomeRemedio = nomeComercial;
+            if (!nomeGenerico.toLowerCase().includes('não especificado') && !nomeGenerico.toLowerCase().includes('não informado')) {
+                nomeRemedio = nomeGenerico;
+            }
+            const drugs = await this.drugsRepository.searchDrugs(nomeRemedio);
             console.log(`🔍 Encontrados ${drugs.length} remédios relacionados`);
-            if (drugs.length === 0) {
-                return {
-                    success: false,
-                    error: 'Nenhum remédio encontrado com base no texto extraído da imagem'
-                };
+            if (drugs.length > 0) {
+                console.log('💊 Remédio encontrado no banco:', drugs[0]?.nome);
             }
-            const drugInfo = drugs[0];
-            if (!drugInfo) {
-                return {
-                    success: false,
-                    error: 'Nenhum remédio encontrado'
-                };
+            else {
+                console.log('💊 Usando informações extraídas da IA');
             }
-            console.log('💊 Remédio encontrado:', drugInfo.nome);
-            const presentation = await this.openaiService.generateDrugPresentation(drugInfo);
+            const presentation = await this.openaiService.generateDrugPresentation(drugs[0]);
             console.log('✨ Apresentação gerada com sucesso');
             return {
                 success: true,
-                drugInfo,
+                drugInfo: {
+                    ...drugs[0],
+                    extractedInformation: drugsInformation
+                },
                 presentation
             };
         }

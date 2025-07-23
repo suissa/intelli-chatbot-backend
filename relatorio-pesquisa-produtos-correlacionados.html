@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatório - Pesquisa de Produtos e Correlações</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #fff;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+            text-align: center;
+        }
+
+        h2 {
+            color: #34495e;
+            margin: 30px 0 15px 0;
+            font-size: 1.8rem;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 10px;
+        }
+
+        h3 {
+            color: #7f8c8d;
+            margin: 20px 0 10px 0;
+            font-size: 1.3rem;
+        }
+
+        .card {
+            background: #fff;
+            border: 1px solid #e1e8ed;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .endpoint {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+        }
+
+        .method {
+            background: #3498db;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .url {
+            background: #f8f9fa;
+            padding: 5px 10px;
+            border-radius: 4px;
+            border: 1px solid #dee2e6;
+            font-size: 0.9rem;
+        }
+
+        .code-block {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            overflow-x: auto;
+        }
+
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .feature-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        .feature-list li:before {
+            content: "✅ ";
+            margin-right: 10px;
+        }
+
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 15px 0;
+        }
+
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 15px 0;
+        }
+
+        .info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 15px 0;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+
+        .table th,
+        .table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .table th {
+            background: #f8f9fa;
+            font-weight: 600;
+        }
+
+        .table tr:hover {
+            background: #f8f9fa;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .endpoint {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📋 Relatório - Pesquisa de Produtos e Correlações</h1>
+        
+        <div class="card">
+            <h2>🎯 Objetivo</h2>
+            <p>Implementação de uma nova funcionalidade que permite pesquisar produtos farmacêuticos e obter suas características, além de identificar produtos correlacionados que normalmente são comprados em conjunto.</p>
+        </div>
+
+        <h2>🚀 Nova Funcionalidade Implementada</h2>
+        
+        <div class="card">
+            <h3>Endpoint de Pesquisa</h3>
+            <div class="endpoint">
+                <span class="method">GET</span>
+                <span class="url">/api/attendances/search-product?productName={nome_do_produto}</span>
+            </div>
+            
+            <div class="info">
+                <strong>Parâmetros:</strong>
+                <ul>
+                    <li><code>productName</code> (obrigatório): Nome do produto a ser pesquisado</li>
+                </ul>
+            </div>
+        </div>
+
+        <h2>🔧 Arquivos Modificados</h2>
+        
+        <div class="card">
+            <h3>1. Serviço OpenAI</h3>
+            <p><strong>Arquivo:</strong> <code>src/domain/services/openai.service.ts</code></p>
+            <ul class="feature-list">
+                <li>Adicionado método <code>searchProductAndCorrelations()</code></li>
+                <li>Implementado prompt especializado para vendedores de farmácia</li>
+                <li>Configurado para gerar análise completa com características e correlações</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h3>2. Controller de Atendimento</h3>
+            <p><strong>Arquivo:</strong> <code>src/application/controllers/attendance.controller.ts</code></p>
+            <ul class="feature-list">
+                <li>Adicionado método <code>searchProductAndCorrelations()</code></li>
+                <li>Implementada validação de entrada</li>
+                <li>Integração com repositório de remédios e serviço OpenAI</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h3>3. Configuração de Rotas</h3>
+            <p><strong>Arquivo:</strong> <code>src/server.ts</code></p>
+            <ul class="feature-list">
+                <li>Adicionada rota GET para pesquisa de produtos</li>
+                <li>Configurado schema Swagger para documentação</li>
+                <li>Implementada validação de parâmetros</li>
+            </ul>
+        </div>
+
+        <h2>🤖 Funcionalidades da IA</h2>
+        
+        <div class="card">
+            <h3>Análise de Produtos</h3>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Funcionalidade</th>
+                        <th>Descrição</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Características do Produto</strong></td>
+                        <td>Lista as características principais do produto pesquisado</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Produtos Correlacionados</strong></td>
+                        <td>Identifica 3-5 produtos que normalmente são comprados em conjunto</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Texto de Venda</strong></td>
+                        <td>Gera texto persuasivo tentando vender produtos correlacionados</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h2>📝 Estrutura da Resposta</h2>
+        
+        <div class="card">
+            <div class="code-block">
+{
+  "success": true,
+  "data": {
+    "product": {
+      "id": 1,
+      "nome": "Paracetamol",
+      "categoria": "Analgésico",
+      "preco": "5.50",
+      ...
+    },
+    "analysis": "**CARACTERÍSTICAS DO PRODUTO:**\n💊 Paracetamol é um analgésico...\n\n**PRODUTOS CORRELACIONADOS:**\n- Dipirona\n- Ibuprofeno\n- Vitamina C\n\n**TEXTO DE VENDA:**\n🌟 Que tal complementar seu tratamento...",
+    "availableProducts": 150
+  },
+  "message": "Product analysis and correlations generated successfully"
+}
+            </div>
+        </div>
+
+        <h2>🎨 Prompt da IA</h2>
+        
+        <div class="card">
+            <p>O prompt foi configurado para que a IA se comporte como um <strong>ótimo vendedor de farmácia</strong>, sendo:</p>
+            <ul class="feature-list">
+                <li>Persuasivo e experiente</li>
+                <li>Capaz de identificar necessidades dos clientes</li>
+                <li>Especialista em sugerir produtos complementares</li>
+                <li>Utiliza emojis para tornar a resposta mais atrativa</li>
+                <li>Honesto mas convincente nas vendas</li>
+            </ul>
+        </div>
+
+        <h2>🔍 Fluxo de Processamento</h2>
+        
+        <div class="card">
+            <ol>
+                <li><strong>Recebe o nome do produto</strong> via query parameter</li>
+                <li><strong>Valida a entrada</strong> (mínimo 2 caracteres)</li>
+                <li><strong>Busca o produto</strong> no banco de dados</li>
+                <li><strong>Obtém todos os produtos</strong> disponíveis para correlação</li>
+                <li><strong>Envia para OpenAI</strong> com prompt especializado</li>
+                <li><strong>Retorna análise completa</strong> com características e correlações</li>
+            </ol>
+        </div>
+
+        <h2>✅ Benefícios Implementados</h2>
+        
+        <div class="card">
+            <ul class="feature-list">
+                <li>Melhora a experiência do cliente com sugestões inteligentes</li>
+                <li>Aumenta as vendas através de produtos correlacionados</li>
+                <li>Fornece informações detalhadas sobre produtos</li>
+                <li>Automatiza o processo de vendas cruzadas</li>
+                <li>Reduz a necessidade de intervenção manual do atendente</li>
+            </ul>
+        </div>
+
+        <h2>🚨 Tratamento de Erros</h2>
+        
+        <div class="card">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Situação</th>
+                        <th>Mensagem</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>400</td>
+                        <td>Nome do produto inválido</td>
+                        <td>"Nome do produto é obrigatório e deve ter pelo menos 2 caracteres"</td>
+                    </tr>
+                    <tr>
+                        <td>404</td>
+                        <td>Produto não encontrado</td>
+                        <td>"Nenhum produto encontrado com o nome: {nome}"</td>
+                    </tr>
+                    <tr>
+                        <td>500</td>
+                        <td>Erro interno</td>
+                        <td>"Erro interno: {detalhes do erro}"</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="success">
+            <h3>🎉 Implementação Concluída</h3>
+            <p>A nova funcionalidade de pesquisa de produtos e correlações foi implementada com sucesso, seguindo os princípios de Domain Driven Design e Clean Code. A IA foi configurada para se comportar como um excelente vendedor de farmácia, proporcionando uma experiência de atendimento superior.</p>
+        </div>
+
+        <div class="info">
+            <h3>📚 Fontes de Informação</h3>
+            <ul>
+                <li><a href="https://openai.com/api/" target="_blank">OpenAI API Documentation</a></li>
+                <li><a href="https://fastify.dev/docs/latest/" target="_blank">Fastify Documentation</a></li>
+                <li><a href="https://typeorm.io/" target="_blank">TypeORM Documentation</a></li>
+                <li><a href="https://swagger.io/" target="_blank">Swagger/OpenAPI Specification</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html> 

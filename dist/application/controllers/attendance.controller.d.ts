@@ -1,7 +1,9 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
-import { AttendanceRepository } from '../../infrastructure/repositories/attendance.repository';
+import { IAttendanceRepository } from '../../infrastructure/repositories/attendance.repository';
 import { DrugImageProcessorService } from '../../domain/services/drug-image-processor.service';
 import { TextProcessorService } from '../../domain/services/text-processor.service';
+import { DrugsRepository } from '../../infrastructure/repositories/drugs.repository';
+import { OpenAIService } from '../../domain/services/openai.service';
 export interface AttendanceController {
     getAllAttendances(request: FastifyRequest, reply: FastifyReply): Promise<void>;
     getAttendanceById(request: FastifyRequest<{
@@ -65,12 +67,15 @@ export interface AttendanceController {
         };
     }>, reply: FastifyReply): Promise<void>;
     processDrugImage(request: FastifyRequest, reply: FastifyReply): Promise<void>;
+    searchProductAndCorrelations(request: FastifyRequest, reply: FastifyReply): Promise<void>;
 }
 export declare class AttendanceControllerImpl implements AttendanceController {
     private attendanceRepository;
     private drugImageProcessorService;
     private textProcessorService;
-    constructor(attendanceRepository: AttendanceRepository, drugImageProcessorService: DrugImageProcessorService, textProcessorService: TextProcessorService);
+    private drugsRepository;
+    private openaiService;
+    constructor(attendanceRepository: IAttendanceRepository, drugImageProcessorService: DrugImageProcessorService, textProcessorService: TextProcessorService, drugsRepository: DrugsRepository, openaiService: OpenAIService);
     getAllAttendances(request: FastifyRequest, reply: FastifyReply): Promise<void>;
     getAttendanceById(request: FastifyRequest<{
         Params: {
@@ -132,6 +137,7 @@ export declare class AttendanceControllerImpl implements AttendanceController {
             id: string;
         };
     }>, reply: FastifyReply): Promise<void>;
+    searchProductAndCorrelations(request: FastifyRequest, reply: FastifyReply): Promise<void>;
     processDrugImage(request: FastifyRequest, reply: FastifyReply): Promise<void>;
 }
 //# sourceMappingURL=attendance.controller.d.ts.map

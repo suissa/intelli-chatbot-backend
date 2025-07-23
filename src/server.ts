@@ -434,6 +434,69 @@ async function registerAttendanceRoutes() {
     await attendanceController.processDrugImage(request, reply);
   });
 
+  // GET /api/attendances/search-product - Pesquisar produto e correlações
+  fastify.get('/api/attendances/search-product', {
+    schema: {
+      tags: ['Attendances'],
+      summary: 'Pesquisar produto e suas correlações',
+      description: 'Recebe o nome de um produto, busca suas características e produtos correlacionados',
+      querystring: {
+        type: 'object',
+        properties: {
+          productName: { type: 'string', description: 'Nome do produto a ser pesquisado' }
+        },
+        required: ['productName']
+      },
+      response: {
+        200: {
+          description: 'Produto e correlações encontrados com sucesso',
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            data: {
+              type: 'object',
+              properties: {
+                product: { type: 'object' },
+                analysis: { type: 'string' },
+                availableProducts: { type: 'number' }
+              }
+            },
+            message: { type: 'string' }
+          }
+        },
+        400: {
+          description: 'Erro na requisição',
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            error: { type: 'string' },
+            message: { type: 'string' }
+          }
+        },
+        404: {
+          description: 'Produto não encontrado',
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            error: { type: 'string' },
+            message: { type: 'string' }
+          }
+        },
+        500: {
+          description: 'Erro interno',
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            error: { type: 'string' },
+            message: { type: 'string' }
+          }
+        }
+      }
+    }
+  }, async (request, reply) => {
+    await attendanceController.searchProductAndCorrelations(request, reply);
+  });
+
   // PUT /api/attendances/:id - Atualizar atendimento
   fastify.put('/api/attendances/:id', async (request, reply) => {
     await attendanceController.updateAttendance(request as any, reply);

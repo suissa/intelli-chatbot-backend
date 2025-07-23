@@ -27,6 +27,86 @@ export class OpenAIService {
     });
   }
 
+  async searchProductAndCorrelations(productName: string): Promise<any> {
+    try {
+      console.log('🔍 Pesquisando produto e correlações...');
+      
+      const prompt = `
+        Você é um ótimo vendedor de farmácia, experiente e persuasivo. 
+        
+        Produto pesquisado: ${productName}
+        
+        
+        Sua tarefa é:
+        1. Analisar o produto pesquisado e listar suas características principais
+        2. Identificar 3-5 produtos correlacionados que normalmente são comprados em conjunto (use seu conhecimento sobre farmácia)
+        3. Criar um texto persuasivo de venda tentando vender um dos produtos correlacionados junto com o produto pesquisado
+        
+        Formato da resposta:
+        **CARACTERÍSTICAS DO PRODUTO:**
+        [Liste as características principais do produto pesquisado]
+        
+        **PRODUTOS CORRELACIONADOS:**
+        [Liste 5-10 produtos que são comprados em conjunto, com nome, preço e categoria] na seguinte estrutura:
+        [Nome] - [Preço] - [Categoria]
+        no Nome retorne apenas o nome do produto sem ordem numerica
+        
+        **TEXTO DE VENDA:**
+        [Crie um texto persuasivo tentando vender um produto correlacionado junto com o produto pesquisado. Seja um ótimo vendedor, use emojis, destaque benefícios, seja convincente mas honesto]
+        
+        Use muitos emojis relevantes e seja muito persuasivo como um excelente vendedor!
+      `;
+
+      const response = await this.openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [
+          {
+            role: "system",
+            content: "Você é um vendedor de farmácia experiente, persuasivo e muito bom em identificar necessidades dos clientes e sugerir produtos complementares."
+          },
+          {
+            role: "user",
+            content: prompt
+          }
+        ],
+        max_tokens: 1500,
+      });
+
+      const responseContent = response.choices[0]?.message?.content;
+      
+      if (!responseContent) {
+        throw new Error('Resposta vazia da OpenAI');
+      }
+
+            console.log('✅ Análise de produto e correlações gerada com sucesso');
+      console.log('🔍 Resposta:', responseContent);
+      
+      // Extrair as seções da resposta usando regex
+      const caracteristicasMatch = responseContent.match(/\*\*CARACTERÍSTICAS DO PRODUTO:\*\*\s*([\s\S]*?)(?=\*\*PRODUTOS CORRELACIONADOS:\*\*)/i);
+      const produtosMatch = responseContent.match(/\*\*PRODUTOS CORRELACIONADOS:\*\*\s*([\s\S]*?)(?=\*\*TEXTO DE VENDA:\*\*)/i);
+      const textoMatch = responseContent.match(/\*\*TEXTO DE VENDA:\*\*\s*([\s\S]*?)$/i);
+      
+      const caracteristicasDoProduto = caracteristicasMatch ? caracteristicasMatch[1]!.trim() : 'Não encontrado';
+      const produtosCorrelacionados = produtosMatch ? produtosMatch[1]!.trim() : 'Não encontrado';
+      const textoDeVenda = textoMatch ? textoMatch[1]!.trim() : 'Não encontrado';
+      
+      console.log('🔍 Características:', caracteristicasDoProduto);
+      console.log('🔍 Produtos correlacionados:', produtosCorrelacionados);
+      console.log('🔍 Texto de venda:', textoDeVenda);
+      
+      // Retornar como objeto estruturado (como em Python)
+      return {
+        caracteristicasDoProduto,
+        produtosCorrelacionados,
+        textoDeVenda
+      };
+      
+    } catch (error) {
+      console.error('❌ Erro ao pesquisar produto e correlações:', error);
+      throw error;
+    }
+  }
+
   normalize(raw: string): string {
     return raw
       .normalize("NFKD")
@@ -60,7 +140,6 @@ export class OpenAIService {
         ],
         // response_format: { type: "json_object" },
         max_tokens: 1000,
-        temperature: 0.1,
       });
 
       const responseContent = response.choices[0]?.message?.content;

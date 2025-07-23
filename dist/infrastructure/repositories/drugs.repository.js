@@ -51,9 +51,10 @@ let DrugsRepositoryImpl = class DrugsRepositoryImpl {
     }
     async searchDrugs(term) {
         try {
-            const cleanTerm = term.replace(/[\n\r\t]/g, ' ').replace(/\s+/g, ' ').trim();
+            console.log('🔍 Buscando remédios para o termo:', term);
+            const cleanTerm = String(term).replace(/[\n\r\t]/g, ' ').trim();
             const remedios = await this.repository.find({
-                where: { nome: (0, typeorm_1.Like)(`%${cleanTerm}%`) },
+                where: { nome: (0, typeorm_1.Raw)(alias => `LOWER(${alias}) LIKE LOWER(:t)`, { t: `%${cleanTerm.toLowerCase()}%` }) },
                 order: { nome: 'ASC' },
                 take: 10
             });

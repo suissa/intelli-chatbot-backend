@@ -1,12 +1,14 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '../../shared/types';
-import { AttendanceRepository } from '../../infrastructure/repositories/attendance.repository';
+import { IAttendanceRepository } from '../../infrastructure/repositories/attendance.repository';
 import { DrugImageProcessorService } from '../../domain/services/drug-image-processor.service';
 import { TextProcessorService } from '../../domain/services/text-processor.service';
 import { TipoAtendimento, StatusAtendimento } from '../../domain/entities';
 import path from 'path';
 import fs from 'fs';
+import { DrugsRepository } from '../../infrastructure/repositories/drugs.repository';
+import { OpenAIService } from '../../domain/services/openai.service';
 
 export interface AttendanceController {
   getAllAttendances(request: FastifyRequest, reply: FastifyReply): Promise<void>;
@@ -26,14 +28,17 @@ export interface AttendanceController {
   completeAttendance(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply): Promise<void>;
   cancelAttendance(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply): Promise<void>;
   processDrugImage(request: FastifyRequest, reply: FastifyReply): Promise<void>;
+  searchProductAndCorrelations(request: FastifyRequest, reply: FastifyReply): Promise<void>;
 }
 
 @injectable()
 export class AttendanceControllerImpl implements AttendanceController {
   constructor(
-    @inject(TYPES.AttendanceRepository) private attendanceRepository: AttendanceRepository,
+    @inject(TYPES.AttendanceRepository) private attendanceRepository: IAttendanceRepository,
     @inject(TYPES.DrugImageProcessorService) private drugImageProcessorService: DrugImageProcessorService,
-    @inject(TYPES.TextProcessorService) private textProcessorService: TextProcessorService
+    @inject(TYPES.TextProcessorService) private textProcessorService: TextProcessorService,
+    @inject(TYPES.DrugsRepository) private drugsRepository: DrugsRepository,
+    @inject(TYPES.OpenAIService) private openaiService: OpenAIService
   ) {}
 
   async getAllAttendances(request: FastifyRequest, reply: FastifyReply): Promise<void> {
@@ -496,6 +501,116 @@ export class AttendanceControllerImpl implements AttendanceController {
         success: false,
         error: 'Internal server error',
         message: 'Failed to cancel attendance'
+      });
+    }
+  }
+  async setCorrelatedProducts(
+    remedioName: string,
+    rawText: string
+  ): Promise<void> {
+    // 1) Quebra por linha e limpa
+    const linhas = rawText
+      .split('\n')
+      .map(l => l.trim())
+      .filter(l => !!l);
+
+      const correlacionados = linhas.map(item => {
+        // a) Divide em [nomeMarkdown, preçoBr, categoriaBr]
+        const partes = item.split(' - ').map(p => p.trim());
+    
+        if (partes.length < 1) {
+          return null;
+        }
+        // b) Nome: remove os ** do Markdown
+        const name = partes[0]?.replace(/\*\*[0-9]+\.\s*/g, '');
+    
+        // c) Preço: "R$ 12,00" → "12.00"
+        const precoBr = partes[1] ?? ''; // ex: "R$ 12,00"
+        const numeroOnly = precoBr
+          .replace(/[^0-9,\.]/g, '')    // tira "R$", espaços etc → "12,00"
+          .replace(/\./g, '')           // remove possíveis separadores de milhar
+          .replace(',', '.');           // vírgula → ponto
+        const price = parseFloat(numeroOnly) || 0;
+    
+        // d) Categoria: terceira parte ou valor original
+        const category = partes[2] ?? 'indefinida';
+    
+        return { name, category, price };
+      });
+      console.log('🔍 Correlacionados:', correlacionados);
+      const correlacionadosFiltrados = correlacionados.filter(item => item !== null);
+      console.log('🔍 Correlacionados Filtrados:', correlacionadosFiltrados);
+    // preciso buscar o id do produto no banco de dados
+    //preciso de uma função getDrugByName
+    console.log('🔍 Remédio Name:', remedioName);
+    const produtos = await this.drugsRepository.getDrugByName(remedioName);
+    console.log('🔍 Produtos:', produtos);
+    if (produtos.length === 0) {
+      throw new Error('Produto não encontrado');
+    }
+    await this.drugsRepository.updateCorrelatedProducts(produtos, correlacionadosFiltrados as any);
+
+  }
+  async searchProductAndCorrelations(request: FastifyRequest, reply: FastifyReply): Promise<void> {
+    try {
+      const { productName } = request.query as any;
+      
+      if (!productName || productName.trim().length < 2) {
+        reply.status(400).send({
+          success: false,
+          error: 'Nome do produto é obrigatório e deve ter pelo menos 2 caracteres',
+          message: 'Please provide a valid product name'
+        });
+        return;
+      }
+
+      console.log('🔍 Pesquisando produto e correlações:', productName);
+
+
+      // 2. Gerar análise com OpenAI usando apenas o produto encontrado
+      const analysis = await this.openaiService.searchProductAndCorrelations(productName);
+      console.log('🔍 Análise:', analysis); 
+      const textoDeVenda = analysis.textoDeVenda;
+      console.log('✅ Análise de produto e correlações gerada com sucesso');
+
+      console.log('🔍 Características do produto:', analysis.caracteristicasDoProduto);
+      console.log('🔍 Produtos correlacionados:', analysis.produtosCorrelacionados);
+      console.log('🔍 Texto de venda:', textoDeVenda);
+
+      await this.setCorrelatedProducts(productName, analysis.produtosCorrelacionados);
+
+      // inserir no banco de dados os produtos correlacionados
+      // const produtosCorrelacionados = analysis.produtosCorrelacionados.split(',');
+      // for (const produto of produtosCorrelacionados) {
+      //   await this.attendanceRepository.createAttendance({
+      //     product: produto,
+      //     caractheristics: analysis.caracteristicasDoProduto,
+      //     correlacionados: analysis.produtosCorrelacionados,
+      //     textoDeVenda: textoDeVenda
+
+      // await this.attendanceRepository.createAttendance({
+      //   product: productName,
+      //   caractheristics: analysis.caracteristicasDoProduto,
+      //   correlacionados: analysis.produtosCorrelacionados,
+      //   textoDeVenda: textoDeVenda
+      // });
+      reply.send({
+        success: true,
+        data: {
+          product: productName,
+          caractheristics: analysis.caracteristicasDoProduto,
+          correlacionados: analysis.produtosCorrelacionados,
+          textoDeVenda: analysis.textoDeVenda
+        },
+        message: 'Product analysis and correlations generated successfully'
+      });
+
+    } catch (error) {
+      console.error('❌ Erro ao pesquisar produto e correlações:', error);
+      reply.status(500).send({
+        success: false,
+        error: 'Internal server error',
+        message: `Erro interno: ${error instanceof Error ? error.message : 'Erro desconhecido'}`
       });
     }
   }

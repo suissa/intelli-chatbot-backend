@@ -1,5 +1,5 @@
 import { Farmacia } from '../../domain/entities';
-export interface PharmacyRepository {
+export interface IPharmacyRepository {
     getAllPharmacies(): Promise<Farmacia[]>;
     getPharmacyById(id: string): Promise<Farmacia | null>;
     getPharmacyByCNPJ(cnpj: string): Promise<Farmacia | null>;
@@ -13,7 +13,7 @@ export interface PharmacyRepository {
     activatePharmacy(id: string): Promise<boolean>;
     deactivatePharmacy(id: string): Promise<boolean>;
 }
-export declare class PharmacyRepository implements PharmacyRepository {
+export declare class PharmacyRepository implements IPharmacyRepository {
     private repository;
     constructor();
     getAllPharmacies(): Promise<Farmacia[]>;

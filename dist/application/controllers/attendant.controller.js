@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AttendantControllerImpl = void 0;
 const inversify_1 = require("inversify");
 const types_1 = require("../../shared/types");
+const attendant_repository_1 = require("../../infrastructure/repositories/attendant.repository");
 const entities_1 = require("../../domain/entities");
 let AttendantControllerImpl = class AttendantControllerImpl {
     constructor(attendantRepository) {
@@ -294,6 +295,6 @@ exports.AttendantControllerImpl = AttendantControllerImpl;
 exports.AttendantControllerImpl = AttendantControllerImpl = __decorate([
     (0, inversify_1.injectable)(),
     __param(0, (0, inversify_1.inject)(types_1.TYPES.AttendantRepository)),
-    __metadata("design:paramtypes", [Object])
+    __metadata("design:paramtypes", [attendant_repository_1.AttendantRepository])
 ], AttendantControllerImpl);
 //# sourceMappingURL=attendant.controller.js.map

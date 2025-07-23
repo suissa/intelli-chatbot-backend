@@ -1,5 +1,5 @@
 import { Atendente, VozAtendente, PerfilAtendente } from '../../domain/entities';
-export interface AttendantRepository {
+export interface IAttendantRepository {
     getAllAttendants(): Promise<Atendente[]>;
     getAttendantById(id: string): Promise<Atendente | null>;
     getAttendantsByPharmacy(pharmacyId: string): Promise<Atendente[]>;
@@ -12,7 +12,7 @@ export interface AttendantRepository {
     activateAttendant(id: string): Promise<boolean>;
     deactivateAttendant(id: string): Promise<boolean>;
 }
-export declare class AttendantRepository implements AttendantRepository {
+export declare class AttendantRepository implements IAttendantRepository {
     private repository;
     constructor();
     getAllAttendants(): Promise<Atendente[]>;
