@@ -577,7 +577,7 @@ export class AttendanceControllerImpl implements AttendanceController {
       console.log('🔍 Produtos correlacionados:', analysis.produtosCorrelacionados);
       console.log('🔍 Texto de venda:', analysis.textoDeVenda);
 
-      // await this.setCorrelatedProducts(productName, analysis.produtosCorrelacionados);
+      await this.setCorrelatedProducts(productName, analysis.produtosCorrelacionados);
       const analysisParsed = JSON.parse(JSON.stringify(analysis));  
       console.log('🔍IMPORTANTE analysis:', analysisParsed);
 
