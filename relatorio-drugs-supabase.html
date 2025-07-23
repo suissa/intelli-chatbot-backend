@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatório - Repository Drugs Supabase</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #fff;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+            text-align: center;
+        }
+
+        h2 {
+            color: #34495e;
+            margin: 30px 0 15px 0;
+            font-size: 1.8rem;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+
+        h3 {
+            color: #2980b9;
+            margin: 20px 0 10px 0;
+            font-size: 1.3rem;
+        }
+
+        .success-card {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .info-card {
+            background: #e8f4fd;
+            border: 1px solid #bee5eb;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .code-block {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+
+        .endpoint-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .endpoint-card {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 15px;
+        }
+
+        .endpoint-method {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .method-get {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .endpoint-url {
+            font-family: 'Courier New', monospace;
+            color: #495057;
+            margin-bottom: 10px;
+        }
+
+        .endpoint-desc {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .feature-list {
+            list-style: none;
+            margin: 15px 0;
+        }
+
+        .feature-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+        }
+
+        .feature-list li:last-child {
+            border-bottom: none;
+        }
+
+        .check-icon {
+            color: #28a745;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+
+        .structure-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .structure-card {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            padding: 15px;
+        }
+
+        .structure-title {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .structure-fields {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+
+        .tech-badge {
+            display: inline-block;
+            background: #3498db;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin: 2px;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .endpoint-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>💊 Repository Drugs - Supabase Integration</h1>
+        
+        <div class="success-card">
+            <h3>✅ Implementação Concluída com Sucesso!</h3>
+            <p>
+                O repository Drugs foi implementado com sucesso, conectando ao Supabase e 
+                mantendo exatamente a estrutura da tabela <strong>remedios</strong>.
+            </p>
+        </div>
+
+        <h2>🔗 Conexão Supabase</h2>
+        <div class="info-card">
+            <h3>Configuração da Conexão</h3>
+            <div class="code-block">
+URL: https://jxcvnpbifzfconntrtrf.supabase.co<br>
+API Key: sbp_36f5f7521d3d4afad62c5a49f14a4fa37a074975<br>
+Tabela: remedios
+            </div>
+            <p><strong>Status:</strong> ✅ Conectado e funcionando</p>
+        </div>
+
+        <h2>🏗️ Nova Estrutura da Entity Remedio</h2>
+        <div class="structure-grid">
+            <div class="structure-card">
+                <div class="structure-title">Campos Principais</div>
+                <div class="structure-fields">
+                    • id (number)<br>
+                    • nome (string)<br>
+                    • categoria (string)<br>
+                    • laboratorio (string)<br>
+                    • preco (number)<br>
+                    • estoque (number)<br>
+                    • concentracao (string)<br>
+                    • forma_farmaceutica (string)
+                </div>
+            </div>
+            <div class="structure-card">
+                <div class="structure-title">Datas e Status</div>
+                <div class="structure-fields">
+                    • data_fabricacao (Date)<br>
+                    • data_validade (Date)<br>
+                    • requer_receita (boolean)<br>
+                    • ativo (boolean)<br>
+                    • created_at (Date)<br>
+                    • updated_at (Date)
+                </div>
+            </div>
+            <div class="structure-card">
+                <div class="structure-title">Informações Médicas</div>
+                <div class="structure-fields">
+                    • principio_ativo (string)<br>
+                    • efeitos_colaterais (string)<br>
+                    • contraindicacoes (string)<br>
+                    • usos (string)
+                </div>
+            </div>
+        </div>
+
+        <h2>🔧 Funcionalidades Implementadas</h2>
+        <div class="info-card">
+            <ul class="feature-list">
+                <li><span class="check-icon">✅</span> <strong>getAllDrugs():</strong> Busca todos os remédios da tabela</li>
+                <li><span class="check-icon">✅</span> <strong>getDrugById():</strong> Busca remédio por ID específico</li>
+                <li><span class="check-icon">✅</span> <strong>searchDrugs():</strong> Busca por nome, princípio ativo, laboratório ou categoria</li>
+                <li><span class="check-icon">✅</span> <strong>getDrugsByCategory():</strong> Filtra por categoria específica</li>
+                <li><span class="check-icon">✅</span> <strong>getActiveDrugs():</strong> Retorna apenas remédios ativos</li>
+                <li><span class="check-icon">✅</span> <strong>getDrugsInStock():</strong> Retorna remédios com estoque > 0</li>
+                <li><span class="check-icon">✅</span> <strong>getExpiredDrugs():</strong> Retorna remédios vencidos</li>
+                <li><span class="check-icon">✅</span> <strong>getDrugsExpiringSoon():</strong> Retorna remédios próximos do vencimento</li>
+            </ul>
+        </div>
+
+        <h2>🌐 Endpoints da API</h2>
+        <div class="endpoint-grid">
+            <div class="endpoint-card">
+                <span class="endpoint-method method-get">GET</span>
+                <div class="endpoint-url">/api/drugs</div>
+                <div class="endpoint-desc">Lista todos os remédios</div>
+            </div>
+            <div class="endpoint-card">
+                <span class="endpoint-method method-get">GET</span>
+                <div class="endpoint-url">/api/drugs/:id</div>
+                <div class="endpoint-desc">Busca remédio por ID</div>
+            </div>
+            <div class="endpoint-card">
+                <span class="endpoint-method method-get">GET</span>
+                <div class="endpoint-url">/api/drugs/search?q=termo</div>
+                <div class="endpoint-desc">Busca remédios por termo</div>
+            </div>
+            <div class="endpoint-card">
+                <span class="endpoint-method method-get">GET</span>
+                <div class="endpoint-url">/api/drugs/category/:category</div>
+                <div class="endpoint-desc">Filtra por categoria</div>
+            </div>
+            <div class="endpoint-card">
+                <span class="endpoint-method method-get">GET</span>
+                <div class="endpoint-url">/api/drugs/active</div>
+                <div class="endpoint-desc">Remédios ativos</div>
+            </div>
+            <div class="endpoint-card">
+                <span class="endpoint-method method-get">GET</span>
+                <div class="endpoint-url">/api/drugs/stock</div>
+                <div class="endpoint-desc">Remédios em estoque</div>
+            </div>
+            <div class="endpoint-card">
+                <span class="endpoint-method method-get">GET</span>
+                <div class="endpoint-url">/api/drugs/expired</div>
+                <div class="endpoint-desc">Remédios vencidos</div>
+            </div>
+            <div class="endpoint-card">
+                <span class="endpoint-method method-get">GET</span>
+                <div class="endpoint-url">/api/drugs/expiring?days=30</div>
+                <div class="endpoint-desc">Próximos do vencimento</div>
+            </div>
+        </div>
+
+        <h2>🛠️ Stack Tecnológica</h2>
+        <div class="info-card">
+            <div style="text-align: center;">
+                <span class="tech-badge">Fastify</span>
+                <span class="tech-badge">TypeScript</span>
+                <span class="tech-badge">InversifyJS</span>
+                <span class="tech-badge">Supabase</span>
+                <span class="tech-badge">PostgreSQL</span>
+                <span class="tech-badge">DDD</span>
+                <span class="tech-badge">Class Validator</span>
+            </div>
+        </div>
+
+        <h2>📁 Arquivos Criados/Modificados</h2>
+        <div class="info-card">
+            <ul class="feature-list">
+                <li><span class="check-icon">✅</span> <strong>Entity:</strong> src/domain/entities/remedio.entity.ts (refatorada)</li>
+                <li><span class="check-icon">✅</span> <strong>DTOs:</strong> src/application/dto/create-remedio.dto.ts (refatorados)</li>
+                <li><span class="check-icon">✅</span> <strong>Repository:</strong> src/infrastructure/repositories/drugs.repository.ts (novo)</li>
+                <li><span class="check-icon">✅</span> <strong>Controller:</strong> src/application/controllers/drugs.controller.ts (novo)</li>
+                <li><span class="check-icon">✅</span> <strong>Container:</strong> src/shared/container.ts (atualizado)</li>
+                <li><span class="check-icon">✅</span> <strong>Types:</strong> src/shared/types.ts (atualizado)</li>
+                <li><span class="check-icon">✅</span> <strong>Servidor:</strong> src/server.ts (novo)</li>
+            </ul>
+        </div>
+
+        <h2>🚀 Como Testar</h2>
+        <div class="info-card">
+            <div class="code-block">
+# Iniciar o servidor<br>
+npm run dev<br><br>
+# Testar endpoints<br>
+curl http://localhost:3000/api/drugs<br>
+curl http://localhost:3000/api/drugs/8631<br>
+curl "http://localhost:3000/api/drugs/search?q=Losartana"<br>
+curl http://localhost:3000/api/drugs/category/Anticoagulante<br>
+curl http://localhost:3000/api/drugs/active<br>
+curl http://localhost:3000/api/drugs/stock<br>
+curl http://localhost:3000/api/drugs/expired<br>
+curl "http://localhost:3000/api/drugs/expiring?days=30"
+            </div>
+        </div>
+
+        <h2>📊 Métodos de Negócio Adicionados</h2>
+        <div class="info-card">
+            <ul class="feature-list">
+                <li><span class="check-icon">✅</span> <strong>validarDataValidade():</strong> Verifica se o remédio não está vencido</li>
+                <li><span class="check-icon">✅</span> <strong>isVencido():</strong> Retorna se o remédio está vencido</li>
+                <li><span class="check-icon">✅</span> <strong>diasParaVencimento():</strong> Calcula dias até o vencimento</li>
+                <li><span class="check-icon">✅</span> <strong>matchesSearch():</strong> Busca fuzzy por nome, princípio ativo, laboratório e categoria</li>
+                <li><span class="check-icon">✅</span> <strong>getInfoResumida():</strong> Retorna informações resumidas do remédio</li>
+            </ul>
+        </div>
+
+        <div class="success-card">
+            <h3>🎉 Implementação Completa!</h3>
+            <p>
+                O repository Drugs foi implementado com sucesso, conectando ao Supabase e 
+                mantendo exatamente a estrutura da tabela. Todos os endpoints estão funcionais 
+                e prontos para uso em produção.
+            </p>
+            <p><strong>URL Base:</strong> http://localhost:3000</p>
+            <p><strong>Documentação:</strong> http://localhost:3000</p>
+        </div>
+    </div>
+</body>
+</html> 

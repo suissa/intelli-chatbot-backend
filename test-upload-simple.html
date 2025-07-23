@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Upload Imagem - Simplificado</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #ffffff;
+        }
+        
+        .container {
+            border: 1px solid #e1e5e9;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #34495e;
+        }
+        
+        input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            border: 2px dashed #3498db;
+            border-radius: 6px;
+            background: #f8f9fa;
+        }
+        
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        button:hover {
+            background: #2980b9;
+        }
+        
+        button:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+        }
+        
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 6px;
+            display: none;
+        }
+        
+        .result.success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        
+        .result.error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        
+        pre {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 14px;
+            white-space: pre-wrap;
+        }
+        
+        .status {
+            text-align: center;
+            margin: 10px 0;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Teste Upload de Imagem</h1>
+        
+        <form id="uploadForm">
+            <div class="form-group">
+                <label for="imageFile">📸 Selecione uma imagem de remédio:</label>
+                <input type="file" id="imageFile" name="file" accept="image/*" required>
+            </div>
+            
+            <button type="submit" id="submitBtn">🚀 Processar Imagem</button>
+        </form>
+        
+        <div id="status" class="status"></div>
+        <div id="result" class="result"></div>
+    </div>
+
+    <script>
+        const form = document.getElementById('uploadForm');
+        const fileInput = document.getElementById('imageFile');
+        const submitBtn = document.getElementById('submitBtn');
+        const status = document.getElementById('status');
+        const result = document.getElementById('result');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const file = fileInput.files[0];
+            if (!file) {
+                showError('Por favor, selecione um arquivo de imagem.');
+                return;
+            }
+
+            // Verificar se é uma imagem
+            if (!file.type.startsWith('image/')) {
+                showError('Por favor, selecione apenas arquivos de imagem.');
+                return;
+            }
+
+            // Preparar o formulário
+            const formData = new FormData();
+            formData.append('file', file);
+
+            // Desabilitar botão e mostrar status
+            submitBtn.disabled = true;
+            submitBtn.textContent = '⏳ Processando...';
+            status.textContent = '📤 Enviando imagem...';
+            hideResult();
+
+            try {
+                const response = await fetch('http://localhost:3000/api/attendances/process-drug-image', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showSuccess('✅ Imagem processada com sucesso!', data);
+                } else {
+                    showError(`❌ Erro: ${data.message || 'Erro desconhecido'}`, data);
+                }
+            } catch (error) {
+                console.error('Erro na requisição:', error);
+                showError(`❌ Erro de conexão: ${error.message}`);
+            } finally {
+                // Reabilitar botão
+                submitBtn.disabled = false;
+                submitBtn.textContent = '🚀 Processar Imagem';
+                status.textContent = '';
+            }
+        });
+
+        function showSuccess(message, data) {
+            result.className = 'result success';
+            result.innerHTML = `
+                <h3>${message}</h3>
+                <pre>${JSON.stringify(data, null, 2)}</pre>
+            `;
+            result.style.display = 'block';
+        }
+
+        function showError(message, data = null) {
+            result.className = 'result error';
+            let content = `<h3>${message}</h3>`;
+            if (data) {
+                content += `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+            }
+            result.innerHTML = content;
+            result.style.display = 'block';
+        }
+
+        function hideResult() {
+            result.style.display = 'none';
+        }
+
+        // Mostrar informações do arquivo selecionado
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                status.textContent = `📁 Arquivo selecionado: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+            } else {
+                status.textContent = '';
+            }
+        });
+    </script>
+</body>
+</html> 

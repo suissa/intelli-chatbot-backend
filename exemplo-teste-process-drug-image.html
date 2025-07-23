@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste - Processamento de Imagem de Remédio</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #fff;
+            color: #333;
+        }
+        .container {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .endpoint {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .method {
+            font-weight: bold;
+            color: #1976d2;
+        }
+        .url {
+            font-family: monospace;
+            background: #f5f5f5;
+            padding: 5px;
+            border-radius: 4px;
+        }
+        .code {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 15px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            overflow-x: auto;
+        }
+        .curl {
+            background: #2d3748;
+            color: #e2e8f0;
+        }
+        .response {
+            background: #f0fff4;
+            border-left: 4px solid #48bb78;
+        }
+        .error {
+            background: #fed7d7;
+            border-left: 4px solid #e53e3e;
+        }
+        .warning {
+            background: #fef5e7;
+            border-left: 4px solid #ed8936;
+        }
+        h1, h2, h3 {
+            color: #2d3748;
+        }
+        .step {
+            margin: 20px 0;
+            padding: 15px;
+            border-left: 4px solid #4299e1;
+            background: #ebf8ff;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Teste - Processamento de Imagem de Remédio</h1>
+    
+    <div class="container">
+        <h2>📋 Informações da Rota</h2>
+        <div class="endpoint">
+            <div class="method">POST</div>
+            <div class="url">/api/attendances/process-drug-image</div>
+        </div>
+        
+        <p><strong>Descrição:</strong> Recebe uma imagem de remédio, extrai texto com OCR, busca no banco e gera apresentação com OpenAI</p>
+        <p><strong>Content-Type:</strong> multipart/form-data</p>
+    </div>
+
+    <div class="container">
+        <h2>🔧 Como Testar</h2>
+        
+        <div class="step">
+            <h3>1. Usando cURL</h3>
+            <div class="code curl">curl -X POST http://localhost:3000/api/attendances/process-drug-image \
+  -F "file=@caminho/para/sua/imagem.jpg" \
+  -H "Content-Type: multipart/form-data"</div>
+        </div>
+
+        <div class="step">
+            <h3>2. Usando Postman</h3>
+            <ul>
+                <li>Método: <strong>POST</strong></li>
+                <li>URL: <code>http://localhost:3000/api/attendances/process-drug-image</code></li>
+                <li>Body: <strong>form-data</strong></li>
+                <li>Key: <code>file</code> (tipo: File)</li>
+                <li>Value: Selecione sua imagem</li>
+            </ul>
+        </div>
+
+        <div class="step">
+            <h3>3. Usando JavaScript/Fetch</h3>
+            <div class="code">const formData = new FormData();
+formData.append('file', fileInput.files[0]);
+
+fetch('http://localhost:3000/api/attendances/process-drug-image', {
+  method: 'POST',
+  body: formData
+})
+.then(response => response.json())
+.then(data => console.log(data))
+.catch(error => console.error('Error:', error));</div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>📤 Exemplo de Requisição</h2>
+        <p><strong>Não é necessário enviar JSON!</strong> A rota espera um arquivo de imagem.</p>
+        
+        <div class="warning">
+            <h3>⚠️ Importante:</h3>
+            <ul>
+                <li>O campo deve se chamar <code>file</code></li>
+                <li>Aceita formatos: JPEG, PNG, GIF, etc.</li>
+                <li>O arquivo deve ser uma imagem de remédio</li>
+                <li>Tamanho máximo recomendado: 10MB</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>📥 Exemplo de Resposta de Sucesso</h2>
+        <div class="response">
+            <div class="code">{
+  "success": true,
+  "data": {
+    "drugInfo": {
+      "id": 1,
+      "nome": "Paracetamol",
+      "principio_ativo": "Paracetamol",
+      "laboratorio": "EMS",
+      "categoria": "Analgésico",
+      "preco": 8.50,
+      "estoque": 100,
+      "ativo": true
+    },
+    "presentation": "💊 **PARACETAMOL** - Seu aliado contra a dor! 🎯\n\n✨ **Princípio Ativo:** Paracetamol\n🏭 **Laboratório:** EMS\n📂 **Categoria:** Analgésico\n💰 **Preço:** R$ 8,50\n\n🔥 **Indicado para:**\n• Dores de cabeça 🤕\n• Dores musculares 💪\n• Febre 🌡️\n• Dores leves a moderadas\n\n⚡ **Ação rápida e eficaz!**\n\n❓ **Confirma que é este remédio que você precisa?** 🤔"
+  },
+  "message": "Drug image processed successfully"
+}</div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>❌ Exemplo de Resposta de Erro</h2>
+        <div class="error">
+            <div class="code">{
+  "success": false,
+  "error": "No image file provided",
+  "message": "Please upload an image file"
+}</div>
+        </div>
+        
+        <div class="error">
+            <div class="code">{
+  "success": false,
+  "error": "Drug not found",
+  "message": "Nenhum remédio encontrado com base no texto extraído da imagem"
+}</div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>🔍 Códigos de Status HTTP</h2>
+        <ul>
+            <li><strong>200:</strong> Sucesso - Remédio processado</li>
+            <li><strong>400:</strong> Erro na requisição - Arquivo inválido ou não enviado</li>
+            <li><strong>404:</strong> Remédio não encontrado no banco</li>
+            <li><strong>500:</strong> Erro interno do servidor</li>
+        </ul>
+    </div>
+
+    <div class="container">
+        <h2>🎯 Dicas para Teste</h2>
+        <ul>
+            <li>Use imagens claras e bem iluminadas</li>
+            <li>Certifique-se que o texto do remédio está legível</li>
+            <li>Teste com diferentes tipos de remédios</li>
+            <li>Verifique se o servidor está rodando em <code>http://localhost:3000</code></li>
+            <li>Confirme que o banco de dados está conectado</li>
+        </ul>
+    </div>
+
+    <div class="container">
+        <h2>🔧 Troubleshooting</h2>
+        <div class="warning">
+            <h3>Erro: "No bindings found for service: OCRService"</h3>
+            <p><strong>Solução:</strong> Este erro foi corrigido! O OCRService agora está registrado no container do InversifyJS.</p>
+        </div>
+        
+        <div class="warning">
+            <h3>Erro: "Failed to connect to database"</h3>
+            <p><strong>Solução:</strong> Verifique se o PostgreSQL está rodando e as credenciais no arquivo <code>.env</code> estão corretas.</p>
+        </div>
+    </div>
+</body>
+</html> 
