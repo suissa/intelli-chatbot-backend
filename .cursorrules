@@ -1,2 +1,7 @@
 Deve utilizar a arquitetura Domain Driven Design com Clean Code
 Deve uitilizar apenas 1 terminal sempre, nunca criar um novo
+
+Usando o RabbitMQ padronizamos os nomes de:
+
+- Consumer: apenas recebe as mensagens
+- Producer: apenas envias as mensagens
