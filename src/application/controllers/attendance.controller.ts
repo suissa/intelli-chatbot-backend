@@ -570,38 +570,35 @@ export class AttendanceControllerImpl implements AttendanceController {
       // 2. Gerar análise com OpenAI usando apenas o produto encontrado
       const analysis = await this.openaiService.searchProductAndCorrelations(productName);
       console.log('🔍 Análise:', analysis); 
-      const textoDeVenda = analysis.textoDeVenda;
+      // const textoDeVenda = analysis.textoDeVenda;
       console.log('✅ Análise de produto e correlações gerada com sucesso');
 
       console.log('🔍 Características do produto:', analysis.caracteristicasDoProduto);
       console.log('🔍 Produtos correlacionados:', analysis.produtosCorrelacionados);
-      console.log('🔍 Texto de venda:', textoDeVenda);
+      console.log('🔍 Texto de venda:', analysis.textoDeVenda);
 
-      await this.setCorrelatedProducts(productName, analysis.produtosCorrelacionados);
+      // await this.setCorrelatedProducts(productName, analysis.produtosCorrelacionados);
+      const analysisParsed = JSON.parse(JSON.stringify(analysis));  
+      console.log('🔍IMPORTANTE analysis:', analysisParsed);
 
-      // inserir no banco de dados os produtos correlacionados
-      // const produtosCorrelacionados = analysis.produtosCorrelacionados.split(',');
-      // for (const produto of produtosCorrelacionados) {
-      //   await this.attendanceRepository.createAttendance({
-      //     product: produto,
-      //     caractheristics: analysis.caracteristicasDoProduto,
-      //     correlacionados: analysis.produtosCorrelacionados,
-      //     textoDeVenda: textoDeVenda
-
-      // await this.attendanceRepository.createAttendance({
-      //   product: productName,
-      //   caractheristics: analysis.caracteristicasDoProduto,
-      //   correlacionados: analysis.produtosCorrelacionados,
-      //   textoDeVenda: textoDeVenda
-      // });
+      const product = {
+        name: productName,
+        caracteristicasDoProduto: analysis.caracteristicasDoProduto,
+        produtosCorrelacionados: analysis.produtosCorrelacionados,
+        textoDeVenda: analysis.textoDeVenda
+      };
+      console.log('🔑 product literal:', product);
       reply.send({
         success: true,
         data: {
-          product: productName,
-          caractheristics: analysis.caracteristicasDoProduto,
-          correlacionados: analysis.produtosCorrelacionados,
-          textoDeVenda: analysis.textoDeVenda
+          "product": {
+            "name": product.name,
+            "caracteristicasDoProduto": product.caracteristicasDoProduto,
+            "produtosCorrelacionados": product.produtosCorrelacionados,
+            "textoDeVenda": product.textoDeVenda
+          }
         },
+        analysis: product.textoDeVenda,
         message: 'Product analysis and correlations generated successfully'
       });
 

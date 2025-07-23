@@ -47,7 +47,7 @@ export class OpenAIService {
         [Liste as características principais do produto pesquisado]
         
         **PRODUTOS CORRELACIONADOS:**
-        [Liste 5-10 produtos que são comprados em conjunto, com nome, preço e categoria] na seguinte estrutura:
+        [Liste 10 produtos que são comprados em conjunto, com nome, preço e categoria] na seguinte estrutura:
         [Nome] - [Preço] - [Categoria]
         no Nome retorne apenas o nome do produto sem ordem numerica
         

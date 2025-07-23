@@ -435,7 +435,9 @@ async function registerAttendanceRoutes() {
   });
 
   // GET /api/attendances/search-product - Pesquisar produto e correlações
-  fastify.get('/api/attendances/search-product', {
+  fastify.get<{
+    Querystring: { productName: string }
+  }>('/api/attendances/search-product', {
     schema: {
       tags: ['Attendances'],
       summary: 'Pesquisar produto e suas correlações',
@@ -456,10 +458,20 @@ async function registerAttendanceRoutes() {
             data: {
               type: 'object',
               properties: {
-                product: { type: 'object' },
+                product: {
+                  type: 'object',
+                  properties: {
+                    name: { type: 'string' },
+                    caracteristicasDoProduto: { type: 'string' },
+                    produtosCorrelacionados: { type: 'string' },
+                    textoDeVenda: { type: 'string' }
+                  },
+                  required: ['name', 'textoDeVenda']
+                },
                 analysis: { type: 'string' },
                 availableProducts: { type: 'number' }
-              }
+              },
+              required: ['product']
             },
             message: { type: 'string' }
           }
@@ -496,7 +508,7 @@ async function registerAttendanceRoutes() {
   }, async (request, reply) => {
     await attendanceController.searchProductAndCorrelations(request, reply);
   });
-
+  
   // PUT /api/attendances/:id - Atualizar atendimento
   fastify.put('/api/attendances/:id', async (request, reply) => {
     await attendanceController.updateAttendance(request as any, reply);
