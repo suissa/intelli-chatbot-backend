@@ -27,6 +27,7 @@ export const TYPES = {
   DrugImageProcessorService: Symbol.for('DrugImageProcessorService'),
   TextProcessorService: Symbol.for('TextProcessorService'),
   OCRService: Symbol.for('OCRService'),
+  MessageProcessorService: Symbol.for('MessageProcessorService'),
   
   // Controllers
   AtendenteController: Symbol.for('AtendenteController'),
@@ -44,6 +45,7 @@ export const TYPES = {
   RabbitMQConnection: Symbol.for('RabbitMQConnection'),
   MessageQueueProducer: Symbol.for('MessageQueueProducer'),
   MessageQueueConsumer: Symbol.for('MessageQueueConsumer'),
+  MessageQueueManager: Symbol.for('MessageQueueManager'),
   
   // Utils
   Logger: Symbol.for('Logger'),

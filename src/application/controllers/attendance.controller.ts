@@ -9,6 +9,7 @@ import path from 'path';
 import fs from 'fs';
 import { DrugsRepository } from '../../infrastructure/repositories/drugs.repository';
 import { OpenAIService } from '../../domain/services/openai.service';
+import { MessageProcessorService } from '../../domain/services/message-processor.service';
 
 export interface AttendanceController {
   getAllAttendances(request: FastifyRequest, reply: FastifyReply): Promise<void>;
@@ -38,7 +39,8 @@ export class AttendanceControllerImpl implements AttendanceController {
     @inject(TYPES.DrugImageProcessorService) private drugImageProcessorService: DrugImageProcessorService,
     @inject(TYPES.TextProcessorService) private textProcessorService: TextProcessorService,
     @inject(TYPES.DrugsRepository) private drugsRepository: DrugsRepository,
-    @inject(TYPES.OpenAIService) private openaiService: OpenAIService
+    @inject(TYPES.OpenAIService) private openaiService: OpenAIService,
+    @inject(TYPES.MessageProcessorService) private messageProcessorService: MessageProcessorService
   ) {}
 
   async getAllAttendances(request: FastifyRequest, reply: FastifyReply): Promise<void> {
@@ -566,39 +568,20 @@ export class AttendanceControllerImpl implements AttendanceController {
 
       console.log('🔍 Pesquisando produto e correlações:', productName);
 
+      // Usar o MessageProcessorService para buscar produto e correlações
+      const productAnalysis = await this.messageProcessorService.searchProductAndCorrelations(productName);
 
-      // 2. Gerar análise com OpenAI usando apenas o produto encontrado
-      const analysis = await this.openaiService.searchProductAndCorrelations(productName);
-      console.log('🔍 Análise:', analysis); 
-      // const textoDeVenda = analysis.textoDeVenda;
-      console.log('✅ Análise de produto e correlações gerada com sucesso');
-
-      console.log('🔍 Características do produto:', analysis.caracteristicasDoProduto);
-      console.log('🔍 Produtos correlacionados:', analysis.produtosCorrelacionados);
-      console.log('🔍 Texto de venda:', analysis.textoDeVenda);
-
-      await this.setCorrelatedProducts(productName, analysis.produtosCorrelacionados);
-      const analysisParsed = JSON.parse(JSON.stringify(analysis));  
-      console.log('🔍IMPORTANTE analysis:', analysisParsed);
-
-      const product = {
-        name: productName,
-        caracteristicasDoProduto: analysis.caracteristicasDoProduto,
-        produtosCorrelacionados: analysis.produtosCorrelacionados,
-        textoDeVenda: analysis.textoDeVenda
-      };
-      console.log('🔑 product literal:', product);
       reply.send({
         success: true,
         data: {
           "product": {
-            "name": product.name,
-            "caracteristicasDoProduto": product.caracteristicasDoProduto,
-            "produtosCorrelacionados": product.produtosCorrelacionados,
-            "textoDeVenda": product.textoDeVenda
+            "name": productAnalysis.name,
+            "caracteristicasDoProduto": productAnalysis.caracteristicasDoProduto,
+            "produtosCorrelacionados": productAnalysis.produtosCorrelacionados,
+            "textoDeVenda": productAnalysis.textoDeVenda
           }
         },
-        analysis: product.textoDeVenda,
+        analysis: productAnalysis.textoDeVenda,
         message: 'Product analysis and correlations generated successfully'
       });
 

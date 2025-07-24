@@ -7,7 +7,7 @@ import { environment } from './config/environment';
 import { AppDataSource } from '../infrastructure/database/typeorm.config';
 
 // Repositories
-import { DrugsRepository, DrugsRepository } from '../infrastructure/repositories/drugs.repository';
+import { DrugsRepository } from '../infrastructure/repositories/drugs.repository';
 import { IAttendantRepository, AttendantRepository } from '../infrastructure/repositories/attendant.repository';
 import { IPharmacyRepository, PharmacyRepository } from '../infrastructure/repositories/pharmacy.repository';
 import { IAttendanceRepository, AttendanceRepository } from '../infrastructure/repositories/attendance.repository';
@@ -23,6 +23,12 @@ import { DrugImageProcessorService, DrugImageProcessorServiceImpl } from '../dom
 import { TextProcessorService, TextProcessorServiceImpl } from '../domain/services/text-processor.service';
 import { OCRService } from '../domain/services/ocr';
 import { OpenAIService } from '../domain/services/openai.service';
+import { MessageProcessorService } from '../domain/services/message-processor.service';
+
+// Message Queue
+import { RabbitMQConnection } from '../infrastructure/messaging/rabbitmq-connection';
+import { MessageQueueManager } from '../infrastructure/messaging/message-queue-manager';
+import { MessageQueueController } from '../application/controllers/message-queue.controller';
 
 export const container = new Container();
 
@@ -47,5 +53,11 @@ container.bind<DrugImageProcessorService>(TYPES.DrugImageProcessorService).to(Dr
 container.bind<TextProcessorService>(TYPES.TextProcessorService).to(TextProcessorServiceImpl);
 container.bind<OCRService>(TYPES.OCRService).to(OCRService);
 container.bind<OpenAIService>(TYPES.OpenAIService).to(OpenAIService);
+container.bind<MessageProcessorService>(TYPES.MessageProcessorService).to(MessageProcessorService);
+
+// Message Queue
+container.bind<RabbitMQConnection>(TYPES.RabbitMQConnection).to(RabbitMQConnection).inSingletonScope();
+container.bind<MessageQueueManager>(TYPES.MessageQueueManager).to(MessageQueueManager);
+container.bind<MessageQueueController>(TYPES.MessageQueueController).to(MessageQueueController);
 
 export { container as Container }; 

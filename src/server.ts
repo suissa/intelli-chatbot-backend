@@ -12,6 +12,10 @@ import { DrugsController } from './application/controllers/drugs.controller';
 import { AttendantController } from './application/controllers/attendant.controller';
 import { PharmacyController } from './application/controllers/pharmacy.controller';
 import { AttendanceController } from './application/controllers/attendance.controller';
+import { MessageQueueController } from './application/controllers/message-queue.controller';
+import { RabbitMQConnection } from './infrastructure/messaging/rabbitmq-connection';
+import { MessageQueueManager } from './infrastructure/messaging/message-queue-manager';
+import { MessageProcessorService } from './domain/services/message-processor.service';
 
 const fastify = Fastify({
   logger: true
@@ -631,6 +635,127 @@ fastify.get('/', async (request, reply) => {
   };
 });
 
+// Registrar rotas do Message Queue
+async function registerMessageQueueRoutes() {
+  const messageQueueController = Container.get<MessageQueueController>(TYPES.MessageQueueController);
+
+  // GET /api/message-queue/status - Status do sistema
+  fastify.get('/api/message-queue/status', {
+    schema: {
+      tags: ['Message Queue'],
+      summary: 'Status do sistema de Message Queue',
+      description: 'Retorna o status atual do sistema de Message Queue',
+      response: {
+        200: {
+          description: 'Status do sistema',
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            message: { type: 'string' },
+            timestamp: { type: 'string' },
+            queues: { type: 'object' }
+          }
+        }
+      }
+    }
+  }, async (request, reply) => {
+    await messageQueueController.getStatus(request, reply);
+  });
+
+  // POST /api/message-queue/text - Enviar mensagem de texto
+  fastify.post('/api/message-queue/text', {
+    schema: {
+      tags: ['Message Queue'],
+      summary: 'Enviar mensagem de texto',
+      description: 'Envia uma mensagem de texto para processamento',
+      body: {
+        type: 'object',
+        required: ['message', 'pharmacy_phone', 'consumer_phone'],
+        properties: {
+          message: { type: 'string' },
+          pharmacy_phone: { type: 'string' },
+          consumer_phone: { type: 'string' }
+        }
+      },
+      response: {
+        200: {
+          description: 'Mensagem enviada com sucesso',
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            message: { type: 'string' },
+            data: { type: 'object' }
+          }
+        }
+      }
+    }
+  }, async (request, reply) => {
+    await messageQueueController.sendTextMessage(request, reply);
+  });
+
+  // POST /api/message-queue/image - Enviar mensagem de imagem
+  fastify.post('/api/message-queue/image', {
+    schema: {
+      tags: ['Message Queue'],
+      summary: 'Enviar mensagem de imagem',
+      description: 'Envia uma mensagem de imagem para processamento',
+      body: {
+        type: 'object',
+        required: ['message', 'pharmacy_phone', 'consumer_phone'],
+        properties: {
+          message: { type: 'string' },
+          pharmacy_phone: { type: 'string' },
+          consumer_phone: { type: 'string' }
+        }
+      },
+      response: {
+        200: {
+          description: 'Mensagem enviada com sucesso',
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            message: { type: 'string' },
+            data: { type: 'object' }
+          }
+        }
+      }
+    }
+  }, async (request, reply) => {
+    await messageQueueController.sendImageMessage(request, reply);
+  });
+
+  // POST /api/message-queue/audio - Enviar mensagem de áudio
+  fastify.post('/api/message-queue/audio', {
+    schema: {
+      tags: ['Message Queue'],
+      summary: 'Enviar mensagem de áudio',
+      description: 'Envia uma mensagem de áudio para processamento',
+      body: {
+        type: 'object',
+        required: ['message', 'pharmacy_phone', 'consumer_phone'],
+        properties: {
+          message: { type: 'string' },
+          pharmacy_phone: { type: 'string' },
+          consumer_phone: { type: 'string' }
+        }
+      },
+      response: {
+        200: {
+          description: 'Mensagem enviada com sucesso',
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            message: { type: 'string' },
+            data: { type: 'object' }
+          }
+        }
+      }
+    }
+  }, async (request, reply) => {
+    await messageQueueController.sendAudioMessage(request, reply);
+  });
+}
+
 // Inicializar servidor
 async function start() {
   try {
@@ -639,6 +764,29 @@ async function start() {
     // Inicializar banco de dados PostgreSQL
     console.log('🔍 Inicializando banco de dados...');
     await initializeDatabase();
+    
+    // Inicializar RabbitMQ
+    console.log('🐰 Inicializando RabbitMQ...');
+    const rabbitMQConnection = Container.get<RabbitMQConnection>(TYPES.RabbitMQConnection);
+    await rabbitMQConnection.connect();
+    
+    // Inicializar Message Queue Manager
+    console.log('📨 Inicializando Message Queue Manager...');
+    try {
+      const messageQueueManager = Container.get<MessageQueueManager>(TYPES.MessageQueueManager);
+      console.log('✅ MessageQueueManager obtido do container');
+      
+      console.log('🔄 Inicializando consumers...');
+      await messageQueueManager.initializeConsumers();
+      console.log('✅ Consumers inicializados');
+      
+      console.log('🔄 Inicializando producers...');
+      await messageQueueManager.initializeProducers();
+      console.log('✅ Producers inicializados');
+    } catch (error) {
+      console.error('❌ Erro ao inicializar Message Queue Manager:', error);
+      throw error;
+    }
     
     // Registrar CORS
     await fastify.register(cors, {
@@ -657,6 +805,7 @@ async function start() {
     await registerAttendantRoutes();
     await registerPharmacyRoutes();
     await registerAttendanceRoutes();
+    await registerMessageQueueRoutes();
     
     // Iniciar servidor
     const port = process.env.PORT ? parseInt(process.env.PORT) : 3000;
@@ -670,17 +819,20 @@ async function start() {
     console.log(`👥 Attendants API disponível em http://localhost:${port}/api/attendants`);
     console.log(`🏥 Pharmacies API disponível em http://localhost:${port}/api/pharmacies`);
     console.log(`📞 Attendances API disponível em http://localhost:${port}/api/attendances`);
+    console.log(`📨 Message Queue API disponível em http://localhost:${port}/api/message-queue`);
     
     // Graceful shutdown
     process.on('SIGINT', async () => {
       console.log('\n🛑 Recebido SIGINT, fechando servidor...');
       await closeDatabase();
+      await rabbitMQConnection.disconnect();
       process.exit(0);
     });
     
     process.on('SIGTERM', async () => {
       console.log('\n🛑 Recebido SIGTERM, fechando servidor...');
       await closeDatabase();
+      await rabbitMQConnection.disconnect();
       process.exit(0);
     });
     

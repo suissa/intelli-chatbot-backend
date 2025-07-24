@@ -5,3 +5,5 @@ Usando o RabbitMQ padronizamos os nomes de:
 
 - Consumer: apenas recebe as mensagens
 - Producer: apenas envias as mensagens
+
+não use o NPM, use apenas o YARN

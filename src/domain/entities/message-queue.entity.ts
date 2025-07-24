@@ -1,5 +1,19 @@
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
+export interface MessageQueuePayload {
+  message: string;
+  type: string;
+  timestamp: string;
+  pharmacy_phone: string;
+  consumer_phone: string;
+}
+
+export enum MessageType {
+  TEXT = 'text',
+  IMAGE = 'image',
+  AUDIO = 'audio'
+}
+
 export enum TipoMensagem {
   IA = 'ia',
   STORAGE = 'storage'

@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Message Queue - Pharma Atendimento</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #ffffff;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #7f8c8d;
+        }
+
+        .status-card {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-online {
+            background-color: #28a745;
+        }
+
+        .status-offline {
+            background-color: #dc3545;
+        }
+
+        .test-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .test-card {
+            background: #ffffff;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .test-card h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #495057;
+        }
+
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: border-color 0.15s ease-in-out;
+        }
+
+        .form-group input:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+        }
+
+        .btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background-color 0.15s ease-in-out;
+            width: 100%;
+        }
+
+        .btn:hover {
+            background: #0056b3;
+        }
+
+        .btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+
+        .response-area {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .logs-section {
+            background: #ffffff;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .logs-section h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .logs-container {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .log-entry {
+            margin-bottom: 5px;
+            padding: 2px 0;
+        }
+
+        .log-info { color: #63b3ed; }
+        .log-success { color: #68d391; }
+        .log-error { color: #fc8181; }
+        .log-warning { color: #f6e05e; }
+
+        @media (max-width: 768px) {
+            .test-section {
+                grid-template-columns: 1fr;
+            }
+            
+            body {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🐰 Teste Message Queue - Pharma Atendimento</h1>
+            <p>Sistema de processamento de mensagens com RabbitMQ</p>
+        </div>
+
+        <div class="status-card">
+            <h3>
+                <span class="status-indicator" id="statusIndicator"></span>
+                Status do Sistema
+            </h3>
+            <p id="statusText">Verificando status...</p>
+            <button class="btn" onclick="checkStatus()">Verificar Status</button>
+        </div>
+
+        <div class="test-section">
+            <div class="test-card">
+                <h3>📝 Teste Mensagem de Texto</h3>
+                <div class="form-group">
+                    <label for="textMessage">Mensagem:</label>
+                    <textarea id="textMessage" rows="3" placeholder="Digite sua mensagem de texto...">Olá, preciso de ajuda com um medicamento</textarea>
+                </div>
+                <div class="form-group">
+                    <label for="textPharmacyPhone">Telefone da Farmácia:</label>
+                    <input type="text" id="textPharmacyPhone" placeholder="+5511999999999" value="+5511999999999">
+                </div>
+                <div class="form-group">
+                    <label for="textConsumerPhone">Telefone do Consumidor:</label>
+                    <input type="text" id="textConsumerPhone" placeholder="+5511888888888" value="+5511888888888">
+                </div>
+                <button class="btn" onclick="sendTextMessage()">Enviar Mensagem de Texto</button>
+                <div class="response-area" id="textResponse"></div>
+            </div>
+
+            <div class="test-card">
+                <h3>🖼️ Teste Mensagem de Imagem</h3>
+                <div class="form-group">
+                    <label for="imageMessage">URL da Imagem:</label>
+                    <input type="text" id="imageMessage" placeholder="https://exemplo.com/imagem.jpg" value="https://exemplo.com/imagem-remedio.jpg">
+                </div>
+                <div class="form-group">
+                    <label for="imagePharmacyPhone">Telefone da Farmácia:</label>
+                    <input type="text" id="imagePharmacyPhone" placeholder="+5511999999999" value="+5511999999999">
+                </div>
+                <div class="form-group">
+                    <label for="imageConsumerPhone">Telefone do Consumidor:</label>
+                    <input type="text" id="imageConsumerPhone" placeholder="+5511888888888" value="+5511888888888">
+                </div>
+                <button class="btn" onclick="sendImageMessage()">Enviar Mensagem de Imagem</button>
+                <div class="response-area" id="imageResponse"></div>
+            </div>
+
+            <div class="test-card">
+                <h3>🎵 Teste Mensagem de Áudio</h3>
+                <div class="form-group">
+                    <label for="audioMessage">URL do Áudio:</label>
+                    <input type="text" id="audioMessage" placeholder="https://exemplo.com/audio.mp3" value="https://exemplo.com/audio-mensagem.mp3">
+                </div>
+                <div class="form-group">
+                    <label for="audioPharmacyPhone">Telefone da Farmácia:</label>
+                    <input type="text" id="audioPharmacyPhone" placeholder="+5511999999999" value="+5511999999999">
+                </div>
+                <div class="form-group">
+                    <label for="audioConsumerPhone">Telefone do Consumidor:</label>
+                    <input type="text" id="audioConsumerPhone" placeholder="+5511888888888" value="+5511888888888">
+                </div>
+                <button class="btn" onclick="sendAudioMessage()">Enviar Mensagem de Áudio</button>
+                <div class="response-area" id="audioResponse"></div>
+            </div>
+        </div>
+
+        <div class="logs-section">
+            <h3>📋 Logs do Sistema</h3>
+            <div class="logs-container" id="logsContainer">
+                <div class="log-entry log-info">Sistema inicializado...</div>
+            </div>
+            <button class="btn" onclick="clearLogs()" style="margin-top: 10px;">Limpar Logs</button>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:3000/api/message-queue';
+        let logs = [];
+
+        function addLog(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${message}`;
+            logs.push({ message: logEntry, type });
+            
+            const logsContainer = document.getElementById('logsContainer');
+            const logDiv = document.createElement('div');
+            logDiv.className = `log-entry log-${type}`;
+            logDiv.textContent = logEntry;
+            logsContainer.appendChild(logDiv);
+            logsContainer.scrollTop = logsContainer.scrollHeight;
+        }
+
+        function clearLogs() {
+            logs = [];
+            document.getElementById('logsContainer').innerHTML = '<div class="log-entry log-info">Logs limpos...</div>';
+        }
+
+        async function checkStatus() {
+            try {
+                addLog('Verificando status do sistema...', 'info');
+                
+                const response = await fetch(`${API_BASE}/status`);
+                const data = await response.json();
+                
+                const statusIndicator = document.getElementById('statusIndicator');
+                const statusText = document.getElementById('statusText');
+                
+                if (data.success) {
+                    statusIndicator.className = 'status-indicator status-online';
+                    statusText.textContent = 'Sistema funcionando corretamente';
+                    addLog('Status: Sistema online', 'success');
+                } else {
+                    statusIndicator.className = 'status-indicator status-offline';
+                    statusText.textContent = 'Sistema com problemas';
+                    addLog('Status: Sistema offline', 'error');
+                }
+            } catch (error) {
+                addLog(`Erro ao verificar status: ${error.message}`, 'error');
+                document.getElementById('statusIndicator').className = 'status-indicator status-offline';
+                document.getElementById('statusText').textContent = 'Erro ao conectar com o servidor';
+            }
+        }
+
+        async function sendTextMessage() {
+            const message = document.getElementById('textMessage').value;
+            const pharmacyPhone = document.getElementById('textPharmacyPhone').value;
+            const consumerPhone = document.getElementById('textConsumerPhone').value;
+            
+            if (!message || !pharmacyPhone || !consumerPhone) {
+                addLog('Erro: Todos os campos são obrigatórios', 'error');
+                return;
+            }
+
+            try {
+                addLog('Enviando mensagem de texto...', 'info');
+                
+                const response = await fetch(`${API_BASE}/text`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message,
+                        pharmacy_phone: pharmacyPhone,
+                        consumer_phone: consumerPhone
+                    })
+                });
+
+                const data = await response.json();
+                document.getElementById('textResponse').textContent = JSON.stringify(data, null, 2);
+                
+                if (data.success) {
+                    addLog('Mensagem de texto enviada com sucesso', 'success');
+                } else {
+                    addLog(`Erro ao enviar mensagem: ${data.message}`, 'error');
+                }
+            } catch (error) {
+                addLog(`Erro ao enviar mensagem de texto: ${error.message}`, 'error');
+                document.getElementById('textResponse').textContent = `Erro: ${error.message}`;
+            }
+        }
+
+        async function sendImageMessage() {
+            const message = document.getElementById('imageMessage').value;
+            const pharmacyPhone = document.getElementById('imagePharmacyPhone').value;
+            const consumerPhone = document.getElementById('imageConsumerPhone').value;
+            
+            if (!message || !pharmacyPhone || !consumerPhone) {
+                addLog('Erro: Todos os campos são obrigatórios', 'error');
+                return;
+            }
+
+            try {
+                addLog('Enviando mensagem de imagem...', 'info');
+                
+                const response = await fetch(`${API_BASE}/image`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message,
+                        pharmacy_phone: pharmacyPhone,
+                        consumer_phone: consumerPhone
+                    })
+                });
+
+                const data = await response.json();
+                document.getElementById('imageResponse').textContent = JSON.stringify(data, null, 2);
+                
+                if (data.success) {
+                    addLog('Mensagem de imagem enviada com sucesso', 'success');
+                } else {
+                    addLog(`Erro ao enviar mensagem: ${data.message}`, 'error');
+                }
+            } catch (error) {
+                addLog(`Erro ao enviar mensagem de imagem: ${error.message}`, 'error');
+                document.getElementById('imageResponse').textContent = `Erro: ${error.message}`;
+            }
+        }
+
+        async function sendAudioMessage() {
+            const message = document.getElementById('audioMessage').value;
+            const pharmacyPhone = document.getElementById('audioPharmacyPhone').value;
+            const consumerPhone = document.getElementById('audioConsumerPhone').value;
+            
+            if (!message || !pharmacyPhone || !consumerPhone) {
+                addLog('Erro: Todos os campos são obrigatórios', 'error');
+                return;
+            }
+
+            try {
+                addLog('Enviando mensagem de áudio...', 'info');
+                
+                const response = await fetch(`${API_BASE}/audio`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message,
+                        pharmacy_phone: pharmacyPhone,
+                        consumer_phone: consumerPhone
+                    })
+                });
+
+                const data = await response.json();
+                document.getElementById('audioResponse').textContent = JSON.stringify(data, null, 2);
+                
+                if (data.success) {
+                    addLog('Mensagem de áudio enviada com sucesso', 'success');
+                } else {
+                    addLog(`Erro ao enviar mensagem: ${data.message}`, 'error');
+                }
+            } catch (error) {
+                addLog(`Erro ao enviar mensagem de áudio: ${error.message}`, 'error');
+                document.getElementById('audioResponse').textContent = `Erro: ${error.message}`;
+            }
+        }
+
+        // Verificar status ao carregar a página
+        window.onload = function() {
+            addLog('Página carregada, verificando status...', 'info');
+            checkStatus();
+        };
+    </script>
+</body>
+</html> 

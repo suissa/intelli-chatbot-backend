@@ -2,7 +2,6 @@ import { injectable } from 'inversify';
 import * as tesseract from 'node-tesseract-ocr'
 import path from 'path'
 import fs from 'fs'
-import sharp from 'sharp';
 
 @injectable()
 export class OCRService {
@@ -45,7 +44,10 @@ export class OCRService {
     try {
       const tempPath = path.join(__dirname, `temp-ocr-${Date.now()}.png`);
   
-      const imagemProcessada = await sharp(imageBuffer)
+      // Importação dinâmica do sharp apenas quando necessário
+      const sharp = await import('sharp');
+      
+      const imagemProcessada = await sharp.default(imageBuffer)
         .grayscale()                 // remove cor
         .normalize()                 // aumenta contraste
         .threshold(160)              // binarização

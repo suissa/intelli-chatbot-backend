@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatório - Scripts Message Queue RabbitMQ</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #ffffff;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .header p {
+            color: #7f8c8d;
+            font-size: 1.1em;
+        }
+
+        .section {
+            margin-bottom: 40px;
+            padding: 20px;
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .section h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e9ecef;
+            font-size: 1.8em;
+        }
+
+        .section h3 {
+            color: #34495e;
+            margin: 20px 0 10px 0;
+            font-size: 1.3em;
+        }
+
+        .code-block {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+
+        .script-card {
+            background: #ffffff;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .script-card h4 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+        }
+
+        .script-card .filename {
+            background: #007bff;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .feature-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            align-items: center;
+        }
+
+        .feature-list li:before {
+            content: "✅";
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+
+        .usage-example {
+            background: #e3f2fd;
+            border: 1px solid #bbdefb;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .usage-example h5 {
+            color: #1976d2;
+            margin-bottom: 10px;
+        }
+
+        .output-example {
+            background: #f3e5f5;
+            border: 1px solid #e1bee7;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+
+        .output-example h5 {
+            color: #7b1fa2;
+            margin-bottom: 10px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+
+        .status-completed {
+            background: #28a745;
+            color: white;
+        }
+
+        .status-tested {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .links {
+            background: #e8f5e8;
+            border: 1px solid #c8e6c9;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+
+        .links h4 {
+            color: #2e7d32;
+            margin-bottom: 10px;
+        }
+
+        .links a {
+            color: #2e7d32;
+            text-decoration: none;
+            display: block;
+            padding: 5px 0;
+        }
+
+        .links a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📨 Relatório - Scripts Message Queue RabbitMQ</h1>
+            <p>Scripts JavaScript para envio de mensagens de teste</p>
+            <p><strong>Data:</strong> <span id="currentDate"></span></p>
+        </div>
+
+        <div class="section">
+            <h2>📋 Resumo Executivo</h2>
+            <p>Criação de scripts JavaScript independentes para enviar mensagens de teste para o sistema de Message Queue RabbitMQ. Os scripts foram desenvolvidos para facilitar testes e validação do sistema de processamento de mensagens.</p>
+            
+            <div class="status-badge status-completed">✅ Scripts Criados</div>
+            <div class="status-badge status-tested">✅ Testados com Sucesso</div>
+        </div>
+
+        <div class="section">
+            <h2>🔧 Scripts Criados</h2>
+            
+            <div class="script-card">
+                <div class="filename">send-message.js</div>
+                <h4>Script Completo com Múltiplas Funcionalidades</h4>
+                
+                <h5>Funcionalidades:</h5>
+                <ul class="feature-list">
+                    <li>Envio de mensagens de teste pré-definidas</li>
+                    <li>Envio de mensagens personalizadas (modo interativo)</li>
+                    <li>Suporte a todos os tipos: text, image, audio</li>
+                    <li>Logs detalhados e coloridos</li>
+                    <li>Tratamento robusto de erros</li>
+                    <li>Configuração via variáveis de ambiente</li>
+                    <li>Sistema de ajuda integrado</li>
+                </ul>
+
+                <div class="usage-example">
+                    <h5>Como Usar:</h5>
+                    <div class="code-block">
+# Mostrar ajuda
+node send-message.js help
+
+# Enviar mensagens de teste
+node send-message.js test
+
+# Enviar mensagem personalizada
+node send-message.js custom
+                    </div>
+                </div>
+
+                <div class="output-example">
+                    <h5>Exemplo de Saída:</h5>
+                    <div class="code-block">
+🐰 RabbitMQ Message Sender
+==========================
+
+🚀 Iniciando envio de mensagens de teste...
+
+📤 Enviando mensagem 1/4...
+🔄 Conectando ao RabbitMQ...
+✅ Conectado ao RabbitMQ com sucesso!
+📋 Queue 'consumer_messages' verificada/criada
+✅ Mensagem enviada com sucesso!
+📊 Detalhes da mensagem:
+   - Tipo: text
+   - Mensagem: Olá! Preciso de ajuda com um medicamento...
+   - Farmácia: +5511999999999
+   - Consumidor: +5511888888888
+   - Timestamp: 2025-07-23T23:55:38.666Z
+🔌 Conexões fechadas
+                    </div>
+                </div>
+            </div>
+
+            <div class="script-card">
+                <div class="filename">send-quick-message.js</div>
+                <h4>Script Simples para Envio Rápido</h4>
+                
+                <h5>Funcionalidades:</h5>
+                <ul class="feature-list">
+                    <li>Envio rápido de mensagem de texto</li>
+                    <li>Configuração fixa e simples</li>
+                    <li>Logs básicos e diretos</li>
+                    <li>Execução imediata sem parâmetros</li>
+                </ul>
+
+                <div class="usage-example">
+                    <h5>Como Usar:</h5>
+                    <div class="code-block">
+node send-quick-message.js
+                    </div>
+                </div>
+
+                <div class="output-example">
+                    <h5>Exemplo de Saída:</h5>
+                    <div class="code-block">
+🔄 Conectando ao RabbitMQ...
+✅ Conectado ao RabbitMQ!
+📋 Queue 'consumer_messages' verificada
+✅ Mensagem enviada com sucesso!
+📨 Conteúdo da mensagem:
+{
+  "message": "Olá! Preciso de ajuda com um medicamento...",
+  "type": "text",
+  "timestamp": "2025-07-23T23:55:38.666Z",
+  "pharmacy_phone": "+5511999999999",
+  "consumer_phone": "+5511888888888"
+}
+🔌 Conexões fechadas
+                    </div>
+                </div>
+            </div>
+
+            <div class="script-card">
+                <div class="filename">test-messages.js</div>
+                <h4>Script para Testes Automatizados</h4>
+                
+                <h5>Funcionalidades:</h5>
+                <ul class="feature-list">
+                    <li>Envio de 4 mensagens de teste diferentes</li>
+                    <li>Diferentes tipos: text, image, audio</li>
+                    <li>Diferentes números de telefone</li>
+                    <li>Delay automático entre mensagens</li>
+                    <li>Logs organizados por mensagem</li>
+                </ul>
+
+                <div class="usage-example">
+                    <h5>Como Usar:</h5>
+                    <div class="code-block">
+node test-messages.js
+                    </div>
+                </div>
+
+                <div class="output-example">
+                    <h5>Exemplo de Saída:</h5>
+                    <div class="code-block">
+🚀 Iniciando testes de mensagens...
+
+📤 Enviando mensagem 1/4 (text)...
+✅ Mensagem text enviada com sucesso!
+   📝 Conteúdo: Olá! Preciso de ajuda com um medicamento...
+   📞 De: +5511888888888
+   🏥 Para: +5511999999999
+
+📤 Enviando mensagem 2/4 (text)...
+✅ Mensagem text enviada com sucesso!
+   📝 Conteúdo: Tenho uma receita médica, vocês podem me ajudar?...
+   📞 De: +5511777777777
+   🏥 Para: +5511999999999
+
+📤 Enviando mensagem 3/4 (image)...
+✅ Mensagem image enviada com sucesso!
+   📝 Conteúdo: https://exemplo.com/imagem-remedio.jpg...
+   📞 De: +5511666666666
+   🏥 Para: +5511999999999
+
+📤 Enviando mensagem 4/4 (audio)...
+✅ Mensagem audio enviada com sucesso!
+   📝 Conteúdo: https://exemplo.com/audio-mensagem.mp3...
+   📞 De: +5511555555555
+   🏥 Para: +5511999999999
+
+🎉 Testes concluídos!
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📊 Resultados dos Testes</h2>
+            
+            <h3>Testes Realizados</h3>
+            <ul class="feature-list">
+                <li>✅ Conexão com RabbitMQ estabelecida</li>
+                <li>✅ Queue 'consumer_messages' criada/verificada</li>
+                <li>✅ Mensagens enviadas com sucesso</li>
+                <li>✅ Diferentes tipos de mensagem testados</li>
+                <li>✅ Logs funcionando corretamente</li>
+                <li>✅ Conexões fechadas adequadamente</li>
+            </ul>
+
+            <h3>Configuração de Teste</h3>
+            <div class="code-block">
+RabbitMQ URL: amqp://localhost:5672
+Queue: consumer_messages
+Container: pharmai_rabbitmq
+Status: Running
+Ports: 5672 (AMQP), 15672 (Management UI)
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🔧 Configuração e Dependências</h2>
+            
+            <h3>Dependências Instaladas</h3>
+            <div class="code-block">
+npm install amqplib
+            </div>
+
+            <h3>Variáveis de Ambiente</h3>
+            <div class="code-block">
+RABBITMQ_URL=amqp://localhost:5672
+            </div>
+
+            <h3>Estrutura da Mensagem</h3>
+            <div class="code-block">
+{
+  message: "Conteúdo da mensagem",
+  type: "text|image|audio",
+  timestamp: "2025-07-23T23:55:38.666Z",
+  pharmacy_phone: "+5511999999999",
+  consumer_phone: "+5511888888888"
+}
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📁 Arquivos Criados</h2>
+            
+            <ul class="feature-list">
+                <li><strong>send-message.js</strong> - Script completo com múltiplas funcionalidades</li>
+                <li><strong>send-quick-message.js</strong> - Script simples para envio rápido</li>
+                <li><strong>test-messages.js</strong> - Script para testes automatizados</li>
+                <li><strong>README-message-scripts.md</strong> - Documentação completa</li>
+                <li><strong>relatorio-scripts-message-queue.html</strong> - Este relatório</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>🔍 Monitoramento e Debug</h2>
+            
+            <h3>RabbitMQ Management UI</h3>
+            <p>Acesse o painel de gerenciamento para monitorar as mensagens:</p>
+            <div class="code-block">
+URL: http://localhost:15672
+Usuário: guest
+Senha: guest
+            </div>
+
+            <h3>Logs do Sistema</h3>
+            <p>Para ver o processamento das mensagens, monitore os logs do servidor principal quando estiver rodando.</p>
+        </div>
+
+        <div class="section">
+            <h2>🚀 Próximos Passos</h2>
+            
+            <ul class="feature-list">
+                <li>Integrar scripts com sistema de CI/CD</li>
+                <li>Criar scripts para diferentes ambientes (dev, staging, prod)</li>
+                <li>Adicionar validação de mensagens</li>
+                <li>Implementar retry mechanism</li>
+                <li>Criar scripts para monitoramento de queues</li>
+                <li>Adicionar métricas e alertas</li>
+            </ul>
+        </div>
+
+        <div class="links">
+            <h4>📚 Documentação e Recursos</h4>
+            <a href="README-message-scripts.md" target="_blank">📖 README dos Scripts</a>
+            <a href="https://www.rabbitmq.com/documentation.html" target="_blank">📚 Documentação RabbitMQ</a>
+            <a href="https://github.com/amqplib/amqplib" target="_blank">🔧 amqplib Library</a>
+            <a href="test-message-queue.html" target="_blank">🧪 Página de Teste HTML</a>
+            <a href="relatorio-implementacao-message-queue.html" target="_blank">📊 Relatório de Implementação</a>
+        </div>
+
+        <div class="section">
+            <h2>✅ Checklist de Conclusão</h2>
+            
+            <ul class="feature-list">
+                <li>✅ Scripts JavaScript criados</li>
+                <li>✅ Conexão com RabbitMQ testada</li>
+                <li>✅ Envio de mensagens funcionando</li>
+                <li>✅ Diferentes tipos de mensagem testados</li>
+                <li>✅ Logs e tratamento de erros implementados</li>
+                <li>✅ Documentação criada</li>
+                <li>✅ README com instruções de uso</li>
+                <li>✅ Relatórios gerados</li>
+                <li>✅ Testes automatizados funcionando</li>
+                <li>✅ Configuração Docker integrada</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Atualizar data atual
+        document.getElementById('currentDate').textContent = new Date().toLocaleDateString('pt-BR', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    </script>
+</body>
+</html> 

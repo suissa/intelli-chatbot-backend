@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatório - Implementação Message Queue RabbitMQ</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #ffffff;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .header p {
+            color: #7f8c8d;
+            font-size: 1.1em;
+        }
+
+        .section {
+            margin-bottom: 40px;
+            padding: 20px;
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .section h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e9ecef;
+            font-size: 1.8em;
+        }
+
+        .section h3 {
+            color: #34495e;
+            margin: 20px 0 10px 0;
+            font-size: 1.3em;
+        }
+
+        .code-block {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+
+        .file-structure {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            margin: 10px 0;
+        }
+
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .feature-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            align-items: center;
+        }
+
+        .feature-list li:before {
+            content: "✅";
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+
+        .architecture-diagram {
+            background: #ffffff;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .queue-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .queue-card {
+            background: #ffffff;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .queue-card h4 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .queue-card p {
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+
+        .api-endpoints {
+            background: #ffffff;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .endpoint {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .endpoint:last-child {
+            border-bottom: none;
+        }
+
+        .method {
+            background: #007bff;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+
+        .url {
+            font-family: 'Courier New', monospace;
+            color: #495057;
+        }
+
+        .description {
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+
+        .status-completed {
+            background: #28a745;
+            color: white;
+        }
+
+        .status-pending {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .links {
+            background: #e3f2fd;
+            border: 1px solid #bbdefb;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+
+        .links h4 {
+            color: #1976d2;
+            margin-bottom: 10px;
+        }
+
+        .links a {
+            color: #1976d2;
+            text-decoration: none;
+            display: block;
+            padding: 5px 0;
+        }
+
+        .links a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .endpoint {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🐰 Relatório - Implementação Message Queue RabbitMQ</h1>
+            <p>Sistema de processamento de mensagens para Pharma Atendimento</p>
+            <p><strong>Data:</strong> <span id="currentDate"></span></p>
+        </div>
+
+        <div class="section">
+            <h2>📋 Resumo Executivo</h2>
+            <p>Implementação completa de um sistema de message queue utilizando RabbitMQ seguindo os princípios de Domain Driven Design (DDD) e Clean Code. O sistema permite o processamento assíncrono de mensagens de texto, imagem e áudio para o sistema de atendimento farmacêutico.</p>
+            
+            <div class="status-badge status-completed">✅ Implementação Concluída</div>
+        </div>
+
+        <div class="section">
+            <h2>🏗️ Arquitetura Implementada</h2>
+            
+            <h3>Padrões Utilizados</h3>
+            <ul class="feature-list">
+                <li>Domain Driven Design (DDD)</li>
+                <li>Clean Code</li>
+                <li>Dependency Injection (InversifyJS)</li>
+                <li>Repository Pattern</li>
+                <li>Service Layer Pattern</li>
+                <li>Producer/Consumer Pattern</li>
+            </ul>
+
+            <h3>Estrutura de Pastas</h3>
+            <div class="file-structure">
+src/
+├── domain/
+│   ├── entities/
+│   │   └── message-queue.entity.ts
+│   └── services/
+│       └── message-queue.service.ts
+├── infrastructure/
+│   └── messaging/
+│       ├── rabbitmq.config.ts
+│       ├── rabbitmq-connection.ts
+│       ├── message-queue-manager.ts
+│       ├── consumers/
+│       │   ├── consumer-messages.ts
+│       │   ├── consumer-text-message.ts
+│       │   ├── consumer-image-message.ts
+│       │   └── consumer-audio-message.ts
+│       └── producers/
+│           └── message-producer.ts
+└── application/
+    └── controllers/
+        └── message-queue.controller.ts
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📨 Queues e Tópicos</h2>
+            
+            <div class="queue-info">
+                <div class="queue-card">
+                    <h4>🎧 ConsumerMessages</h4>
+                    <p>Queue principal que recebe todas as mensagens e as roteia para os tópicos específicos</p>
+                    <strong>Nome:</strong> consumer_messages
+                </div>
+                
+                <div class="queue-card">
+                    <h4>📝 TextMessages</h4>
+                    <p>Queue para processamento de mensagens de texto</p>
+                    <strong>Nome:</strong> text_messages
+                </div>
+                
+                <div class="queue-card">
+                    <h4>🖼️ ImageMessages</h4>
+                    <p>Queue para processamento de mensagens de imagem</p>
+                    <strong>Nome:</strong> image_messages
+                </div>
+                
+                <div class="queue-card">
+                    <h4>🎵 AudioMessages</h4>
+                    <p>Queue para processamento de mensagens de áudio</p>
+                    <strong>Nome:</strong> audio_messages
+                </div>
+            </div>
+
+            <h3>Exchange de Roteamento</h3>
+            <p>Utilizamos um exchange do tipo <strong>direct</strong> chamado <code>message_router</code> para rotear as mensagens baseado no tipo (text, image, audio).</p>
+        </div>
+
+        <div class="section">
+            <h2>🔧 Componentes Implementados</h2>
+            
+            <h3>1. Entidades de Domínio</h3>
+            <div class="code-block">
+interface MessageQueuePayload {
+  message: string;
+  type: string;
+  timestamp: string;
+  pharmacy_phone: string;
+  consumer_phone: string;
+}
+
+enum MessageType {
+  TEXT = 'text',
+  IMAGE = 'image',
+  AUDIO = 'audio'
+}
+            </div>
+
+            <h3>2. Interfaces de Serviço</h3>
+            <div class="code-block">
+interface IMessageConsumer {
+  consume(queueName: string, callback: Function): Promise&lt;void&gt;;
+  acknowledge(message: any): void;
+  reject(message: any, requeue?: boolean): void;
+}
+
+interface IMessageProducer {
+  publish(queueName: string, message: MessageQueuePayload): Promise&lt;void&gt;;
+}
+
+interface IMessageQueueManager {
+  initializeConsumers(): Promise&lt;void&gt;;
+  initializeProducers(): Promise&lt;void&gt;;
+  routeMessage(message: MessageQueuePayload): Promise&lt;void&gt;;
+}
+            </div>
+
+            <h3>3. Consumers Específicos</h3>
+            <ul class="feature-list">
+                <li><strong>ConsumerMessages:</strong> Consumer principal que roteia mensagens</li>
+                <li><strong>ConsumerTextMessage:</strong> Processa mensagens de texto</li>
+                <li><strong>ConsumerImageMessage:</strong> Processa mensagens de imagem</li>
+                <li><strong>ConsumerAudioMessage:</strong> Processa mensagens de áudio</li>
+            </ul>
+
+            <h3>4. Producer</h3>
+            <ul class="feature-list">
+                <li><strong>MessageProducer:</strong> Envia mensagens para queues específicas</li>
+                <li>Suporte a publicação em queues e exchanges</li>
+                <li>Mensagens persistentes com timestamp</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>🌐 API Endpoints</h2>
+            
+            <div class="api-endpoints">
+                <div class="endpoint">
+                    <div>
+                        <span class="method">GET</span>
+                        <span class="url">/api/message-queue/status</span>
+                    </div>
+                    <span class="description">Status do sistema de Message Queue</span>
+                </div>
+                
+                <div class="endpoint">
+                    <div>
+                        <span class="method">POST</span>
+                        <span class="url">/api/message-queue/text</span>
+                    </div>
+                    <span class="description">Enviar mensagem de texto</span>
+                </div>
+                
+                <div class="endpoint">
+                    <div>
+                        <span class="method">POST</span>
+                        <span class="url">/api/message-queue/image</span>
+                    </div>
+                    <span class="description">Enviar mensagem de imagem</span>
+                </div>
+                
+                <div class="endpoint">
+                    <div>
+                        <span class="method">POST</span>
+                        <span class="url">/api/message-queue/audio</span>
+                    </div>
+                    <span class="description">Enviar mensagem de áudio</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🐳 Configuração Docker</h2>
+            
+            <h3>RabbitMQ Container</h3>
+            <div class="code-block">
+rabbitmq:
+  image: rabbitmq:3-management-alpine
+  container_name: pharmai_rabbitmq
+  environment:
+    RABBITMQ_DEFAULT_USER: guest
+    RABBITMQ_DEFAULT_PASS: guest
+    RABBITMQ_DEFAULT_VHOST: /
+  ports:
+    - "5672:5672"
+    - "15672:15672"
+            </div>
+
+            <h3>Variáveis de Ambiente</h3>
+            <div class="code-block">
+# Configurações do RabbitMQ
+RABBITMQ_URL=amqp://localhost:5672
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🧪 Testes e Validação</h2>
+            
+            <h3>Página de Teste Criada</h3>
+            <p>Foi criada uma página HTML completa para testar o sistema: <strong>test-message-queue.html</strong></p>
+            
+            <ul class="feature-list">
+                <li>Interface responsiva e moderna</li>
+                <li>Testes para todos os tipos de mensagem</li>
+                <li>Logs em tempo real</li>
+                <li>Verificação de status do sistema</li>
+                <li>Validação de campos obrigatórios</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>📊 Fluxo de Processamento</h2>
+            
+            <div class="architecture-diagram">
+                <h3>Fluxo de Mensagens</h3>
+                <p><strong>1.</strong> Mensagem recebida via API</p>
+                <p><strong>2.</strong> Enviada para ConsumerMessages</p>
+                <p><strong>3.</strong> Roteada baseada no tipo (text/image/audio)</p>
+                <p><strong>4.</strong> Processada pelo consumer específico</p>
+                <p><strong>5.</strong> Acknowledge da mensagem</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🔗 Links e Recursos</h2>
+            
+            <div class="links">
+                <h4>Documentação e Referências</h4>
+                <a href="https://www.rabbitmq.com/documentation.html" target="_blank">📚 RabbitMQ Documentation</a>
+                <a href="https://www.rabbitmq.com/tutorials/amqp-concepts.html" target="_blank">📖 AMQP Concepts</a>
+                <a href="https://github.com/amqplib/amqplib" target="_blank">🔧 amqplib Library</a>
+                <a href="https://martinfowler.com/bliki/DomainDrivenDesign.html" target="_blank">🏗️ Domain Driven Design</a>
+                <a href="https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html" target="_blank">🧹 Clean Architecture</a>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>✅ Checklist de Implementação</h2>
+            
+            <ul class="feature-list">
+                <li>✅ Interface do RabbitMQ criada</li>
+                <li>✅ Consumer principal (ConsumerMessages) implementado</li>
+                <li>✅ Consumers específicos para cada tipo de mensagem</li>
+                <li>✅ Producer para envio de mensagens</li>
+                <li>✅ Gerenciador de Message Queue</li>
+                <li>✅ Controller para API REST</li>
+                <li>✅ Configuração de Dependency Injection</li>
+                <li>✅ Integração com Fastify</li>
+                <li>✅ Configuração Docker</li>
+                <li>✅ Página de testes HTML</li>
+                <li>✅ Documentação Swagger</li>
+                <li>✅ Graceful shutdown</li>
+                <li>✅ Logs detalhados</li>
+                <li>✅ Tratamento de erros</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>🚀 Próximos Passos</h2>
+            
+            <ul class="feature-list">
+                <li>Implementar processamento específico para cada tipo de mensagem</li>
+                <li>Adicionar integração com serviços externos (WhatsApp, etc.)</li>
+                <li>Implementar retry mechanism para mensagens falhadas</li>
+                <li>Adicionar métricas e monitoramento</li>
+                <li>Implementar dead letter queue</li>
+                <li>Adicionar testes unitários e de integração</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Atualizar data atual
+        document.getElementById('currentDate').textContent = new Date().toLocaleDateString('pt-BR', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    </script>
+</body>
+</html> 
