@@ -16,6 +16,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@elevenlabs/elevenlabs-js": "^2.7.0",
     "@fastify/cors": "^11.0.1",
     "@fastify/multipart": "^9.0.3",
     "@fastify/swagger": "^9.5.1",

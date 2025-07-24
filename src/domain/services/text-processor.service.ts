@@ -3,7 +3,7 @@ import { TYPES } from '../../shared/types';
 import { DrugsRepository } from '../../infrastructure/repositories/drugs.repository';
 import { OpenAIService } from './openai.service';
 
-export interface TextProcessorService {
+export interface ITextProcessorService {
   extractDrugFromText(text: string): Promise<{
     success: boolean;
     drugInfo?: any;
@@ -13,7 +13,7 @@ export interface TextProcessorService {
 }
 
 @injectable()
-export class TextProcessorServiceImpl implements TextProcessorService {
+export class TextProcessorService implements ITextProcessorService {
   constructor(
     @inject(TYPES.DrugsRepository) private drugsRepository: DrugsRepository,
     @inject(TYPES.OpenAIService) private openaiService: OpenAIService

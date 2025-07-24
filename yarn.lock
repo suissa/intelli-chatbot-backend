@@ -14,6 +14,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@elevenlabs/elevenlabs-js@npm:^2.7.0":
+  version: 2.7.0
+  resolution: "@elevenlabs/elevenlabs-js@npm:2.7.0"
+  dependencies:
+    command-exists: "npm:^1.2.9"
+    node-fetch: "npm:^2.7.0"
+  checksum: 10c0/c6dc104e5ceeb2c820009f4e7225602791dd80e44769e4c6670edc3c27917f7b02c47bd748882971c4b44e0c8ae42c073a383d792985e6f277d164409e3a645f
+  languageName: node
+  linkType: hard
+
 "@emnapi/runtime@npm:^1.4.4":
   version: 1.4.5
   resolution: "@emnapi/runtime@npm:1.4.5"
@@ -1605,6 +1615,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"command-exists@npm:^1.2.9":
+  version: 1.2.9
+  resolution: "command-exists@npm:1.2.9"
+  checksum: 10c0/75040240062de46cd6cd43e6b3032a8b0494525c89d3962e280dde665103f8cc304a8b313a5aa541b91da2f5a9af75c5959dc3a77893a2726407a5e9a0234c16
+  languageName: node
+  linkType: hard
+
 "concat-map@npm:0.0.1":
   version: 0.0.1
   resolution: "concat-map@npm:0.0.1"
@@ -1988,6 +2005,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "fastify_atendimento@workspace:."
   dependencies:
+    "@elevenlabs/elevenlabs-js": "npm:^2.7.0"
     "@fastify/cors": "npm:^11.0.1"
     "@fastify/multipart": "npm:^9.0.3"
     "@fastify/swagger": "npm:^9.5.1"
@@ -3047,6 +3065,20 @@ __metadata:
   dependencies:
     node-gyp: "npm:latest"
   checksum: 10c0/fb32a206276d608037fa1bcd7e9921e177fe992fc610d098aa3128baca3c0050fc1e014fa007e9b3874cf865ddb4f5bd9f43ccb7cbbbe4efaff6a83e920b17e9
+  languageName: node
+  linkType: hard
+
+"node-fetch@npm:^2.7.0":
+  version: 2.7.0
+  resolution: "node-fetch@npm:2.7.0"
+  dependencies:
+    whatwg-url: "npm:^5.0.0"
+  peerDependencies:
+    encoding: ^0.1.0
+  peerDependenciesMeta:
+    encoding:
+      optional: true
+  checksum: 10c0/b55786b6028208e6fbe594ccccc213cab67a72899c9234eb59dba51062a299ea853210fcf526998eaa2867b0963ad72338824450905679ff0fa304b8c5093ae8
   languageName: node
   linkType: hard
 

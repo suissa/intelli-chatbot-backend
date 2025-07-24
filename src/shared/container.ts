@@ -20,7 +20,7 @@ import { AttendanceController, AttendanceControllerImpl } from '../application/c
 
 // Services
 import { DrugImageProcessorService, DrugImageProcessorServiceImpl } from '../domain/services/drug-image-processor.service';
-import { TextProcessorService, TextProcessorServiceImpl } from '../domain/services/text-processor.service';
+import { TextProcessorService, TextProcessorService } from '../domain/services/text-processor.service';
 import { OCRService } from '../domain/services/ocr';
 import { OpenAIService } from '../domain/services/openai.service';
 import { MessageProcessorService } from '../domain/services/message-processor.service';
@@ -50,7 +50,7 @@ container.bind<AttendanceController>(TYPES.AttendanceController).to(AttendanceCo
 
 // Services
 container.bind<DrugImageProcessorService>(TYPES.DrugImageProcessorService).to(DrugImageProcessorServiceImpl);
-container.bind<TextProcessorService>(TYPES.TextProcessorService).to(TextProcessorServiceImpl);
+container.bind<TextProcessorService>(TYPES.TextProcessorService).to(TextProcessorService);
 container.bind<OCRService>(TYPES.OCRService).to(OCRService);
 container.bind<OpenAIService>(TYPES.OpenAIService).to(OpenAIService);
 container.bind<MessageProcessorService>(TYPES.MessageProcessorService).to(MessageProcessorService);
