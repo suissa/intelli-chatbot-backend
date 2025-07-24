@@ -3,6 +3,11 @@ export declare class Remedio {
     nome: string;
     preco: number;
     ativo: boolean;
+    produtosCorrelacionados: Array<{
+        name: string;
+        category: string;
+        price: number;
+    }>;
     isAtivo(): boolean;
     ativar(): void;
     desativar(): void;

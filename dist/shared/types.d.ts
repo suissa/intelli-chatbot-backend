@@ -21,6 +21,7 @@ export declare const TYPES: {
     readonly DrugImageProcessorService: symbol;
     readonly TextProcessorService: symbol;
     readonly OCRService: symbol;
+    readonly MessageProcessorService: symbol;
     readonly AtendenteController: symbol;
     readonly FarmaciaController: symbol;
     readonly AtendimentoController: symbol;
@@ -34,6 +35,7 @@ export declare const TYPES: {
     readonly RabbitMQConnection: symbol;
     readonly MessageQueueProducer: symbol;
     readonly MessageQueueConsumer: symbol;
+    readonly MessageQueueManager: symbol;
     readonly Logger: symbol;
     readonly Validator: symbol;
     readonly Environment: symbol;

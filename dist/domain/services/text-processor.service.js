@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.TextProcessorServiceImpl = void 0;
 const inversify_1 = require("inversify");
 const types_1 = require("../../shared/types");
+const drugs_repository_1 = require("../../infrastructure/repositories/drugs.repository");
 const openai_service_1 = require("./openai.service");
 let TextProcessorServiceImpl = class TextProcessorServiceImpl {
     constructor(drugsRepository, openaiService) {
@@ -100,6 +101,7 @@ exports.TextProcessorServiceImpl = TextProcessorServiceImpl = __decorate([
     (0, inversify_1.injectable)(),
     __param(0, (0, inversify_1.inject)(types_1.TYPES.DrugsRepository)),
     __param(1, (0, inversify_1.inject)(types_1.TYPES.OpenAIService)),
-    __metadata("design:paramtypes", [Object, openai_service_1.OpenAIService])
+    __metadata("design:paramtypes", [drugs_repository_1.DrugsRepository,
+        openai_service_1.OpenAIService])
 ], TextProcessorServiceImpl);
 //# sourceMappingURL=text-processor.service.js.map

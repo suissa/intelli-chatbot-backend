@@ -7,18 +7,7 @@ const RABBITMQ_URL = 'amqp://localhost:5672';
 const QUEUE_NAME = 'consumer_messages';
 const PHARMACY_PHONE = '+5511999999999';
 
-// // Função para criar um arquivo de áudio de teste (simulado)
-// function createTestAudioFile() {
-//   const testAudioPath = path.join(__dirname, 'audio.mp3');
-  
-//   // Criar um arquivo de teste simples (não é um áudio real, apenas para teste)
-//   const testContent = 'Este é um arquivo de teste para simular um áudio MP3';
-//   fs.writeFileSync(testAudioPath, testContent);
-  
-//   console.log(`📁 Arquivo de teste criado: ${testAudioPath}`);
-//   return testAudioPath;
-// }
-
+console.time('testQuickAudio');
 // Função para enviar mensagem de áudio
 async function sendAudioMessage(audioFilePath) {
   try {
@@ -27,7 +16,6 @@ async function sendAudioMessage(audioFilePath) {
     const connection = await amqp.connect(RABBITMQ_URL);
     const channel = await connection.createChannel();
     
-    // Verificar se a queue existe
     await channel.assertQueue(QUEUE_NAME, { durable: true });
     
     const message = {
@@ -35,7 +23,7 @@ async function sendAudioMessage(audioFilePath) {
       type: 'audio',
       timestamp: new Date().toISOString(),
       pharmacy_phone: PHARMACY_PHONE,
-              consumer_phone: '+5511888888888',
+      consumer_phone: '+5511888888888',
       audio_file_path: audioFilePath
     };
 
@@ -76,12 +64,10 @@ async function consumePharmacyResponse() {
       
       const pharmacyQueueName = `pharmacy:${PHARMACY_PHONE}:text`;
       
-      // Verificar se a queue existe
       await channel.assertQueue(pharmacyQueueName, { durable: true });
       
       console.log(`📋 Consumindo da queue: ${pharmacyQueueName}`);
       
-      // Configurar timeout de 30 segundos
       const timeout = setTimeout(() => {
         console.log('⏰ Timeout: Nenhuma resposta recebida em 30 segundos');
         channel.close();
@@ -89,34 +75,23 @@ async function consumePharmacyResponse() {
         resolve(null);
       }, 30000);
       
-      // Consumir mensagens até encontrar uma de sucesso
       await channel.consume(pharmacyQueueName, (msg) => {
         if (msg) {
+          clearTimeout(timeout);
+          
           try {
             const response = JSON.parse(msg.content.toString());
             console.log('📨 Resposta da farmácia recebida:');
             console.log('✅ Status:', response.success ? 'Sucesso' : 'Erro');
             console.log('📝 Mensagem:', response.message);
+            console.log('📊 Dados:', JSON.stringify(response.data, null, 2));
+            console.log('🕐 Timestamp:', response.timestamp);
             
-            if (response.success) {
-              // Encontrou mensagem de sucesso
-              clearTimeout(timeout);
-              console.log('📊 Dados:', JSON.stringify(response.data, null, 2));
-              console.log('🕐 Timestamp:', response.timestamp);
-              
-              // Acknowledge da mensagem
-              channel.ack(msg);
-              
-              // Fechar conexão
-              channel.close();
-              connection.close();
-              
-              resolve(response);
-            } else {
-              // Mensagem de erro, continuar consumindo
-              console.log('⚠️ Mensagem de erro recebida, continuando...');
-              channel.ack(msg);
-            }
+            channel.ack(msg);
+            channel.close();
+            connection.close();
+            
+            resolve(response);
           } catch (error) {
             console.error('❌ Erro ao processar resposta:', error);
             channel.nack(msg, false, false);
@@ -133,72 +108,54 @@ async function consumePharmacyResponse() {
 }
 
 // Função principal
-async function testAudioTranscription() {
+async function testQuickAudio() {
   try {
-    console.log('🎵 Testando transcrição de áudio...');
+    console.log('🎵 Teste rápido de transcrição de áudio...');
     console.log('');
     
-    // Criar arquivo de teste
-    // const audioFilePath = createTestAudioFile();
-    const audioFilePath = path.join(__dirname, 'anitta.mp3');
+    const audioFilePath = path.join(__dirname, 'cpm22.mp3');
     
-    // Verificar se o arquivo existe, se não existir, criar um de teste
     if (!fs.existsSync(audioFilePath)) {
-      console.log(`📁 Arquivo de áudio não encontrado: ${audioFilePath}`);
       console.log('🔧 Criando arquivo de teste...');
-      
-      // Criar um arquivo de teste simples (não é um áudio real, apenas para teste)
-      const testContent = 'Este é um arquivo de teste para simular um áudio MP3. Em um ambiente real, este seria um arquivo de áudio válido.';
+      const testContent = 'Este é um arquivo de teste para simular um áudio MP3.';
       fs.writeFileSync(audioFilePath, testContent);
-      
       console.log(`✅ Arquivo de teste criado: ${audioFilePath}`);
-      console.log('⚠️  Nota: Este é um arquivo simulado. Para testes reais, substitua por um arquivo MP3 válido.');
-      console.log('');
     } else {
-      console.log(`📁 Arquivo de áudio encontrado: ${audioFilePath}`);
+      console.log(`📁 Arquivo encontrado: ${audioFilePath}`);
     }
     
-    console.log(`📁 Arquivo de áudio encontrado: ${audioFilePath}`);
     console.log('');
-    
-    // Iniciar consumidor de resposta ANTES de enviar a mensagem
     console.log('🔄 Iniciando consumidor de resposta...');
     const responsePromise = consumePharmacyResponse();
     
-    // Aguardar um pouco para garantir que o consumidor está pronto
     await new Promise(resolve => setTimeout(resolve, 1000));
     
-    console.time('sendAudioMessage');
-    // Enviar mensagem de áudio
+    console.log('📤 Enviando mensagem...');
     await sendAudioMessage(audioFilePath);
-    console.timeEnd('sendAudioMessage');
     console.log('');
     
-    // Aguardar resposta da farmácia
-    console.log('⏳ Aguardando resposta da transcrição...');
-    console.time('consumePharmacyResponse');
+    console.log('⏳ Aguardando resposta...');
     const response = await responsePromise;
-    console.timeEnd('consumePharmacyResponse');
+    
     if (response) {
       console.log('');
-      console.log('🎉 Teste de transcrição de áudio concluído com sucesso!');
-      console.log('');
-      console.log('📊 Resumo do teste:');
-      console.log(`   ✅ Status: ${response.success ? 'Sucesso' : 'Erro'}`);
-      console.log(`   📝 Mensagem: ${response.message}`);
+      console.log('🎉 Teste concluído com sucesso!');
+      console.log(`✅ Status: ${response.success ? 'Sucesso' : 'Erro'}`);
+      console.log(`📝 Mensagem: ${response.message}`);
       if (response.data && response.data.transcribedText) {
-        console.log(`   🎵 Texto transcrito: "${response.data.transcribedText}"`);
+        console.log(`🎵 Texto transcrito: "${response.data.transcribedText.substring(0, 100)}..."`);
       }
     } else {
       console.log('');
-      console.log('⚠️ Teste concluído, mas nenhuma resposta foi recebida');
-      console.log('📋 Verifique os logs do servidor para mais detalhes');
+      console.log('⚠️ Nenhuma resposta recebida');
     }
     
+    console.timeEnd('testQuickAudio');
   } catch (error) {
-    console.error('❌ Erro no teste de transcrição de áudio:', error);
+    console.error('❌ Erro no teste:', error);
+    console.log(error);
+    console.timeEnd('testQuickAudio');
   }
 }
 
-// Executar teste
-testAudioTranscription(); 
+testQuickAudio(); 

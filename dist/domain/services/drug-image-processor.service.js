@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.DrugImageProcessorServiceImpl = void 0;
 const inversify_1 = require("inversify");
 const types_1 = require("../../shared/types");
+const drugs_repository_1 = require("../../infrastructure/repositories/drugs.repository");
 const ocr_1 = require("./ocr");
 const openai_service_1 = require("./openai.service");
 let DrugImageProcessorServiceImpl = class DrugImageProcessorServiceImpl {
@@ -126,7 +127,8 @@ exports.DrugImageProcessorServiceImpl = DrugImageProcessorServiceImpl = __decora
     __param(0, (0, inversify_1.inject)(types_1.TYPES.DrugsRepository)),
     __param(1, (0, inversify_1.inject)(types_1.TYPES.OCRService)),
     __param(2, (0, inversify_1.inject)(types_1.TYPES.OpenAIService)),
-    __metadata("design:paramtypes", [Object, ocr_1.OCRService,
+    __metadata("design:paramtypes", [drugs_repository_1.DrugsRepository,
+        ocr_1.OCRService,
         openai_service_1.OpenAIService])
 ], DrugImageProcessorServiceImpl);
 //# sourceMappingURL=drug-image-processor.service.js.map

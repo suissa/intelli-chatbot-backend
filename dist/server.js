@@ -368,10 +368,20 @@ async function registerAttendanceRoutes() {
                         data: {
                             type: 'object',
                             properties: {
-                                product: { type: 'object' },
+                                product: {
+                                    type: 'object',
+                                    properties: {
+                                        name: { type: 'string' },
+                                        caracteristicasDoProduto: { type: 'string' },
+                                        produtosCorrelacionados: { type: 'string' },
+                                        textoDeVenda: { type: 'string' }
+                                    },
+                                    required: ['name', 'textoDeVenda']
+                                },
                                 analysis: { type: 'string' },
                                 availableProducts: { type: 'number' }
-                            }
+                            },
+                            required: ['product']
                         },
                         message: { type: 'string' }
                     }
@@ -516,11 +526,140 @@ fastify.get('/', async (request, reply) => {
         }
     };
 });
+async function registerMessageQueueRoutes() {
+    const messageQueueController = container_1.Container.get(types_1.TYPES.MessageQueueController);
+    fastify.get('/api/message-queue/status', {
+        schema: {
+            tags: ['Message Queue'],
+            summary: 'Status do sistema de Message Queue',
+            description: 'Retorna o status atual do sistema de Message Queue',
+            response: {
+                200: {
+                    description: 'Status do sistema',
+                    type: 'object',
+                    properties: {
+                        success: { type: 'boolean' },
+                        message: { type: 'string' },
+                        timestamp: { type: 'string' },
+                        queues: { type: 'object' }
+                    }
+                }
+            }
+        }
+    }, async (request, reply) => {
+        await messageQueueController.getStatus(request, reply);
+    });
+    fastify.post('/api/message-queue/text', {
+        schema: {
+            tags: ['Message Queue'],
+            summary: 'Enviar mensagem de texto',
+            description: 'Envia uma mensagem de texto para processamento',
+            body: {
+                type: 'object',
+                required: ['message', 'pharmacy_phone', 'consumer_phone'],
+                properties: {
+                    message: { type: 'string' },
+                    pharmacy_phone: { type: 'string' },
+                    consumer_phone: { type: 'string' }
+                }
+            },
+            response: {
+                200: {
+                    description: 'Mensagem enviada com sucesso',
+                    type: 'object',
+                    properties: {
+                        success: { type: 'boolean' },
+                        message: { type: 'string' },
+                        data: { type: 'object' }
+                    }
+                }
+            }
+        }
+    }, async (request, reply) => {
+        await messageQueueController.sendTextMessage(request, reply);
+    });
+    fastify.post('/api/message-queue/image', {
+        schema: {
+            tags: ['Message Queue'],
+            summary: 'Enviar mensagem de imagem',
+            description: 'Envia uma mensagem de imagem para processamento',
+            body: {
+                type: 'object',
+                required: ['message', 'pharmacy_phone', 'consumer_phone'],
+                properties: {
+                    message: { type: 'string' },
+                    pharmacy_phone: { type: 'string' },
+                    consumer_phone: { type: 'string' }
+                }
+            },
+            response: {
+                200: {
+                    description: 'Mensagem enviada com sucesso',
+                    type: 'object',
+                    properties: {
+                        success: { type: 'boolean' },
+                        message: { type: 'string' },
+                        data: { type: 'object' }
+                    }
+                }
+            }
+        }
+    }, async (request, reply) => {
+        await messageQueueController.sendImageMessage(request, reply);
+    });
+    fastify.post('/api/message-queue/audio', {
+        schema: {
+            tags: ['Message Queue'],
+            summary: 'Enviar mensagem de áudio',
+            description: 'Envia uma mensagem de áudio para processamento',
+            body: {
+                type: 'object',
+                required: ['message', 'pharmacy_phone', 'consumer_phone'],
+                properties: {
+                    message: { type: 'string' },
+                    pharmacy_phone: { type: 'string' },
+                    consumer_phone: { type: 'string' }
+                }
+            },
+            response: {
+                200: {
+                    description: 'Mensagem enviada com sucesso',
+                    type: 'object',
+                    properties: {
+                        success: { type: 'boolean' },
+                        message: { type: 'string' },
+                        data: { type: 'object' }
+                    }
+                }
+            }
+        }
+    }, async (request, reply) => {
+        await messageQueueController.sendAudioMessage(request, reply);
+    });
+}
 async function start() {
     try {
         console.log('🚀 Iniciando Fastify Atendimento API...');
         console.log('🔍 Inicializando banco de dados...');
         await (0, typeorm_config_1.initializeDatabase)();
+        console.log('🐰 Inicializando RabbitMQ...');
+        const rabbitMQConnection = container_1.Container.get(types_1.TYPES.RabbitMQConnection);
+        await rabbitMQConnection.connect();
+        console.log('📨 Inicializando Message Queue Manager...');
+        try {
+            const messageQueueManager = container_1.Container.get(types_1.TYPES.MessageQueueManager);
+            console.log('✅ MessageQueueManager obtido do container');
+            console.log('🔄 Inicializando consumers...');
+            await messageQueueManager.initializeConsumers();
+            console.log('✅ Consumers inicializados');
+            console.log('🔄 Inicializando producers...');
+            await messageQueueManager.initializeProducers();
+            console.log('✅ Producers inicializados');
+        }
+        catch (error) {
+            console.error('❌ Erro ao inicializar Message Queue Manager:', error);
+            throw error;
+        }
         await fastify.register(cors_1.default, {
             origin: true
         });
@@ -531,6 +670,7 @@ async function start() {
         await registerAttendantRoutes();
         await registerPharmacyRoutes();
         await registerAttendanceRoutes();
+        await registerMessageQueueRoutes();
         const port = process.env.PORT ? parseInt(process.env.PORT) : 3000;
         const host = process.env.HOST || '0.0.0.0';
         await fastify.listen({ port, host });
@@ -540,14 +680,17 @@ async function start() {
         console.log(`👥 Attendants API disponível em http://localhost:${port}/api/attendants`);
         console.log(`🏥 Pharmacies API disponível em http://localhost:${port}/api/pharmacies`);
         console.log(`📞 Attendances API disponível em http://localhost:${port}/api/attendances`);
+        console.log(`📨 Message Queue API disponível em http://localhost:${port}/api/message-queue`);
         process.on('SIGINT', async () => {
             console.log('\n🛑 Recebido SIGINT, fechando servidor...');
             await (0, typeorm_config_1.closeDatabase)();
+            await rabbitMQConnection.disconnect();
             process.exit(0);
         });
         process.on('SIGTERM', async () => {
             console.log('\n🛑 Recebido SIGTERM, fechando servidor...');
             await (0, typeorm_config_1.closeDatabase)();
+            await rabbitMQConnection.disconnect();
             process.exit(0);
         });
     }

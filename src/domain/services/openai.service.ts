@@ -236,8 +236,10 @@ export class OpenAIService {
       const transcription = await this.openai.audio.transcriptions.create({
         file: fs.createReadStream(audioFilePath),
         model: "gpt-4o-transcribe",
+        language: "pt",
+        response_format: "json",
       });
-
+      console.log('🔍 Transcription:', transcription);
       const transcribedText = transcription.text;
       
       console.log('✅ Transcrição concluída com sucesso');

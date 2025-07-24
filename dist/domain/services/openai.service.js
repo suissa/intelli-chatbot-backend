@@ -1,10 +1,43 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
@@ -54,7 +87,9 @@ let OpenAIService = class OpenAIService {
         [Liste as características principais do produto pesquisado]
         
         **PRODUTOS CORRELACIONADOS:**
-        [Liste 1-5 produtos que são comprados em conjunto]
+        [Liste 10 produtos que são comprados em conjunto, com nome, preço e categoria] na seguinte estrutura:
+        [Nome] - [Preço] - [Categoria]
+        no Nome retorne apenas o nome do produto sem ordem numerica
         
         **TEXTO DE VENDA:**
         [Crie um texto persuasivo tentando vender um produto correlacionado junto com o produto pesquisado. Seja um ótimo vendedor, use emojis, destaque benefícios, seja convincente mas honesto]
@@ -190,6 +225,75 @@ let OpenAIService = class OpenAIService {
         catch (error) {
             console.error('Erro ao gerar apresentação com OpenAI:', error);
             return 'Desculpe, não foi possível gerar a apresentação no momento.';
+        }
+    }
+    async transcribeAudio(audioFilePath) {
+        try {
+            console.log('🎵 Iniciando transcrição de áudio...');
+            console.log(`📁 Arquivo: ${audioFilePath}`);
+            const fs = await Promise.resolve().then(() => __importStar(require('fs')));
+            if (!fs.existsSync(audioFilePath)) {
+                throw new Error(`Arquivo de áudio não encontrado: ${audioFilePath}`);
+            }
+            const fileExtension = audioFilePath.split('.').pop()?.toLowerCase();
+            if (fileExtension !== 'mp3' && fileExtension !== 'wav' && fileExtension !== 'm4a') {
+                throw new Error(`Formato de arquivo não suportado: ${fileExtension}. Formatos suportados: mp3, wav, m4a`);
+            }
+            console.log('🔄 Enviando arquivo para transcrição...');
+            const transcription = await this.openai.audio.transcriptions.create({
+                file: fs.createReadStream(audioFilePath),
+                model: "gpt-4o-transcribe",
+                language: "pt",
+                response_format: "json",
+            });
+            console.log('🔍 Transcription:', transcription);
+            const transcribedText = transcription.text;
+            console.log('✅ Transcrição concluída com sucesso');
+            console.log(`📝 Texto transcrito: ${transcribedText.substring(0, 100)}...`);
+            return transcribedText;
+        }
+        catch (error) {
+            console.error('❌ Erro ao transcrever áudio:', error);
+            throw error;
+        }
+    }
+    async transcribeAudioFromBuffer(audioBuffer, filename = 'audio.mp3') {
+        try {
+            console.log('🎵 Iniciando transcrição de áudio a partir do buffer...');
+            console.log(`📁 Nome do arquivo: ${filename}`);
+            console.log(`📊 Tamanho do buffer: ${audioBuffer.length} bytes`);
+            const fileExtension = filename.split('.').pop()?.toLowerCase();
+            if (fileExtension !== 'mp3' && fileExtension !== 'wav' && fileExtension !== 'm4a') {
+                throw new Error(`Formato de arquivo não suportado: ${fileExtension}. Formatos suportados: mp3, wav, m4a`);
+            }
+            console.log('🔄 Enviando buffer para transcrição...');
+            const fs = await Promise.resolve().then(() => __importStar(require('fs')));
+            const path = await Promise.resolve().then(() => __importStar(require('path')));
+            const tempDir = path.join(process.cwd(), 'temp');
+            if (!fs.existsSync(tempDir)) {
+                fs.mkdirSync(tempDir, { recursive: true });
+            }
+            const tempFilePath = path.join(tempDir, filename);
+            fs.writeFileSync(tempFilePath, audioBuffer);
+            try {
+                const transcription = await this.openai.audio.transcriptions.create({
+                    file: fs.createReadStream(tempFilePath),
+                    model: "gpt-4o-transcribe",
+                });
+                const transcribedText = transcription.text;
+                console.log('✅ Transcrição concluída com sucesso');
+                console.log(`📝 Texto transcrito: ${transcribedText.substring(0, 100)}...`);
+                return transcribedText;
+            }
+            finally {
+                if (fs.existsSync(tempFilePath)) {
+                    fs.unlinkSync(tempFilePath);
+                }
+            }
+        }
+        catch (error) {
+            console.error('❌ Erro ao transcrever áudio do buffer:', error);
+            throw error;
         }
     }
 };

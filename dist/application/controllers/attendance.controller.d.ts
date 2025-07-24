@@ -4,6 +4,7 @@ import { DrugImageProcessorService } from '../../domain/services/drug-image-proc
 import { TextProcessorService } from '../../domain/services/text-processor.service';
 import { DrugsRepository } from '../../infrastructure/repositories/drugs.repository';
 import { OpenAIService } from '../../domain/services/openai.service';
+import { MessageProcessorService } from '../../domain/services/message-processor.service';
 export interface AttendanceController {
     getAllAttendances(request: FastifyRequest, reply: FastifyReply): Promise<void>;
     getAttendanceById(request: FastifyRequest<{
@@ -75,7 +76,8 @@ export declare class AttendanceControllerImpl implements AttendanceController {
     private textProcessorService;
     private drugsRepository;
     private openaiService;
-    constructor(attendanceRepository: IAttendanceRepository, drugImageProcessorService: DrugImageProcessorService, textProcessorService: TextProcessorService, drugsRepository: DrugsRepository, openaiService: OpenAIService);
+    private messageProcessorService;
+    constructor(attendanceRepository: IAttendanceRepository, drugImageProcessorService: DrugImageProcessorService, textProcessorService: TextProcessorService, drugsRepository: DrugsRepository, openaiService: OpenAIService, messageProcessorService: MessageProcessorService);
     getAllAttendances(request: FastifyRequest, reply: FastifyReply): Promise<void>;
     getAttendanceById(request: FastifyRequest<{
         Params: {
@@ -137,6 +139,7 @@ export declare class AttendanceControllerImpl implements AttendanceController {
             id: string;
         };
     }>, reply: FastifyReply): Promise<void>;
+    setCorrelatedProducts(remedioName: string, rawText: string): Promise<void>;
     searchProductAndCorrelations(request: FastifyRequest, reply: FastifyReply): Promise<void>;
     processDrugImage(request: FastifyRequest, reply: FastifyReply): Promise<void>;
 }

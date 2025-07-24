@@ -16,14 +16,17 @@ exports.AttendanceControllerImpl = void 0;
 const inversify_1 = require("inversify");
 const types_1 = require("../../shared/types");
 const entities_1 = require("../../domain/entities");
+const drugs_repository_1 = require("../../infrastructure/repositories/drugs.repository");
 const openai_service_1 = require("../../domain/services/openai.service");
+const message_processor_service_1 = require("../../domain/services/message-processor.service");
 let AttendanceControllerImpl = class AttendanceControllerImpl {
-    constructor(attendanceRepository, drugImageProcessorService, textProcessorService, drugsRepository, openaiService) {
+    constructor(attendanceRepository, drugImageProcessorService, textProcessorService, drugsRepository, openaiService, messageProcessorService) {
         this.attendanceRepository = attendanceRepository;
         this.drugImageProcessorService = drugImageProcessorService;
         this.textProcessorService = textProcessorService;
         this.drugsRepository = drugsRepository;
         this.openaiService = openaiService;
+        this.messageProcessorService = messageProcessorService;
     }
     async getAllAttendances(request, reply) {
         try {
@@ -447,6 +450,37 @@ let AttendanceControllerImpl = class AttendanceControllerImpl {
             });
         }
     }
+    async setCorrelatedProducts(remedioName, rawText) {
+        const linhas = rawText
+            .split('\n')
+            .map(l => l.trim())
+            .filter(l => !!l);
+        const correlacionados = linhas.map(item => {
+            const partes = item.split(' - ').map(p => p.trim());
+            if (partes.length < 1) {
+                return null;
+            }
+            const name = partes[0]?.replace(/\*\*[0-9]+\.\s*/g, '');
+            const precoBr = partes[1] ?? '';
+            const numeroOnly = precoBr
+                .replace(/[^0-9,\.]/g, '')
+                .replace(/\./g, '')
+                .replace(',', '.');
+            const price = parseFloat(numeroOnly) || 0;
+            const category = partes[2] ?? 'indefinida';
+            return { name, category, price };
+        });
+        console.log('🔍 Correlacionados:', correlacionados);
+        const correlacionadosFiltrados = correlacionados.filter(item => item !== null);
+        console.log('🔍 Correlacionados Filtrados:', correlacionadosFiltrados);
+        console.log('🔍 Remédio Name:', remedioName);
+        const produtos = await this.drugsRepository.getDrugByName(remedioName);
+        console.log('🔍 Produtos:', produtos);
+        if (produtos.length === 0) {
+            throw new Error('Produto não encontrado');
+        }
+        await this.drugsRepository.updateCorrelatedProducts(produtos, correlacionadosFiltrados);
+    }
     async searchProductAndCorrelations(request, reply) {
         try {
             const { productName } = request.query;
@@ -459,20 +493,18 @@ let AttendanceControllerImpl = class AttendanceControllerImpl {
                 return;
             }
             console.log('🔍 Pesquisando produto e correlações:', productName);
-            const analysis = await this.openaiService.searchProductAndCorrelations(productName);
-            const textoDeVenda = analysis.textoDeVenda;
-            console.log('✅ Análise de produto e correlações gerada com sucesso');
-            console.log('🔍 Características do produto:', analysis.caracteristicasDoProduto);
-            console.log('🔍 Produtos correlacionados:', analysis.produtosCorrelacionados);
-            console.log('🔍 Texto de venda:', textoDeVenda);
+            const productAnalysis = await this.messageProcessorService.searchProductAndCorrelations(productName);
             reply.send({
                 success: true,
                 data: {
-                    product: productName,
-                    caractheristics: analysis.caracteristicasDoProduto,
-                    correlacionados: analysis.produtosCorrelacionados,
-                    textoDeVenda: textoDeVenda
+                    "product": {
+                        "name": productAnalysis.name,
+                        "caracteristicasDoProduto": productAnalysis.caracteristicasDoProduto,
+                        "produtosCorrelacionados": productAnalysis.produtosCorrelacionados,
+                        "textoDeVenda": productAnalysis.textoDeVenda
+                    }
                 },
+                analysis: productAnalysis.textoDeVenda,
                 message: 'Product analysis and correlations generated successfully'
             });
         }
@@ -547,6 +579,9 @@ exports.AttendanceControllerImpl = AttendanceControllerImpl = __decorate([
     __param(2, (0, inversify_1.inject)(types_1.TYPES.TextProcessorService)),
     __param(3, (0, inversify_1.inject)(types_1.TYPES.DrugsRepository)),
     __param(4, (0, inversify_1.inject)(types_1.TYPES.OpenAIService)),
-    __metadata("design:paramtypes", [Object, Object, Object, Object, openai_service_1.OpenAIService])
+    __param(5, (0, inversify_1.inject)(types_1.TYPES.MessageProcessorService)),
+    __metadata("design:paramtypes", [Object, Object, Object, drugs_repository_1.DrugsRepository,
+        openai_service_1.OpenAIService,
+        message_processor_service_1.MessageProcessorService])
 ], AttendanceControllerImpl);
 //# sourceMappingURL=attendance.controller.js.map

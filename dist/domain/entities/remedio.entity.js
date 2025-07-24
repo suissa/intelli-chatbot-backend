@@ -61,6 +61,10 @@ __decorate([
     (0, typeorm_1.Column)({ type: 'boolean', default: true }),
     __metadata("design:type", Boolean)
 ], Remedio.prototype, "ativo", void 0);
+__decorate([
+    (0, typeorm_1.Column)('json', { name: 'produtos_correlacionados', nullable: true }),
+    __metadata("design:type", Array)
+], Remedio.prototype, "produtosCorrelacionados", void 0);
 exports.Remedio = Remedio = __decorate([
     (0, typeorm_1.Entity)('remedios')
 ], Remedio);

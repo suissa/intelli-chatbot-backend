@@ -18,11 +18,15 @@ const drug_image_processor_service_1 = require("../domain/services/drug-image-pr
 const text_processor_service_1 = require("../domain/services/text-processor.service");
 const ocr_1 = require("../domain/services/ocr");
 const openai_service_1 = require("../domain/services/openai.service");
+const message_processor_service_1 = require("../domain/services/message-processor.service");
+const rabbitmq_connection_1 = require("../infrastructure/messaging/rabbitmq-connection");
+const message_queue_manager_1 = require("../infrastructure/messaging/message-queue-manager");
+const message_queue_controller_1 = require("../application/controllers/message-queue.controller");
 exports.container = new inversify_1.Container();
 exports.Container = exports.container;
 exports.container.bind(types_1.TYPES.Environment).toConstantValue(environment_1.environment);
 exports.container.bind(types_1.TYPES.DataSource).toConstantValue(typeorm_config_1.AppDataSource);
-exports.container.bind(types_1.TYPES.DrugsRepository).to(drugs_repository_1.DrugsRepositoryImpl);
+exports.container.bind(types_1.TYPES.DrugsRepository).to(drugs_repository_1.DrugsRepository);
 exports.container.bind(types_1.TYPES.AttendantRepository).to(attendant_repository_1.AttendantRepository);
 exports.container.bind(types_1.TYPES.PharmacyRepository).to(pharmacy_repository_1.PharmacyRepository);
 exports.container.bind(types_1.TYPES.AttendanceRepository).to(attendance_repository_1.AttendanceRepository);
@@ -34,4 +38,8 @@ exports.container.bind(types_1.TYPES.DrugImageProcessorService).to(drug_image_pr
 exports.container.bind(types_1.TYPES.TextProcessorService).to(text_processor_service_1.TextProcessorServiceImpl);
 exports.container.bind(types_1.TYPES.OCRService).to(ocr_1.OCRService);
 exports.container.bind(types_1.TYPES.OpenAIService).to(openai_service_1.OpenAIService);
+exports.container.bind(types_1.TYPES.MessageProcessorService).to(message_processor_service_1.MessageProcessorService);
+exports.container.bind(types_1.TYPES.RabbitMQConnection).to(rabbitmq_connection_1.RabbitMQConnection).inSingletonScope();
+exports.container.bind(types_1.TYPES.MessageQueueManager).to(message_queue_manager_1.MessageQueueManager);
+exports.container.bind(types_1.TYPES.MessageQueueController).to(message_queue_controller_1.MessageQueueController);
 //# sourceMappingURL=container.js.map

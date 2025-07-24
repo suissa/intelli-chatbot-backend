@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.DrugsControllerImpl = void 0;
 const inversify_1 = require("inversify");
 const types_1 = require("../../shared/types");
+const drugs_repository_1 = require("../../infrastructure/repositories/drugs.repository");
 let DrugsControllerImpl = class DrugsControllerImpl {
     constructor(drugsRepository) {
         this.drugsRepository = drugsRepository;
@@ -127,6 +128,6 @@ exports.DrugsControllerImpl = DrugsControllerImpl;
 exports.DrugsControllerImpl = DrugsControllerImpl = __decorate([
     (0, inversify_1.injectable)(),
     __param(0, (0, inversify_1.inject)(types_1.TYPES.DrugsRepository)),
-    __metadata("design:paramtypes", [Object])
+    __metadata("design:paramtypes", [drugs_repository_1.DrugsRepository])
 ], DrugsControllerImpl);
 //# sourceMappingURL=drugs.controller.js.map

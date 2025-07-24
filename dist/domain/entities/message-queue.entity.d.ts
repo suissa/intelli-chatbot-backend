@@ -1,3 +1,15 @@
+export interface MessageQueuePayload {
+    message: string;
+    type: string;
+    timestamp: string;
+    pharmacy_phone: string;
+    consumer_phone: string;
+}
+export declare enum MessageType {
+    TEXT = "text",
+    IMAGE = "image",
+    AUDIO = "audio"
+}
 export declare enum TipoMensagem {
     IA = "ia",
     STORAGE = "storage"

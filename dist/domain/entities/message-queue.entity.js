@@ -9,8 +9,14 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.MessageQueue = exports.StatusMensagem = exports.TipoMensagem = void 0;
+exports.MessageQueue = exports.StatusMensagem = exports.TipoMensagem = exports.MessageType = void 0;
 const typeorm_1 = require("typeorm");
+var MessageType;
+(function (MessageType) {
+    MessageType["TEXT"] = "text";
+    MessageType["IMAGE"] = "image";
+    MessageType["AUDIO"] = "audio";
+})(MessageType || (exports.MessageType = MessageType = {}));
 var TipoMensagem;
 (function (TipoMensagem) {
     TipoMensagem["IA"] = "ia";

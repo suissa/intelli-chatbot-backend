@@ -9,12 +9,12 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.DrugsRepositoryImpl = void 0;
+exports.DrugsRepository = void 0;
 const inversify_1 = require("inversify");
 const typeorm_1 = require("typeorm");
 const remedio_entity_1 = require("../../domain/entities/remedio.entity");
 const typeorm_config_1 = require("../database/typeorm.config");
-let DrugsRepositoryImpl = class DrugsRepositoryImpl {
+let DrugsRepository = class DrugsRepository {
     constructor() {
         this.repository = typeorm_config_1.AppDataSource.getRepository(remedio_entity_1.Remedio);
         console.log('🔗 Inicializando repository TypeORM para Remédios...');
@@ -31,6 +31,13 @@ let DrugsRepositoryImpl = class DrugsRepositoryImpl {
             console.error('Erro ao buscar todos os remédios:', error);
             throw new Error('Erro na conexão com o banco de dados');
         }
+    }
+    async getDrugByName(name) {
+        const remedios = await this.repository.find({
+            where: { nome: (0, typeorm_1.Raw)(alias => `LOWER(${alias}) LIKE LOWER(:t)`, { t: `%${name.toLowerCase()}%` }) },
+            order: { nome: 'ASC' }
+        });
+        return remedios || [];
     }
     async getDrugById(id) {
         try {
@@ -66,6 +73,17 @@ let DrugsRepositoryImpl = class DrugsRepositoryImpl {
             throw new Error('Erro na conexão com o banco de dados');
         }
     }
+    async updateCorrelatedProducts(remedios, correlacionados) {
+        if (remedios.length === 0) {
+            throw new Error('Nenhum remédio encontrado');
+        }
+        remedios.forEach(async (remedio) => {
+            await this.repository.update(remedio.id, {
+                produtosCorrelacionados: correlacionados
+            });
+        });
+        console.log(`✅ Remédios atualizados com ${correlacionados.length} correlacionados`);
+    }
     async getActiveDrugs() {
         try {
             const remedios = await this.repository.find({
@@ -81,9 +99,9 @@ let DrugsRepositoryImpl = class DrugsRepositoryImpl {
         }
     }
 };
-exports.DrugsRepositoryImpl = DrugsRepositoryImpl;
-exports.DrugsRepositoryImpl = DrugsRepositoryImpl = __decorate([
+exports.DrugsRepository = DrugsRepository;
+exports.DrugsRepository = DrugsRepository = __decorate([
     (0, inversify_1.injectable)(),
     __metadata("design:paramtypes", [])
-], DrugsRepositoryImpl);
+], DrugsRepository);
 //# sourceMappingURL=drugs.repository.js.map

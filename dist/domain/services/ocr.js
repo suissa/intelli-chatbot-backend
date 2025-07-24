@@ -47,7 +47,6 @@ const inversify_1 = require("inversify");
 const tesseract = __importStar(require("node-tesseract-ocr"));
 const path_1 = __importDefault(require("path"));
 const fs_1 = __importDefault(require("fs"));
-const sharp_1 = __importDefault(require("sharp"));
 let OCRService = class OCRService {
     async reconhecerTexto(caminhoImagem) {
         const imagemPreprocessada = await this.preprocessarImagem(caminhoImagem);
@@ -77,7 +76,8 @@ let OCRService = class OCRService {
     async preprocessarImagemFromBuffer(imageBuffer) {
         try {
             const tempPath = path_1.default.join(__dirname, `temp-ocr-${Date.now()}.png`);
-            const imagemProcessada = await (0, sharp_1.default)(imageBuffer)
+            const sharp = await Promise.resolve().then(() => __importStar(require('sharp')));
+            const imagemProcessada = await sharp.default(imageBuffer)
                 .grayscale()
                 .normalize()
                 .threshold(160)

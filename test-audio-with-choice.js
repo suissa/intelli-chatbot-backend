@@ -1,23 +1,39 @@
 const amqp = require('amqplib');
 const fs = require('fs');
 const path = require('path');
+const readline = require('readline');
 
 // Configurações
 const RABBITMQ_URL = 'amqp://localhost:5672';
 const QUEUE_NAME = 'consumer_messages';
 const PHARMACY_PHONE = '+5511999999999';
 
-// // Função para criar um arquivo de áudio de teste (simulado)
-// function createTestAudioFile() {
-//   const testAudioPath = path.join(__dirname, 'audio.mp3');
+// Interface para leitura de input
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout
+});
+
+// Função para fazer pergunta ao usuário
+function askQuestion(question) {
+  return new Promise((resolve) => {
+    rl.question(question, (answer) => {
+      resolve(answer);
+    });
+  });
+}
+
+// Função para criar arquivo de teste
+function createTestAudioFile(filePath) {
+  console.log('🔧 Criando arquivo de teste...');
   
-//   // Criar um arquivo de teste simples (não é um áudio real, apenas para teste)
-//   const testContent = 'Este é um arquivo de teste para simular um áudio MP3';
-//   fs.writeFileSync(testAudioPath, testContent);
+  const testContent = 'Este é um arquivo de teste para simular um áudio MP3. Em um ambiente real, este seria um arquivo de áudio válido.';
+  fs.writeFileSync(filePath, testContent);
   
-//   console.log(`📁 Arquivo de teste criado: ${testAudioPath}`);
-//   return testAudioPath;
-// }
+  console.log(`✅ Arquivo de teste criado: ${filePath}`);
+  console.log('⚠️  Nota: Este é um arquivo simulado. Para testes reais, substitua por um arquivo MP3 válido.');
+  console.log('');
+}
 
 // Função para enviar mensagem de áudio
 async function sendAudioMessage(audioFilePath) {
@@ -35,7 +51,7 @@ async function sendAudioMessage(audioFilePath) {
       type: 'audio',
       timestamp: new Date().toISOString(),
       pharmacy_phone: PHARMACY_PHONE,
-              consumer_phone: '+5511888888888',
+      consumer_phone: '+5511888888888',
       audio_file_path: audioFilePath
     };
 
@@ -89,34 +105,27 @@ async function consumePharmacyResponse() {
         resolve(null);
       }, 30000);
       
-      // Consumir mensagens até encontrar uma de sucesso
+      // Consumir mensagem
       await channel.consume(pharmacyQueueName, (msg) => {
         if (msg) {
+          clearTimeout(timeout);
+          
           try {
             const response = JSON.parse(msg.content.toString());
             console.log('📨 Resposta da farmácia recebida:');
             console.log('✅ Status:', response.success ? 'Sucesso' : 'Erro');
             console.log('📝 Mensagem:', response.message);
+            console.log('📊 Dados:', JSON.stringify(response.data, null, 2));
+            console.log('🕐 Timestamp:', response.timestamp);
             
-            if (response.success) {
-              // Encontrou mensagem de sucesso
-              clearTimeout(timeout);
-              console.log('📊 Dados:', JSON.stringify(response.data, null, 2));
-              console.log('🕐 Timestamp:', response.timestamp);
-              
-              // Acknowledge da mensagem
-              channel.ack(msg);
-              
-              // Fechar conexão
-              channel.close();
-              connection.close();
-              
-              resolve(response);
-            } else {
-              // Mensagem de erro, continuar consumindo
-              console.log('⚠️ Mensagem de erro recebida, continuando...');
-              channel.ack(msg);
-            }
+            // Acknowledge da mensagem
+            channel.ack(msg);
+            
+            // Fechar conexão
+            channel.close();
+            connection.close();
+            
+            resolve(response);
           } catch (error) {
             console.error('❌ Erro ao processar resposta:', error);
             channel.nack(msg, false, false);
@@ -133,32 +142,65 @@ async function consumePharmacyResponse() {
 }
 
 // Função principal
-async function testAudioTranscription() {
+async function testAudioTranscriptionWithChoice() {
   try {
-    console.log('🎵 Testando transcrição de áudio...');
+    console.log('🎵 Testando transcrição de áudio com escolha...');
     console.log('');
     
-    // Criar arquivo de teste
-    // const audioFilePath = createTestAudioFile();
-    const audioFilePath = path.join(__dirname, 'anitta.mp3');
+    const defaultAudioPath = path.join(__dirname, 'cpm22.mp3');
     
-    // Verificar se o arquivo existe, se não existir, criar um de teste
-    if (!fs.existsSync(audioFilePath)) {
-      console.log(`📁 Arquivo de áudio não encontrado: ${audioFilePath}`);
-      console.log('🔧 Criando arquivo de teste...');
-      
-      // Criar um arquivo de teste simples (não é um áudio real, apenas para teste)
-      const testContent = 'Este é um arquivo de teste para simular um áudio MP3. Em um ambiente real, este seria um arquivo de áudio válido.';
-      fs.writeFileSync(audioFilePath, testContent);
-      
-      console.log(`✅ Arquivo de teste criado: ${audioFilePath}`);
-      console.log('⚠️  Nota: Este é um arquivo simulado. Para testes reais, substitua por um arquivo MP3 válido.');
-      console.log('');
-    } else {
-      console.log(`📁 Arquivo de áudio encontrado: ${audioFilePath}`);
+    // Perguntar ao usuário sobre o arquivo de áudio
+    console.log('📁 Opções para arquivo de áudio:');
+    console.log('1. Usar arquivo existente (cpm22.mp3)');
+    console.log('2. Criar arquivo de teste');
+    console.log('3. Especificar caminho personalizado');
+    console.log('');
+    
+    const choice = await askQuestion('Escolha uma opção (1-3): ');
+    
+    let audioFilePath;
+    
+    switch (choice.trim()) {
+      case '1':
+        if (fs.existsSync(defaultAudioPath)) {
+          audioFilePath = defaultAudioPath;
+          console.log(`📁 Usando arquivo existente: ${audioFilePath}`);
+        } else {
+          console.log('❌ Arquivo cpm22.mp3 não encontrado');
+          console.log('🔧 Criando arquivo de teste...');
+          createTestAudioFile(defaultAudioPath);
+          audioFilePath = defaultAudioPath;
+        }
+        break;
+        
+      case '2':
+        createTestAudioFile(defaultAudioPath);
+        audioFilePath = defaultAudioPath;
+        break;
+        
+      case '3':
+        const customPath = await askQuestion('Digite o caminho completo do arquivo de áudio: ');
+        audioFilePath = customPath.trim();
+        
+        if (!fs.existsSync(audioFilePath)) {
+          console.log(`❌ Arquivo não encontrado: ${audioFilePath}`);
+          console.log('🔧 Criando arquivo de teste no caminho especificado...');
+          createTestAudioFile(audioFilePath);
+        } else {
+          console.log(`📁 Arquivo encontrado: ${audioFilePath}`);
+        }
+        break;
+        
+      default:
+        console.log('❌ Opção inválida. Usando arquivo padrão...');
+        if (fs.existsSync(defaultAudioPath)) {
+          audioFilePath = defaultAudioPath;
+        } else {
+          createTestAudioFile(defaultAudioPath);
+          audioFilePath = defaultAudioPath;
+        }
     }
     
-    console.log(`📁 Arquivo de áudio encontrado: ${audioFilePath}`);
     console.log('');
     
     // Iniciar consumidor de resposta ANTES de enviar a mensagem
@@ -176,9 +218,8 @@ async function testAudioTranscription() {
     
     // Aguardar resposta da farmácia
     console.log('⏳ Aguardando resposta da transcrição...');
-    console.time('consumePharmacyResponse');
     const response = await responsePromise;
-    console.timeEnd('consumePharmacyResponse');
+    
     if (response) {
       console.log('');
       console.log('🎉 Teste de transcrição de áudio concluído com sucesso!');
@@ -197,8 +238,10 @@ async function testAudioTranscription() {
     
   } catch (error) {
     console.error('❌ Erro no teste de transcrição de áudio:', error);
+  } finally {
+    rl.close();
   }
 }
 
 // Executar teste
-testAudioTranscription(); 
+testAudioTranscriptionWithChoice(); 
