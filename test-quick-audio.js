@@ -33,7 +33,7 @@ async function sendAudioMessage(audioFilePath) {
       persistent: true,
       timestamp: Date.now()
     });
-
+    console.log(success);
     if (success) {
       console.log('✅ Mensagem de áudio enviada com sucesso!');
       console.log(`📁 Arquivo: ${audioFilePath}`);
@@ -113,7 +113,17 @@ async function testQuickAudio() {
     console.log('🎵 Teste rápido de transcrição de áudio...');
     console.log('');
     
+    // Path original (Windows)
     const audioFilePath = path.join(__dirname, 'cpm22.mp3');
+    
+    // Converter para path Linux (Docker)
+    const linuxPath = audioFilePath
+      .replace(/\\/g, '/') // Substituir backslashes por forward slashes
+      .replace(/^([A-Z]):/, '/mnt/$1') // Converter C:\ para /mnt/c
+      .toLowerCase(); // Converter para lowercase
+    
+    console.log(`📁 Path Windows: ${audioFilePath}`);
+    console.log(`🐧 Path Linux: ${linuxPath}`);
     
     if (!fs.existsSync(audioFilePath)) {
       console.log('🔧 Criando arquivo de teste...');
@@ -131,12 +141,13 @@ async function testQuickAudio() {
     await new Promise(resolve => setTimeout(resolve, 1000));
     
     console.log('📤 Enviando mensagem...');
-    await sendAudioMessage(audioFilePath);
+    // Usar o path Linux para enviar a mensagem
+    await sendAudioMessage(linuxPath);
     console.log('');
     
     console.log('⏳ Aguardando resposta...');
     const response = await responsePromise;
-    
+    console.log("response", response);
     if (response) {
       console.log('');
       console.log('🎉 Teste concluído com sucesso!');
