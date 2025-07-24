@@ -213,4 +213,91 @@ export class OpenAIService {
       return 'Desculpe, não foi possível gerar a apresentação no momento.';
     }
   }
+
+  async transcribeAudio(audioFilePath: string): Promise<string> {
+    try {
+      console.log('🎵 Iniciando transcrição de áudio...');
+      console.log(`📁 Arquivo: ${audioFilePath}`);
+      
+      // Verificar se o arquivo existe
+      const fs = await import('fs');
+      if (!fs.existsSync(audioFilePath)) {
+        throw new Error(`Arquivo de áudio não encontrado: ${audioFilePath}`);
+      }
+
+      // Verificar extensão do arquivo
+      const fileExtension = audioFilePath.split('.').pop()?.toLowerCase();
+      if (fileExtension !== 'mp3' && fileExtension !== 'wav' && fileExtension !== 'm4a') {
+        throw new Error(`Formato de arquivo não suportado: ${fileExtension}. Formatos suportados: mp3, wav, m4a`);
+      }
+
+      console.log('🔄 Enviando arquivo para transcrição...');
+      
+      const transcription = await this.openai.audio.transcriptions.create({
+        file: fs.createReadStream(audioFilePath),
+        model: "gpt-4o-transcribe",
+      });
+
+      const transcribedText = transcription.text;
+      
+      console.log('✅ Transcrição concluída com sucesso');
+      console.log(`📝 Texto transcrito: ${transcribedText.substring(0, 100)}...`);
+      
+      return transcribedText;
+    } catch (error) {
+      console.error('❌ Erro ao transcrever áudio:', error);
+      throw error;
+    }
+  }
+
+  async transcribeAudioFromBuffer(audioBuffer: Buffer, filename: string = 'audio.mp3'): Promise<string> {
+    try {
+      console.log('🎵 Iniciando transcrição de áudio a partir do buffer...');
+      console.log(`📁 Nome do arquivo: ${filename}`);
+      console.log(`📊 Tamanho do buffer: ${audioBuffer.length} bytes`);
+      
+      // Verificar extensão do arquivo
+      const fileExtension = filename.split('.').pop()?.toLowerCase();
+      if (fileExtension !== 'mp3' && fileExtension !== 'wav' && fileExtension !== 'm4a') {
+        throw new Error(`Formato de arquivo não suportado: ${fileExtension}. Formatos suportados: mp3, wav, m4a`);
+      }
+
+      console.log('🔄 Enviando buffer para transcrição...');
+      
+      // Criar um arquivo temporário a partir do buffer
+      const fs = await import('fs');
+      const path = await import('path');
+      const tempDir = path.join(process.cwd(), 'temp');
+      
+      // Criar diretório temp se não existir
+      if (!fs.existsSync(tempDir)) {
+        fs.mkdirSync(tempDir, { recursive: true });
+      }
+      
+      const tempFilePath = path.join(tempDir, filename);
+      fs.writeFileSync(tempFilePath, audioBuffer);
+      
+      try {
+        const transcription = await this.openai.audio.transcriptions.create({
+          file: fs.createReadStream(tempFilePath),
+          model: "gpt-4o-transcribe",
+        });
+
+        const transcribedText = transcription.text;
+        
+        console.log('✅ Transcrição concluída com sucesso');
+        console.log(`📝 Texto transcrito: ${transcribedText.substring(0, 100)}...`);
+        
+        return transcribedText;
+      } finally {
+        // Limpar arquivo temporário
+        if (fs.existsSync(tempFilePath)) {
+          fs.unlinkSync(tempFilePath);
+        }
+      }
+    } catch (error) {
+      console.error('❌ Erro ao transcrever áudio do buffer:', error);
+      throw error;
+    }
+  }
 } 
