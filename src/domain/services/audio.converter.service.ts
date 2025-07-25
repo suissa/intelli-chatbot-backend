@@ -139,7 +139,7 @@ export class AudioConverter {
           console.log(`🎯 FFmpeg finalizou conversão`);
           resolve();
         })
-        .on('error', (err) => {
+        .on('error', (err: Error) => {
          console.log(`🔴 Erro FFmpeg:`, err);
           reject(err);
         })
@@ -185,7 +185,7 @@ export class AudioConverter {
    */
   async getAudioInfo(filePath: string): Promise<any> {
     return new Promise((resolve, reject) => {
-      ffmpeg.ffprobe(filePath, (err, metadata) => {
+      ffmpeg.ffprobe(filePath, (err: Error, metadata: any ) => {
         if (err) {
           reject(err);
         } else {
