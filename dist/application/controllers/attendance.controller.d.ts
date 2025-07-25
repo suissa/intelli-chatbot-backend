@@ -69,6 +69,11 @@ export interface AttendanceController {
     }>, reply: FastifyReply): Promise<void>;
     processDrugImage(request: FastifyRequest, reply: FastifyReply): Promise<void>;
     searchProductAndCorrelations(request: FastifyRequest, reply: FastifyReply): Promise<void>;
+    query(request: FastifyRequest<{
+        Body: {
+            query: string;
+        };
+    }>, reply: FastifyReply): Promise<void>;
 }
 export declare class AttendanceControllerImpl implements AttendanceController {
     private attendanceRepository;
@@ -142,5 +147,10 @@ export declare class AttendanceControllerImpl implements AttendanceController {
     setCorrelatedProducts(remedioName: string, rawText: string): Promise<void>;
     searchProductAndCorrelations(request: FastifyRequest, reply: FastifyReply): Promise<void>;
     processDrugImage(request: FastifyRequest, reply: FastifyReply): Promise<void>;
+    query(request: FastifyRequest<{
+        Body: {
+            query: string;
+        };
+    }>, reply: FastifyReply): Promise<void>;
 }
 //# sourceMappingURL=attendance.controller.d.ts.map

@@ -98,7 +98,7 @@ export class AudioConverter {
 
     } catch (error) {
       const conversionTime = Date.now() - startTime;
-      logger.error(`🔴 Erro na conversão de áudio:`, error);
+     console.log(`🔴 Erro na conversão de áudio:`, error);
 
       return {
         success: false,
@@ -108,7 +108,7 @@ export class AudioConverter {
         convertedSize: 0,
         originalFormat: '',
         conversionTime,
-        error: error.message
+        error: error instanceof Error ? error.message : 'Unknown error'
       };
     }
   }
@@ -140,7 +140,7 @@ export class AudioConverter {
           resolve();
         })
         .on('error', (err) => {
-          logger.error(`🔴 Erro FFmpeg:`, err);
+         console.log(`🔴 Erro FFmpeg:`, err);
           reject(err);
         })
         .save(outputPath);
@@ -175,7 +175,7 @@ export class AudioConverter {
       }
       return false;
     } catch (error) {
-      logger.error(`🔴 Erro ao remover arquivo original:`, error);
+     console.log(`🔴 Erro ao remover arquivo original:`, error);
       return false;
     }
   }

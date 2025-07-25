@@ -2,6 +2,7 @@ import { injectable } from 'inversify';
 import OpenAI from 'openai';
 import { z } from 'zod';
 import { DrugsRepository } from '../../infrastructure/repositories/drugs.repository';
+import { ChatCompletionMessageParam } from "openai/resources/chat/completions";
 
 // Schema Zod para extração de informações de remédios
 const DrugsInformationExtraction = z.object({
@@ -362,11 +363,10 @@ Você é um vendedor sênior de farmácia. Siga este fluxo:
 
 
     // Monte o histórico da conversa
-    const promptMessages = [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userMessage },
-        ];
-
+    const promptMessages: ChatCompletionMessageParam[] = [
+      { role: 'system', content: systemPrompt, name: 'system' },
+      { role: 'user', content: userMessage, name: 'user' }
+    ];
     const functions = [
       {
         name: 'check_inventory',

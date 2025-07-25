@@ -35,6 +35,15 @@ let DrugImageProcessorServiceImpl = class DrugImageProcessorServiceImpl {
                     error: 'Não foi possível extrair texto suficiente da imagem'
                 };
             }
+            console.log('🤖 Enviando texto para extração de informações com OpenAI...');
+            const drugsInformation = await this.openaiService.extractDrugInformation(extractedText);
+            console.log('💊 Informações extraídas:', drugsInformation);
+            const nomeComercial = (drugsInformation.match(/\*\*Nome Comercial:\*\*\s*([^\r\n]+)/i) || [, ''])[1].trim();
+            const nomeGenerico = (drugsInformation.match(/\*\*Nome Genérico:\*\*\s*([^\r\n]+)/i) || [, ''])[1].trim();
+            let nomeRemedio = nomeComercial;
+            if (!nomeGenerico.toLowerCase().includes('não especificado') && !nomeGenerico.toLowerCase().includes('não informado')) {
+                nomeRemedio = nomeGenerico;
+            }
             const drugs = await this.drugsRepository.searchDrugs(extractedText);
             console.log(`🔍 Encontrados ${drugs.length} remédios relacionados`);
             if (drugs.length === 0) {

@@ -570,6 +570,33 @@ let AttendanceControllerImpl = class AttendanceControllerImpl {
             });
         }
     }
+    async query(request, reply) {
+        try {
+            console.log('🤖 Processando query do cliente:', request.body.query);
+            if (!request.body?.query) {
+                reply.status(400).send({
+                    success: false,
+                    error: 'Query is required',
+                    message: 'Query is required'
+                });
+                return;
+            }
+            const response = await this.openaiService.queryProduct(request.body.query);
+            reply.send({
+                success: true,
+                data: response,
+                message: 'Query processada com sucesso'
+            });
+        }
+        catch (error) {
+            console.error('❌ Erro ao processar query:', error);
+            reply.status(500).send({
+                success: false,
+                error: 'Internal server error',
+                message: `Erro interno: ${error instanceof Error ? error.message : 'Erro desconhecido'}`
+            });
+        }
+    }
 };
 exports.AttendanceControllerImpl = AttendanceControllerImpl;
 exports.AttendanceControllerImpl = AttendanceControllerImpl = __decorate([

@@ -1,5 +1,6 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { PharmacyRepository } from '../../infrastructure/repositories/pharmacy.repository';
+import { OpenAIService } from '../../domain/services/openai.service';
 export interface PharmacyController {
     getAllPharmacies(request: FastifyRequest, reply: FastifyReply): Promise<void>;
     getPharmacyById(request: FastifyRequest<{
@@ -54,7 +55,8 @@ export interface PharmacyController {
 }
 export declare class PharmacyControllerImpl implements PharmacyController {
     private pharmacyRepository;
-    constructor(pharmacyRepository: PharmacyRepository);
+    private openaiService;
+    constructor(pharmacyRepository: PharmacyRepository, openaiService: OpenAIService);
     setWebhook(request: FastifyRequest, reply: FastifyReply): Promise<void>;
     getAllPharmacies(request: FastifyRequest, reply: FastifyReply): Promise<void>;
     getPharmacyById(request: FastifyRequest<{
@@ -62,7 +64,20 @@ export declare class PharmacyControllerImpl implements PharmacyController {
             id: string;
         };
     }>, reply: FastifyReply): Promise<void>;
-    webhook(request: FastifyRequest, reply: FastifyReply): Promise<void>;
+    webhook(request: FastifyRequest<{
+        Body: {
+            event: string;
+            data: {
+                messageType: string;
+                message: {
+                    imageMessage: string;
+                    from: {
+                        id: string;
+                    };
+                };
+            };
+        };
+    }>, reply: FastifyReply): Promise<void>;
     getPharmacyByCNPJ(request: FastifyRequest<{
         Params: {
             cnpj: string;

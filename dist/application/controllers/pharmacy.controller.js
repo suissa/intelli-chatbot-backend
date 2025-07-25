@@ -11,25 +11,32 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PharmacyControllerImpl = void 0;
 const inversify_1 = require("inversify");
 const types_1 = require("../../shared/types");
 const pharmacy_repository_1 = require("../../infrastructure/repositories/pharmacy.repository");
 const evolution_api_sdk_1 = require("evolution-api-sdk");
+const path_1 = __importDefault(require("path"));
+const fs_1 = __importDefault(require("fs"));
+const openai_service_1 = require("../../domain/services/openai.service");
 const client = new evolution_api_sdk_1.EvolutionClient({
     serverUrl: "http://193.203.183.175:8080/",
-    token: "429683C4C977415CAAFCCE10F7D57E1",
-    instance: "suisseba",
+    token: "429683C4C977415CAAFCCE10F7D57E11",
+    instance: "advogados-help-bot",
 });
 let PharmacyControllerImpl = class PharmacyControllerImpl {
-    constructor(pharmacyRepository) {
+    constructor(pharmacyRepository, openaiService) {
         this.pharmacyRepository = pharmacyRepository;
+        this.openaiService = openaiService;
     }
     async setWebhook(request, reply) {
         try {
             await client.webhook.set({
-                url: "http://195.35.19.148:3000/api/pharmacies/webhook",
+                url: "http://193.203.183.175:3000/api/pharmacies/webhook",
                 webhook_by_events: false,
                 events: [
                     "MESSAGES_UPSERT",
@@ -38,6 +45,10 @@ let PharmacyControllerImpl = class PharmacyControllerImpl {
                     "CONTACTS_UPSERT",
                 ],
                 enabled: true,
+            });
+            reply.status(200).send({
+                success: true,
+                message: 'Webhook set successfully'
             });
         }
         catch (error) {
@@ -98,6 +109,21 @@ let PharmacyControllerImpl = class PharmacyControllerImpl {
     async webhook(request, reply) {
         try {
             console.log(request.body);
+            if (request.body?.event === "messages.upsert") {
+                const messageType = request.body?.data?.messageType;
+                if (messageType === "imageMessage") {
+                    const image = request.body?.data?.message?.imageMessage;
+                    const imageBuffer = Buffer.from(image, "base64");
+                    const imagePath = path_1.default.join(process.cwd(), "temp", "image.jpg");
+                    fs_1.default.writeFileSync(imagePath, imageBuffer);
+                    const transcribedText = await this.openaiService.transcribeAudioBase64(imagePath);
+                }
+                const message = request.body?.data?.message;
+                const pharmacy = await this.pharmacyRepository.getPharmacyByCNPJ(message?.from?.id);
+                if (pharmacy) {
+                    await this.pharmacyRepository.updatePharmacy(pharmacy.id, { lastMessage: message });
+                }
+            }
         }
         catch (error) {
             console.error('Error fetching pharmacy by CNPJ:', error);
@@ -355,6 +381,8 @@ exports.PharmacyControllerImpl = PharmacyControllerImpl;
 exports.PharmacyControllerImpl = PharmacyControllerImpl = __decorate([
     (0, inversify_1.injectable)(),
     __param(0, (0, inversify_1.inject)(types_1.TYPES.PharmacyRepository)),
-    __metadata("design:paramtypes", [pharmacy_repository_1.PharmacyRepository])
+    __param(1, (0, inversify_1.inject)(types_1.TYPES.OpenAIService)),
+    __metadata("design:paramtypes", [pharmacy_repository_1.PharmacyRepository,
+        openai_service_1.OpenAIService])
 ], PharmacyControllerImpl);
 //# sourceMappingURL=pharmacy.controller.js.map

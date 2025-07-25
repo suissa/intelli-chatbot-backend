@@ -439,6 +439,51 @@ async function registerAttendanceRoutes() {
     fastify.patch('/api/attendances/:id/cancel', async (request, reply) => {
         await attendanceController.cancelAttendance(request, reply);
     });
+    fastify.post('/api/attendances/query', {
+        schema: {
+            tags: ['Attendances'],
+            summary: 'Rota principal de conversa com o cliente',
+            description: 'Recebe uma mensagem do cliente e processa usando OpenAI para gerar resposta contextualizada',
+            body: {
+                type: 'object',
+                properties: {
+                    query: { type: 'string', description: 'Mensagem/query do cliente' }
+                },
+                required: ['query']
+            },
+            response: {
+                200: {
+                    description: 'Query processada com sucesso',
+                    type: 'object',
+                    properties: {
+                        success: { type: 'boolean' },
+                        data: { type: 'object' },
+                        message: { type: 'string' }
+                    }
+                },
+                400: {
+                    description: 'Erro na requisição',
+                    type: 'object',
+                    properties: {
+                        success: { type: 'boolean' },
+                        error: { type: 'string' },
+                        message: { type: 'string' }
+                    }
+                },
+                500: {
+                    description: 'Erro interno',
+                    type: 'object',
+                    properties: {
+                        success: { type: 'boolean' },
+                        error: { type: 'string' },
+                        message: { type: 'string' }
+                    }
+                }
+            }
+        }
+    }, async (request, reply) => {
+        await attendanceController.query(request, reply);
+    });
 }
 fastify.get('/health', {
     schema: {
@@ -522,6 +567,7 @@ fastify.get('/', async (request, reply) => {
                 completed: '/api/attendances/completed',
                 byDateRange: '/api/attendances/date-range?startDate=2024-01-01&endDate=2024-12-31',
                 processDrugImage: 'POST /api/attendances/process-drug-image',
+                query: 'POST /api/attendances/query',
                 create: 'POST /api/attendances',
                 update: 'PUT /api/attendances/:id',
                 delete: 'DELETE /api/attendances/:id',
