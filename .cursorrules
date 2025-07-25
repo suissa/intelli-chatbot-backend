@@ -7,3 +7,7 @@ Usando o RabbitMQ padronizamos os nomes de:
 - Producer: apenas envias as mensagens
 
 não use o NPM, use apenas o YARN
+
+Nosso padrão de implementação de Interface é o seguinte:
+adiciona o prefixo I na interface e na classe que implementa ela
+não adiciona nada

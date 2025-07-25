@@ -3,7 +3,7 @@ import { inject, injectable } from 'inversify';
 import { TYPES } from '../../shared/types';
 import { PharmacyRepository } from '../../infrastructure/repositories/pharmacy.repository';
 
-export interface PharmacyController {
+export interface IPharmacyController {
   getAllPharmacies(request: FastifyRequest, reply: FastifyReply): Promise<void>;
   getPharmacyById(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply): Promise<void>;
   getPharmacyByCNPJ(request: FastifyRequest<{ Params: { cnpj: string } }>, reply: FastifyReply): Promise<void>;
@@ -16,10 +16,11 @@ export interface PharmacyController {
   deletePharmacy(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply): Promise<void>;
   activatePharmacy(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply): Promise<void>;
   deactivatePharmacy(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply): Promise<void>;
-}
+  checkout(request: FastifyRequest, reply: FastifyReply): Promise<void>;
+} 
 
 @injectable()
-export class PharmacyControllerImpl implements PharmacyController {
+export class PharmacyController implements IPharmacyController {
   constructor(
     @inject(TYPES.PharmacyRepository) private pharmacyRepository: PharmacyRepository
   ) {}
@@ -42,6 +43,15 @@ export class PharmacyControllerImpl implements PharmacyController {
         message: 'Failed to fetch pharmacies'
       });
     }
+  }
+
+  async checkout(request: FastifyRequest, reply: FastifyReply): Promise<void> {
+    console.log(request.body);
+    reply.send({
+      success: true,
+      data: "Pix gerado com sucesso",
+      message: 'Pix gerado com sucesso'
+    });
   }
 
   async getPharmacyById(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply): Promise<void> {

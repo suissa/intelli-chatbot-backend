@@ -79,7 +79,7 @@ export class DrugsControllerImpl implements DrugsController {
   async searchDrugs(request: FastifyRequest<{ Querystring: { q: string } }>, reply: FastifyReply): Promise<void> {
     try {
       const { q } = request.query;
-      
+      console.log("VENHAA q", q);
       if (!q || q.trim().length === 0) {
         reply.status(400).send({
           success: false,
@@ -90,7 +90,7 @@ export class DrugsControllerImpl implements DrugsController {
       }
 
       const drugs = await this.drugsRepository.searchDrugs(q.trim());
-      
+      console.log("PASSO 1", drugs);
       reply.send({
         success: true,
         data: drugs,

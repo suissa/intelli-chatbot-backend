@@ -193,6 +193,21 @@ async function registerPharmacyRoutes() {
     await pharmacyController.getAllPharmacies(request, reply);
   });
 
+  // POST /api/pharmacies/checkout - Checkout   
+  fastify.post('/api/pharmacies/checkout', async (request, reply) => {
+    console.log(request.body);
+      await pharmacyController.checkout(request as any, reply);
+  });
+
+  
+  // POST /api/pharmacies/checkout - Checkout   
+  fastify.post('/api/pharmacies/webhook', async (request, reply) => {
+    console.log(request.body);
+      await pharmacyController.webhook(request as any, reply);
+  });
+
+  
+
   // GET /api/pharmacies/:id - Buscar farmácia por ID
   fastify.get('/api/pharmacies/:id', async (request, reply) => {
     await pharmacyController.getPharmacyById(request as any, reply);
@@ -327,6 +342,11 @@ async function registerAttendanceRoutes() {
   // GET /api/attendances/date-range?startDate=2024-01-01&endDate=2024-12-31 - Atendimentos por período
   fastify.get('/api/attendances/date-range', async (request, reply) => {
     await attendanceController.getAttendancesByDateRange(request as any, reply);
+  });
+
+  // POST /api/attendances/query - Query
+  fastify.post('/api/attendances/query', async (request, reply) => {
+    await attendanceController.query(request as any, reply);
   });
 
   // POST /api/attendances - Criar atendimento
@@ -607,6 +627,7 @@ fastify.get('/', async (request, reply) => {
         byState: '/api/pharmacies/state/:state',
         search: '/api/pharmacies/search?q=termo',
         create: 'POST /api/pharmacies',
+        checkout: 'POST /api/pharmacies/checkout',
         update: 'PUT /api/pharmacies/:id',
         delete: 'DELETE /api/pharmacies/:id',
         activate: 'PATCH /api/pharmacies/:id/activate',

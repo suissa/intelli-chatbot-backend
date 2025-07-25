@@ -1,8 +1,8 @@
 const amqp = require('amqplib');
 
 // Configurações do RabbitMQ
-const RABBITMQ_URL = process.env.RABBITMQ_URL || 'amqp://localhost:5672';
-const QUEUE_NAME = 'consumer_messages';
+const RABBITMQ_URL = process.env.RABBITMQ_URL || 'amqp://127.0.0.1:5672';
+const QUEUE_NAME = 'vai:messag:send';
 
 // Interface da mensagem
 const MessageType = {

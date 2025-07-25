@@ -1,17 +1,21 @@
 const amqp = require('amqplib');
 
 // Configurações
-const RABBITMQ_URL = 'amqp://localhost:5672';
-const QUEUE_NAME = 'consumer_messages';
+const RABBITMQ_URL = 'amqp://127.0.0.1:5672';
+const QUEUE_NAME = 'whatsapp.send.commands';
 
 // Mensagem de exemplo
 const message = {
-    message: 'Olá! Preciso de ajuda com um medicamento para dor de cabeça.',
-    type: 'text',
-    timestamp: new Date().toISOString(),
-    pharmacy_phone: '+5511999999999',
-    consumer_phone: '+5511888888888'
-};
+    command: 'send_message',
+    instanceId: "vai",
+    payload: {
+      to: "5515991956759@s.whatsapp.net",
+      message: "urrul",
+      type: "text"
+    },
+    timestamp: "2025-07-24T10:00:00Z",
+    eventId: "123e4567-e89b-12d3-a456-426614174000"
+}
 
 async function sendQuickMessage() {
     let connection;

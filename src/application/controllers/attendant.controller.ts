@@ -4,7 +4,7 @@ import { TYPES } from '../../shared/types';
 import { AttendantRepository } from '../../infrastructure/repositories/attendant.repository';
 import { VozAtendente, PerfilAtendente } from '../../domain/entities';
 
-export interface AttendantController {
+export interface IAttendantController {
   getAllAttendants(request: FastifyRequest, reply: FastifyReply): Promise<void>;
   getAttendantById(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply): Promise<void>;
   getAttendantsByPharmacy(request: FastifyRequest<{ Params: { pharmacyId: string } }>, reply: FastifyReply): Promise<void>;
@@ -19,7 +19,7 @@ export interface AttendantController {
 }
 
 @injectable()
-export class AttendantControllerImpl implements AttendantController {
+export class AttendantController implements IAttendantController {
   constructor(
     @inject(TYPES.AttendantRepository) private attendantRepository: AttendantRepository
   ) {}

@@ -1,6 +1,8 @@
 import { injectable } from 'inversify';
 import OpenAI from 'openai';
 import { z } from 'zod';
+import axios from 'axios';
+import { DrugsRepository } from '../../infrastructure/repositories/drugs.repository';
 
 // Schema Zod para extração de informações de remédios
 const DrugsInformationExtraction = z.object({
@@ -20,13 +22,131 @@ const DrugsInformationExtraction = z.object({
 @injectable()
 export class OpenAIService {
   private openai: OpenAI;
+  private drugsRepository: DrugsRepository;
 
   constructor() {
     this.openai = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY || 'sk-your-api-key-here',
     });
+    this.drugsRepository = new DrugsRepository();
   }
 
+  async queryProduct(userMessage: string) {
+    const systemPrompt =
+      `Você é um vendedor sênior de farmácia. Siga este fluxo: 
+      1. Sempre que o cliente falar (saudação ou pergunta), responda adequadamente.
+      2. Se perguntar por um remédio, extraia o nome do medicamento.
+      3. Chame a função \`check_inventory\` para ver estoque e preço.
+      4. Se não tiver estoque, responda “Desculpe, não temos {medicamento} em estoque.” e termine.
+      5. Se tiver estoque:
+         a) O modelo **mesmo** deve gerar 10 produtos relacionados, com nome e um preço estimado.
+         b) Envie ao cliente: “Temos {medicamento} por R$ {preco}. Também recomendamos: {rel1} por R$ {preco1}, {rel2} por R$ {preco2}, … Na compra dos 2 (ou 3), oferecemos 10% de desconto. Deseja seguir com esse combo ou apenas {medicamento}?”
+      6. Aguarde a resposta do cliente.
+      7. Se o cliente confirmar a compra (combo ou item único), chame \`generate_pix\` passando os itens e preço final.
+      8. Retorne ao cliente a chave PIX que a função devolveu.`;
+
+    // Monte o histórico da conversa
+    const promptMessages = [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userMessage },
+        ];
+
+    const functions = [
+      {
+        name: 'check_inventory',
+        description: 'GET /api/drugs/search?q=… — retorna { success: boolean, data:{ medicamento: string, preco: number } }',
+        parameters: {
+          type: 'object',
+          properties: {
+            medicamento: { type: 'string' },
+          },
+          required: ['medicamento'],
+        },
+  
+      },
+    ];
+
+    const response = await this.openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: promptMessages,
+      functions,
+      function_call: 'auto',
+      max_tokens: 1000,
+    });
+
+    if (response?.choices[0]?.finish_reason === 'function_call') {
+      const functionCall = response.choices[0]?.message?.function_call;
+      const args = functionCall ? JSON.parse(functionCall.arguments) : {};
+      const nomeRemedio = args.medicamento || '';
+
+      const products = await this.drugsRepository.searchDrugs(nomeRemedio);if (products.length > 0) {
+        if (products[0]?.produtosCorrelacionados == null) {
+          const productsCorrelacionados = await this.searchProductAndCorrelations(response?.choices[0]?.message?.content || '');
+          products[0].produtosCorrelacionados = productsCorrelacionados;
+          const produto = products[0];
+          const correlacionado = produto?.produtosCorrelacionados[0]; // Pega o primeiro correlacionado para o exemplo
+          
+          const textoVenda = await this.generateVendaPersuasiva(
+            produto?.nome || '',
+            correlacionado?.name || '',
+            produto?.preco || 0,
+            correlacionado?.price || 0
+          );
+          console.log("VENHAA textoVenda", textoVenda);
+          return {
+            content: textoVenda,
+            produto,
+            found: true
+          };
+        }
+        // pre
+        const produto = products[0];
+        const correlacionado = produto?.produtosCorrelacionados[0]; // Pega o primeiro correlacionado para o exemplo
+        const textoVenda = await this.generateVendaPersuasiva(
+          produto?.nome || '',
+          correlacionado?.name || '',
+          produto?.preco || 0,
+          correlacionado?.price || 0
+        );
+        console.log("VENHAA textoVenda", textoVenda);
+        // Agora envie textoVenda como resposta final ao usuário (ou inclua junto do seu objeto de retorno)
+        return {
+          content: textoVenda,
+          produto,
+          found: true
+        };
+
+      }
+      return response?.choices[0]?.message;
+    }
+    return response?.choices[0]?.message;
+  }
+
+  async generateVendaPersuasiva(produto: string, correlacionado: string, preco: number, precoCorrelacionado: number): Promise<string> {
+    const prompt = `
+  Você é um vendedor sênior de farmácia muito persuasivo e empático.
+  Monte um texto curto e objetivo, incentivando o cliente a levar tanto ${produto} quanto ${correlacionado}, explicando rapidamente o benefício de cada um.
+  Explique que, levando os dois, o cliente recebe 10% de desconto no valor total (R$ ${(preco + precoCorrelacionado).toFixed(2)}), e informe o preço já com desconto.
+  Seja amigável, use alguns emojis e sempre termine perguntando: "Posso reservar esse combo para você?"
+  `;
+  
+    const totalComDesconto = ((preco + precoCorrelacionado) * 0.9).toFixed(2);
+  
+    const openaiResp = await this.openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        { role: "system", content: "Você é um vendedor de farmácia persuasivo, cordial e eficiente." },
+        { role: "user", content: prompt + 
+          `\nProduto principal: ${produto} (R$ ${preco.toFixed(2)})\nProduto correlacionado: ${correlacionado} (R$ ${precoCorrelacionado.toFixed(2)})\nValor total com desconto: R$ ${totalComDesconto}` 
+        }
+      ],
+      max_tokens: 300,
+      temperature: 0.7,
+    });
+  
+    return openaiResp.choices[0]?.message?.content || 'Não consegui gerar o texto de venda.';
+  }
+  
   async searchProductAndCorrelations(productName: string): Promise<any> {
     try {
       console.log('🔍 Pesquisando produto e correlações...');
@@ -39,7 +159,7 @@ export class OpenAIService {
         
         Sua tarefa é:
         1. Analisar o produto pesquisado e listar suas características principais
-        2. Identificar 3-5 produtos correlacionados que normalmente são comprados em conjunto (use seu conhecimento sobre farmácia)
+        2. Identificar 10 produtos correlacionados que normalmente são comprados em conjunto (use seu conhecimento sobre farmácia)
         3. Criar um texto persuasivo de venda tentando vender um dos produtos correlacionados junto com o produto pesquisado
         
         Formato da resposta:

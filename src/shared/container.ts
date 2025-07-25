@@ -14,9 +14,9 @@ import { IAttendanceRepository, AttendanceRepository } from '../infrastructure/r
 
 // Controllers
 import { DrugsController, DrugsControllerImpl } from '../application/controllers/drugs.controller';
-import { AttendantController, AttendantControllerImpl } from '../application/controllers/attendant.controller';
-import { PharmacyController, PharmacyControllerImpl } from '../application/controllers/pharmacy.controller';
-import { AttendanceController, AttendanceControllerImpl } from '../application/controllers/attendance.controller';
+import { AttendantController, AttendantController } from '../application/controllers/attendant.controller';
+import { PharmacyController, PharmacyController } from '../application/controllers/pharmacy.controller';
+import { AttendanceController, AttendanceController } from '../application/controllers/attendance.controller';
 
 // Services
 import { DrugImageProcessorService, DrugImageProcessorServiceImpl } from '../domain/services/drug-image-processor.service';
@@ -44,9 +44,9 @@ container.bind<IAttendanceRepository>(TYPES.AttendanceRepository).to(AttendanceR
 
 // Controllers
 container.bind<DrugsController>(TYPES.DrugsController).to(DrugsControllerImpl);
-container.bind<AttendantController>(TYPES.AttendantController).to(AttendantControllerImpl);
-container.bind<PharmacyController>(TYPES.PharmacyController).to(PharmacyControllerImpl);
-container.bind<AttendanceController>(TYPES.AttendanceController).to(AttendanceControllerImpl);
+container.bind<AttendantController>(TYPES.AttendantController).to(AttendantController);
+container.bind<PharmacyController>(TYPES.PharmacyController).to(PharmacyController);
+container.bind<AttendanceController>(TYPES.AttendanceController).to(AttendanceController);
 
 // Services
 container.bind<DrugImageProcessorService>(TYPES.DrugImageProcessorService).to(DrugImageProcessorServiceImpl);

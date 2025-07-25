@@ -11,7 +11,7 @@ import { DrugsRepository } from '../../infrastructure/repositories/drugs.reposit
 import { OpenAIService } from '../../domain/services/openai.service';
 import { MessageProcessorService } from '../../domain/services/message-processor.service';
 
-export interface AttendanceController {
+export interface IAttendanceController {
   getAllAttendances(request: FastifyRequest, reply: FastifyReply): Promise<void>;
   getAttendanceById(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply): Promise<void>;
   getAttendancesByPharmacy(request: FastifyRequest<{ Params: { pharmacyId: string } }>, reply: FastifyReply): Promise<void>;
@@ -30,10 +30,11 @@ export interface AttendanceController {
   cancelAttendance(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply): Promise<void>;
   processDrugImage(request: FastifyRequest, reply: FastifyReply): Promise<void>;
   searchProductAndCorrelations(request: FastifyRequest, reply: FastifyReply): Promise<void>;
-}
+  query(request: FastifyRequest, reply: FastifyReply): Promise<void>;
+  }
 
 @injectable()
-export class AttendanceControllerImpl implements AttendanceController {
+export class AttendanceController implements IAttendanceController {
   constructor(
     @inject(TYPES.AttendanceRepository) private attendanceRepository: IAttendanceRepository,
     @inject(TYPES.DrugImageProcessorService) private drugImageProcessorService: DrugImageProcessorService,
@@ -42,6 +43,27 @@ export class AttendanceControllerImpl implements AttendanceController {
     @inject(TYPES.OpenAIService) private openaiService: OpenAIService,
     @inject(TYPES.MessageProcessorService) private messageProcessorService: MessageProcessorService
   ) {}
+
+  async query(request: FastifyRequest<{ Body: { query: string } }>, reply: FastifyReply): Promise<void> {
+    console.log(request.body);
+    if (!request.body?.query) {
+      reply.status(400).send({
+        success: false,
+        error: 'Query is required',
+        message: 'Query is required'
+      });
+      return;
+    }
+
+    console.log("VENHAA OPENAI", request.body.query);
+    const response = await this.openaiService.queryProduct(request.body.query);
+    console.log("VENHAA RESPONSE", response);
+    reply.send({
+      success: true,
+      data: response,
+      message: 'Query realizada com sucesso'
+    });
+  }
 
   async getAllAttendances(request: FastifyRequest, reply: FastifyReply): Promise<void> {
     try {
