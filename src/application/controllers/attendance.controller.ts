@@ -30,6 +30,7 @@ export interface AttendanceController {
   cancelAttendance(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply): Promise<void>;
   processDrugImage(request: FastifyRequest, reply: FastifyReply): Promise<void>;
   searchProductAndCorrelations(request: FastifyRequest, reply: FastifyReply): Promise<void>;
+  query(request: FastifyRequest<{ Body: { query: string } }>, reply: FastifyReply): Promise<void>;
 }
 
 @injectable()
@@ -653,6 +654,37 @@ export class AttendanceControllerImpl implements AttendanceController {
 
     } catch (error) {
       console.error('❌ Erro ao processar imagem:', error);
+      reply.status(500).send({
+        success: false,
+        error: 'Internal server error',
+        message: `Erro interno: ${error instanceof Error ? error.message : 'Erro desconhecido'}`
+      });
+    }
+  }
+
+  async query(request: FastifyRequest<{ Body: { query: string } }>, reply: FastifyReply): Promise<void> {
+    try {
+      console.log('🤖 Processando query do cliente:', request.body.query);
+      
+      if (!request.body?.query) {
+        reply.status(400).send({
+          success: false,
+          error: 'Query is required',
+          message: 'Query is required'
+        });
+        return;
+      }
+
+      // Processar a query usando o OpenAI Service
+      const response = await this.openaiService.queryProduct(request.body.query);
+      
+      reply.send({
+        success: true,
+        data: response,
+        message: 'Query processada com sucesso'
+      });
+    } catch (error) {
+      console.error('❌ Erro ao processar query:', error);
       reply.status(500).send({
         success: false,
         error: 'Internal server error',

@@ -49,6 +49,16 @@ export class DrugImageProcessorServiceImpl implements DrugImageProcessorService 
         };
       }
 
+      
+      console.log('🤖 Enviando texto para extração de informações com OpenAI...');
+      const drugsInformation = await this.openaiService.extractDrugInformation(extractedText);
+      console.log('💊 Informações extraídas:', drugsInformation);
+      const nomeComercial = (drugsInformation.match(/\*\*Nome Comercial:\*\*\s*([^\r\n]+)/i) || [,''])[1].trim();
+      const nomeGenerico = (drugsInformation.match(/\*\*Nome Genérico:\*\*\s*([^\r\n]+)/i) || [,''])[1].trim();
+      let nomeRemedio = nomeComercial;
+      if (!nomeGenerico.toLowerCase().includes('não especificado') && !nomeGenerico.toLowerCase().includes('não informado')) {
+        nomeRemedio = nomeGenerico;
+      }
       // 2. Buscar remédio no banco de dados
       const drugs = await this.drugsRepository.searchDrugs(extractedText);
       console.log(`🔍 Encontrados ${drugs.length} remédios relacionados`);

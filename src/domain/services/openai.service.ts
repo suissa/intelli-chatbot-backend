@@ -1,6 +1,7 @@
 import { injectable } from 'inversify';
 import OpenAI from 'openai';
 import { z } from 'zod';
+import { DrugsRepository } from '../../infrastructure/repositories/drugs.repository';
 
 // Schema Zod para extração de informações de remédios
 const DrugsInformationExtraction = z.object({
@@ -20,11 +21,12 @@ const DrugsInformationExtraction = z.object({
 @injectable()
 export class OpenAIService {
   private openai: OpenAI;
-
+  private drugsRepository: DrugsRepository;
   constructor() {
     this.openai = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY || 'sk-your-api-key-here',
     });
+    this.drugsRepository = new DrugsRepository();
   }
 
   async searchProductAndCorrelations(productName: string): Promise<any> {
@@ -252,6 +254,46 @@ export class OpenAIService {
     }
   }
 
+
+
+  async transcribeAudioBase64(audioFilePath: string): Promise<string> {
+    try {
+      console.log('🎵 Iniciando transcrição de áudio...');
+      console.log(`📁 Arquivo: ${audioFilePath}`);
+      
+      // Verificar se o arquivo existe
+      const fs = await import('fs');
+      if (!fs.existsSync(audioFilePath)) {
+        throw new Error(`Arquivo de áudio não encontrado: ${audioFilePath}`);
+      }
+
+      // Verificar extensão do arquivo
+      const fileExtension = audioFilePath.split('.').pop()?.toLowerCase();
+      if (fileExtension !== 'mp3' && fileExtension !== 'wav' && fileExtension !== 'm4a') {
+        throw new Error(`Formato de arquivo não suportado: ${fileExtension}. Formatos suportados: mp3, wav, m4a`);
+      }
+
+      console.log('🔄 Enviando arquivo para transcrição...');
+      
+      const transcription = await this.openai.audio.transcriptions.create({
+        file: fs.createReadStream(audioFilePath),
+        model: "gpt-4o-transcribe",
+        language: "pt",
+        response_format: "json",
+      });
+      console.log('🔍 Transcription:', transcription);
+      const transcribedText = transcription.text;
+      
+      console.log('✅ Transcrição concluída com sucesso');
+      console.log(`📝 Texto transcrito: ${transcribedText.substring(0, 100)}...`);
+      
+      return transcribedText;
+    } catch (error) {
+      console.error('❌ Erro ao transcrever áudio:', error);
+      throw error;
+    }
+  }
+
   async transcribeAudioFromBuffer(audioBuffer: Buffer, filename: string = 'audio.mp3'): Promise<string> {
     try {
       console.log('🎵 Iniciando transcrição de áudio a partir do buffer...');
@@ -302,4 +344,112 @@ export class OpenAIService {
       throw error;
     }
   }
+
+  async queryProduct(userMessage: string) {
+    const systemPrompt = `
+Você é um vendedor sênior de farmácia. Siga este fluxo: 
+1. Sempre que o cliente falar (saudação ou pergunta), responda adequadamente.
+2. Se perguntar por um remédio, extraia o nome do medicamento.
+3. Chame a função \`check_inventory\` para ver estoque e preço.
+4. Se não tiver estoque, responda “Desculpe, não temos {medicamento} em estoque.” e termine.
+5. Se tiver estoque:
+   a) O modelo mesmo deve gerar 10 produtos relacionados, com nome e um preço estimado.
+   b) Envie ao cliente: “Temos {medicamento} por R$ {preco}. Também recomendamos: {rel1} por R$ {preco1}, {rel2} por R$ {preco2}, … Na compra dos 2 (ou 3), oferecemos 10% de desconto. Deseja seguir com esse combo ou apenas {medicamento}?”
+6. Aguarde a resposta do cliente.
+7. Se o cliente confirmar a compra (combo ou item único), gere a chave PIX.
+8. Retorne ao cliente a chave PIX 123456.
+`.trim();
+
+
+    // Monte o histórico da conversa
+    const promptMessages = [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userMessage },
+        ];
+
+    const functions = [
+      {
+        name: 'check_inventory',
+        description: 'GET /api/drugs/search?q=… — retorna { success: boolean, data:{ medicamento: string, preco: number } }',
+        parameters: {
+          type: 'object',
+          properties: {
+            medicamento: { type: 'string' },
+          },
+          required: ['medicamento'],
+        },
+  
+      },
+    ];
+
+    const response = await this.openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: promptMessages,
+        functions,
+      function_call: 'auto',
+      max_tokens: 1000,
+    });
+
+    if (response?.choices[0]?.finish_reason === 'function_call') {
+      const functionCall = response.choices[0]?.message?.function_call;
+const args = functionCall ? JSON.parse(functionCall.arguments) : {};
+const nomeRemedio = args.medicamento || '';
+
+const products = await this.drugsRepository.searchDrugs(nomeRemedio);
+
+      
+      if (products.length > 0) {
+        if (products[0]?.produtosCorrelacionados == null) {
+          const productsCorrelacionados = await this.searchProductAndCorrelations(response?.choices[0]?.message?.content || '');
+          products[0]!.produtosCorrelacionados = productsCorrelacionados;
+          const produto = products[0];
+          const correlacionado = produto?.produtosCorrelacionados[0]; // Pega o primeiro correlacionado para o exemplo
+          
+          const textoVenda = await this.generateVendaPersuasiva(
+            produto?.nome || '',
+            correlacionado?.name || '',
+            produto?.preco || 0,
+            correlacionado?.price || 0
+          );
+          console.log("VENHAA textoVenda", textoVenda);
+          // Agora envie textoVenda como resposta final ao usuário (ou inclua junto do seu objeto de retorno)
+          return {
+            content: textoVenda,
+            produto,
+            found: true
+          };
+        }
+        return products;
+
+      }
+      return response?.choices[0]?.message;
+    }
+    return response?.choices[0]?.message;
+  }
+
+  async generateVendaPersuasiva(produto: string, correlacionado: string, preco: number, precoCorrelacionado: number): Promise<string> {
+    const prompt = `
+    Você é um vendedor sênior de farmácia muito persuasivo e empático.
+    Monte um texto curto e objetivo, incentivando o cliente a levar tanto ${produto} quanto ${correlacionado}, explicando rapidamente o benefício de cada um.
+    Explique que, levando os dois, o cliente recebe 10% de desconto no valor total (R$ ${(preco + precoCorrelacionado).toFixed(2)}), e informe o preço já com desconto.
+    Seja amigável, use alguns emojis e sempre termine perguntando: "Posso reservar esse combo para você?"
+    `;
+    
+      const totalComDesconto = ((preco + precoCorrelacionado) * 0.9).toFixed(2);
+    
+      const openaiResp = await this.openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [
+          { role: "system", content: "Você é um vendedor de farmácia persuasivo, cordial e eficiente." },
+          { role: "user", content: prompt + 
+            `\nProduto principal: ${produto} (R$ ${preco.toFixed(2)})\nProduto correlacionado: ${correlacionado} (R$ ${precoCorrelacionado.toFixed(2)})\nValor total com desconto: R$ ${totalComDesconto}` 
+          }
+        ],
+        max_tokens: 300,
+        temperature: 0.7,
+      });
+    
+      return openaiResp.choices[0]?.message?.content || 'Não consegui gerar o texto de venda.';
+    }
+  
 } 
