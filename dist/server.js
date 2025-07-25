@@ -150,11 +150,14 @@ async function registerPharmacyRoutes() {
     }, async (request, reply) => {
         await pharmacyController.getAllPharmacies(request, reply);
     });
-    fastify.get('/api/pharmacies/:id', async (request, reply) => {
-        await pharmacyController.getPharmacyById(request, reply);
-    });
     fastify.get('/api/pharmacies/cnpj/:cnpj', async (request, reply) => {
         await pharmacyController.getPharmacyByCNPJ(request, reply);
+    });
+    fastify.post('/api/pharmacies/set-webhook', async (request, reply) => {
+        await pharmacyController.setWebhook(request, reply);
+    });
+    fastify.post('/api/pharmacies/webhook', async (request, reply) => {
+        await pharmacyController.webhook(request, reply);
     });
     fastify.get('/api/pharmacies/active', async (request, reply) => {
         await pharmacyController.getActivePharmacies(request, reply);
@@ -167,6 +170,9 @@ async function registerPharmacyRoutes() {
     });
     fastify.get('/api/pharmacies/search', async (request, reply) => {
         await pharmacyController.searchPharmacies(request, reply);
+    });
+    fastify.get('/api/pharmacies/:id', async (request, reply) => {
+        await pharmacyController.getPharmacyById(request, reply);
     });
     fastify.post('/api/pharmacies', async (request, reply) => {
         await pharmacyController.createPharmacy(request, reply);

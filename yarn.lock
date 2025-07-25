@@ -1882,12 +1882,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"evolution-api-sdk@npm:^0.6.16":
-  version: 0.6.16
-  resolution: "evolution-api-sdk@npm:0.6.16"
+"evolution-api-sdk@npm:^0.6.17":
+  version: 0.6.17
+  resolution: "evolution-api-sdk@npm:0.6.17"
   dependencies:
     libphonenumber-js: "npm:^1.12.7"
-  checksum: 10c0/c119cd11e1bcc83eddb4239ced387efb104e1baedb91b1143f05ca468ae20e180172f995bccfa9169be9cd41a1dfe3265e0b49cd2c1a43b72a379394f34d8ae7
+  checksum: 10c0/dbe5e22f0761bdbf6c0542e54912bdcda613cca602687f80d104c4a00fd38cbc79ce8d238d4550b83b8105ebc57f2d88d73465eb7315e2b4d3e8b177636a55b4
   languageName: node
   linkType: hard
 
@@ -2010,7 +2010,7 @@ __metadata:
     class-validator: "npm:^0.14.2"
     csv-parse: "npm:^6.1.0"
     dotenv: "npm:^17.2.0"
-    evolution-api-sdk: "npm:^0.6.16"
+    evolution-api-sdk: "npm:^0.6.17"
     fastify: "npm:^5.4.0"
     inversify: "npm:^7.6.1"
     jimp: "npm:^1.6.0"

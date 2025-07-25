@@ -49,16 +49,20 @@ export interface PharmacyController {
             id: string;
         };
     }>, reply: FastifyReply): Promise<void>;
+    setWebhook(request: FastifyRequest, reply: FastifyReply): Promise<void>;
+    webhook(request: FastifyRequest, reply: FastifyReply): Promise<void>;
 }
 export declare class PharmacyControllerImpl implements PharmacyController {
     private pharmacyRepository;
     constructor(pharmacyRepository: PharmacyRepository);
+    setWebhook(request: FastifyRequest, reply: FastifyReply): Promise<void>;
     getAllPharmacies(request: FastifyRequest, reply: FastifyReply): Promise<void>;
     getPharmacyById(request: FastifyRequest<{
         Params: {
             id: string;
         };
     }>, reply: FastifyReply): Promise<void>;
+    webhook(request: FastifyRequest, reply: FastifyReply): Promise<void>;
     getPharmacyByCNPJ(request: FastifyRequest<{
         Params: {
             cnpj: string;

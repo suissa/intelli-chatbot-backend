@@ -16,9 +16,38 @@ exports.PharmacyControllerImpl = void 0;
 const inversify_1 = require("inversify");
 const types_1 = require("../../shared/types");
 const pharmacy_repository_1 = require("../../infrastructure/repositories/pharmacy.repository");
+const evolution_api_sdk_1 = require("evolution-api-sdk");
+const client = new evolution_api_sdk_1.EvolutionClient({
+    serverUrl: "http://193.203.183.175:8080/",
+    token: "429683C4C977415CAAFCCE10F7D57E1",
+    instance: "suisseba",
+});
 let PharmacyControllerImpl = class PharmacyControllerImpl {
     constructor(pharmacyRepository) {
         this.pharmacyRepository = pharmacyRepository;
+    }
+    async setWebhook(request, reply) {
+        try {
+            await client.webhook.set({
+                url: "http://195.35.19.148:3000/api/pharmacies/webhook",
+                webhook_by_events: false,
+                events: [
+                    "MESSAGES_UPSERT",
+                    "MESSAGES_UPDATE",
+                    "CONNECTION_UPDATE",
+                    "CONTACTS_UPSERT",
+                ],
+                enabled: true,
+            });
+        }
+        catch (error) {
+            console.error('Error setting webhook:', error);
+            reply.status(500).send({
+                success: false,
+                error: 'Internal server error',
+                message: 'Failed to set webhook'
+            });
+        }
     }
     async getAllPharmacies(request, reply) {
         try {
@@ -59,6 +88,19 @@ let PharmacyControllerImpl = class PharmacyControllerImpl {
         }
         catch (error) {
             console.error('Error fetching pharmacy by ID:', error);
+            reply.status(500).send({
+                success: false,
+                error: 'Internal server error',
+                message: 'Failed to fetch pharmacy'
+            });
+        }
+    }
+    async webhook(request, reply) {
+        try {
+            console.log(request.body);
+        }
+        catch (error) {
+            console.error('Error fetching pharmacy by CNPJ:', error);
             reply.status(500).send({
                 success: false,
                 error: 'Internal server error',
