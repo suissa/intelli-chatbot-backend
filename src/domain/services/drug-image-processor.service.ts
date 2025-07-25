@@ -80,6 +80,11 @@ export class DrugImageProcessorServiceImpl implements DrugImageProcessorService 
       }
       console.log('💊 Remédio encontrado:', drugInfo.nome);
 
+      return {
+        success: true,
+        drugInfo: drugInfo.nome,
+        presentation: ''
+      };
       // 4. Gerar apresentação com OpenAI
       const presentation = await this.openaiService.generateDrugPresentation(drugInfo);
       console.log('✨ Apresentação gerada com sucesso');

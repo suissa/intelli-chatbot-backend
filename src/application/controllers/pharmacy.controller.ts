@@ -3,9 +3,12 @@ import { inject, injectable } from 'inversify';
 import { TYPES } from '../../shared/types';
 import { PharmacyRepository } from '../../infrastructure/repositories/pharmacy.repository';
 import { EvolutionClient } from "evolution-api-sdk";
+import { DrugImageProcessorService } from '../../domain/services/drug-image-processor.service';
+import { TextProcessorService } from '../../domain/services/text-processor.service';
 import path from 'path';
 import fs from 'fs';
 import { OpenAIService } from '../../domain/services/openai.service';
+import axios from 'axios';
 
 const client = new EvolutionClient({
   serverUrl: "http://193.203.183.175:8080/",
@@ -28,13 +31,16 @@ export interface PharmacyController {
   deactivatePharmacy(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply): Promise<void>;
   setWebhook(request: FastifyRequest, reply: FastifyReply): Promise<void>;
   webhook(request: FastifyRequest, reply: FastifyReply): Promise<void>;
+
 }
 
 @injectable()
 export class PharmacyControllerImpl implements PharmacyController {
   constructor(
     @inject(TYPES.PharmacyRepository) private pharmacyRepository: PharmacyRepository,
-    @inject(TYPES.OpenAIService) private openaiService: OpenAIService
+    @inject(TYPES.OpenAIService) private openaiService: OpenAIService,
+    @inject(TYPES.DrugImageProcessorService) private drugImageProcessorService: DrugImageProcessorService,
+    @inject(TYPES.TextProcessorService) private textProcessorService: TextProcessorService
   ) {}
 
   async setWebhook(request: FastifyRequest, reply: FastifyReply): Promise<void> {
@@ -113,7 +119,11 @@ export class PharmacyControllerImpl implements PharmacyController {
     }
   }
 
-  async webhook(request: FastifyRequest<{ Body: { event: string; data: { messageType: string; message: { imageMessage: string; from: { id: string } } } } }>, reply: FastifyReply): Promise<void> {
+
+  async webhook(
+    request: FastifyRequest<{ Body: Record<string, any> }>,
+    reply: FastifyReply
+  ): Promise<void> {
     try {
       console.log(request.body);
       // const pharmacy = await this.pharmacyRepository.getPharmacyByCNPJ(cnpj);
@@ -123,16 +133,44 @@ export class PharmacyControllerImpl implements PharmacyController {
 
       if (messageType === "imageMessage") {
         const image = request.body?.data?.message?.imageMessage;
+        // salve a img com Date.now convertemndo uma string base64 em jpg
         const imageBuffer = Buffer.from(image, "base64");
-        const imagePath = path.join(process.cwd(), "temp", "image.jpg");
+        const imagePath = path.join(process.cwd(), "temp", `${Date.now()}.jpg`);
         fs.writeFileSync(imagePath, imageBuffer);
-        const transcribedText = await this.openaiService.transcribeAudioBase64(imagePath);
+        const drugInfo = await this.drugImageProcessorService.processDrugImage(imagePath);
+        console.log("drugInfo", drugInfo);
+        // fs.unlinkSync(imagePath);
+        const response = await this.openaiService.queryProduct(drugInfo.drugInfo || '');
+        console.log("response da image", response);
+
+         await client.messages.sendText({
+          number: request.body?.data?.message?.from?.id,
+          text: 'teste 123 ',
+        });
+      } else {
+        console.log(request.body?.data?.message);
+        let messageText = request.body?.data?.message?.conversation ||
+          request.body?.data?.message?.extendedTextMessage?.text ||
+          request.body?.data?.message?.ephemeralMessage?.message?.extendedTextMessage?.text;
+        console.log(messageText);
+        
+        const response = await this.openaiService.queryProduct(messageText || '');
+        console.log("response da messageText", response);
+
+         await client.messages.sendText({
+          number: request.body?.data?.message?.from?.id,
+          text: 'teste 123 ',
+        });
       }
+      // if (messageType === "textMessage") {
+      //   const text = request.body?.data?.message?.textMessage;
+      //   console.log(text);
+      // }
       const message = request.body?.data?.message;
-      const pharmacy = await this.pharmacyRepository.getPharmacyByCNPJ(message?.from?.id);
-      if (pharmacy) {
-        await this.pharmacyRepository.updatePharmacy(pharmacy.id, { lastMessage: message } as any);
-      }
+      // const pharmacy = await this.pharmacyRepository.getPharmacyByCNPJ(message?.from?.id);
+      // if (pharmacy) {
+      //   await this.pharmacyRepository.updatePharmacy(pharmacy.id, { lastMessage: message } as any);
+      // }
     }
     } catch (error) {
       console.error('Error fetching pharmacy by CNPJ:', error);

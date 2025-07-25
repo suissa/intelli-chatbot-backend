@@ -29,9 +29,11 @@ const client = new evolution_api_sdk_1.EvolutionClient({
     instance: "advogados-help-bot",
 });
 let PharmacyControllerImpl = class PharmacyControllerImpl {
-    constructor(pharmacyRepository, openaiService) {
+    constructor(pharmacyRepository, openaiService, drugImageProcessorService, textProcessorService) {
         this.pharmacyRepository = pharmacyRepository;
         this.openaiService = openaiService;
+        this.drugImageProcessorService = drugImageProcessorService;
+        this.textProcessorService = textProcessorService;
     }
     async setWebhook(request, reply) {
         try {
@@ -114,15 +116,31 @@ let PharmacyControllerImpl = class PharmacyControllerImpl {
                 if (messageType === "imageMessage") {
                     const image = request.body?.data?.message?.imageMessage;
                     const imageBuffer = Buffer.from(image, "base64");
-                    const imagePath = path_1.default.join(process.cwd(), "temp", "image.jpg");
+                    const imagePath = path_1.default.join(process.cwd(), "temp", `${Date.now()}.jpg`);
                     fs_1.default.writeFileSync(imagePath, imageBuffer);
-                    const transcribedText = await this.openaiService.transcribeAudioBase64(imagePath);
+                    const drugInfo = await this.drugImageProcessorService.processDrugImage(imagePath);
+                    console.log("drugInfo", drugInfo);
+                    const response = await this.openaiService.queryProduct(drugInfo.drugInfo || '');
+                    console.log("response da image", response);
+                    await client.messages.sendText({
+                        number: request.body?.data?.message?.from?.id,
+                        text: 'teste 123 ',
+                    });
+                }
+                else {
+                    console.log(request.body?.data?.message);
+                    let messageText = request.body?.data?.message?.conversation ||
+                        request.body?.data?.message?.extendedTextMessage?.text ||
+                        request.body?.data?.message?.ephemeralMessage?.message?.extendedTextMessage?.text;
+                    console.log(messageText);
+                    const response = await this.openaiService.queryProduct(messageText || '');
+                    console.log("response da messageText", response);
+                    await client.messages.sendText({
+                        number: request.body?.data?.message?.from?.id,
+                        text: 'teste 123 ',
+                    });
                 }
                 const message = request.body?.data?.message;
-                const pharmacy = await this.pharmacyRepository.getPharmacyByCNPJ(message?.from?.id);
-                if (pharmacy) {
-                    await this.pharmacyRepository.updatePharmacy(pharmacy.id, { lastMessage: message });
-                }
             }
         }
         catch (error) {
@@ -382,7 +400,9 @@ exports.PharmacyControllerImpl = PharmacyControllerImpl = __decorate([
     (0, inversify_1.injectable)(),
     __param(0, (0, inversify_1.inject)(types_1.TYPES.PharmacyRepository)),
     __param(1, (0, inversify_1.inject)(types_1.TYPES.OpenAIService)),
+    __param(2, (0, inversify_1.inject)(types_1.TYPES.DrugImageProcessorService)),
+    __param(3, (0, inversify_1.inject)(types_1.TYPES.TextProcessorService)),
     __metadata("design:paramtypes", [pharmacy_repository_1.PharmacyRepository,
-        openai_service_1.OpenAIService])
+        openai_service_1.OpenAIService, Object, Object])
 ], PharmacyControllerImpl);
 //# sourceMappingURL=pharmacy.controller.js.map

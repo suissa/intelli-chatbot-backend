@@ -60,6 +60,11 @@ let DrugImageProcessorServiceImpl = class DrugImageProcessorServiceImpl {
                 };
             }
             console.log('💊 Remédio encontrado:', drugInfo.nome);
+            return {
+                success: true,
+                drugInfo: drugInfo.nome,
+                presentation: ''
+            };
             const presentation = await this.openaiService.generateDrugPresentation(drugInfo);
             console.log('✨ Apresentação gerada com sucesso');
             return {

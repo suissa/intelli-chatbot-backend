@@ -1,5 +1,7 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { PharmacyRepository } from '../../infrastructure/repositories/pharmacy.repository';
+import { DrugImageProcessorService } from '../../domain/services/drug-image-processor.service';
+import { TextProcessorService } from '../../domain/services/text-processor.service';
 import { OpenAIService } from '../../domain/services/openai.service';
 export interface PharmacyController {
     getAllPharmacies(request: FastifyRequest, reply: FastifyReply): Promise<void>;
@@ -56,7 +58,9 @@ export interface PharmacyController {
 export declare class PharmacyControllerImpl implements PharmacyController {
     private pharmacyRepository;
     private openaiService;
-    constructor(pharmacyRepository: PharmacyRepository, openaiService: OpenAIService);
+    private drugImageProcessorService;
+    private textProcessorService;
+    constructor(pharmacyRepository: PharmacyRepository, openaiService: OpenAIService, drugImageProcessorService: DrugImageProcessorService, textProcessorService: TextProcessorService);
     setWebhook(request: FastifyRequest, reply: FastifyReply): Promise<void>;
     getAllPharmacies(request: FastifyRequest, reply: FastifyReply): Promise<void>;
     getPharmacyById(request: FastifyRequest<{
@@ -65,18 +69,7 @@ export declare class PharmacyControllerImpl implements PharmacyController {
         };
     }>, reply: FastifyReply): Promise<void>;
     webhook(request: FastifyRequest<{
-        Body: {
-            event: string;
-            data: {
-                messageType: string;
-                message: {
-                    imageMessage: string;
-                    from: {
-                        id: string;
-                    };
-                };
-            };
-        };
+        Body: Record<string, any>;
     }>, reply: FastifyReply): Promise<void>;
     getPharmacyByCNPJ(request: FastifyRequest<{
         Params: {
