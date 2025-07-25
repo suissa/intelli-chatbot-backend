@@ -125,7 +125,7 @@ export class PharmacyControllerImpl implements PharmacyController {
     reply: FastifyReply
   ): Promise<void> {
     try {
-      console.log(request.body);
+      // console.log(request.body);
       // const pharmacy = await this.pharmacyRepository.getPharmacyByCNPJ(cnpj);
     
     if (request.body?.event === "messages.upsert") {
