@@ -110,7 +110,6 @@ let PharmacyControllerImpl = class PharmacyControllerImpl {
     }
     async webhook(request, reply) {
         try {
-            console.log(request.body);
             if (request.body?.event === "messages.upsert") {
                 const messageType = request.body?.data?.messageType;
                 if (messageType === "imageMessage") {
