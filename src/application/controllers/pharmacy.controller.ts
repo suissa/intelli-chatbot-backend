@@ -2,6 +2,13 @@ import { FastifyRequest, FastifyReply } from 'fastify';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '../../shared/types';
 import { PharmacyRepository } from '../../infrastructure/repositories/pharmacy.repository';
+import { EvolutionClient } from "evolution-api-sdk";
+
+const client = new EvolutionClient({
+  serverUrl: "http://193.203.183.175:8080/",
+  token: "429683C4C977415CAAFCCE10F7D57E1",
+  instance: "suisseba", // optional
+});
 
 export interface PharmacyController {
   getAllPharmacies(request: FastifyRequest, reply: FastifyReply): Promise<void>;
@@ -16,6 +23,8 @@ export interface PharmacyController {
   deletePharmacy(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply): Promise<void>;
   activatePharmacy(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply): Promise<void>;
   deactivatePharmacy(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply): Promise<void>;
+  setWebhook(request: FastifyRequest, reply: FastifyReply): Promise<void>;
+  webhook(request: FastifyRequest, reply: FastifyReply): Promise<void>;
 }
 
 @injectable()
@@ -23,6 +32,29 @@ export class PharmacyControllerImpl implements PharmacyController {
   constructor(
     @inject(TYPES.PharmacyRepository) private pharmacyRepository: PharmacyRepository
   ) {}
+
+  async setWebhook(request: FastifyRequest, reply: FastifyReply): Promise<void> {
+    try {
+      await client.webhook.set({
+        url: "http://195.35.19.148:3000/api/pharmacies/webhook",
+        webhook_by_events: false,
+        events: [
+          "MESSAGES_UPSERT",
+          "MESSAGES_UPDATE",
+          "CONNECTION_UPDATE",
+          "CONTACTS_UPSERT",
+        ],
+        enabled: true,
+      });
+    } catch (error) {
+      console.error('Error setting webhook:', error);
+      reply.status(500).send({
+        success: false,
+        error: 'Internal server error',
+        message: 'Failed to set webhook'
+      });
+    }
+  }
 
   async getAllPharmacies(request: FastifyRequest, reply: FastifyReply): Promise<void> {
     try {
@@ -65,6 +97,20 @@ export class PharmacyControllerImpl implements PharmacyController {
       });
     } catch (error) {
       console.error('Error fetching pharmacy by ID:', error);
+      reply.status(500).send({
+        success: false,
+        error: 'Internal server error',
+        message: 'Failed to fetch pharmacy'
+      });
+    }
+  }
+
+  async webhook(request: FastifyRequest, reply: FastifyReply): Promise<void> {
+    try {
+      console.log(request.body);
+      // const pharmacy = await this.pharmacyRepository.getPharmacyByCNPJ(cnpj);
+    } catch (error) {
+      console.error('Error fetching pharmacy by CNPJ:', error);
       reply.status(500).send({
         success: false,
         error: 'Internal server error',

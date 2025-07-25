@@ -192,15 +192,17 @@ async function registerPharmacyRoutes() {
   }, async (request, reply) => {
     await pharmacyController.getAllPharmacies(request, reply);
   });
-
-  // GET /api/pharmacies/:id - Buscar farmácia por ID
-  fastify.get('/api/pharmacies/:id', async (request, reply) => {
-    await pharmacyController.getPharmacyById(request as any, reply);
-  });
-
   // GET /api/pharmacies/cnpj/:cnpj - Buscar farmácia por CNPJ
   fastify.get('/api/pharmacies/cnpj/:cnpj', async (request, reply) => {
     await pharmacyController.getPharmacyByCNPJ(request as any, reply);
+  });
+
+  fastify.post('/api/pharmacies/set-webhook', async (request, reply) => {
+    await pharmacyController.setWebhook(request as any, reply);
+  });
+
+  fastify.post('/api/pharmacies/webhook', async (request, reply) => {
+    await pharmacyController.webhook(request as any, reply);
   });
 
   // GET /api/pharmacies/active - Farmácias ativas
@@ -221,6 +223,12 @@ async function registerPharmacyRoutes() {
   // GET /api/pharmacies/search?q=termo - Buscar farmácias
   fastify.get('/api/pharmacies/search', async (request, reply) => {
     await pharmacyController.searchPharmacies(request as any, reply);
+  });
+
+
+  // GET /api/pharmacies/:id - Buscar farmácia por ID
+  fastify.get('/api/pharmacies/:id', async (request, reply) => {
+    await pharmacyController.getPharmacyById(request as any, reply);
   });
 
   // POST /api/pharmacies - Criar farmácia

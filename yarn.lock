@@ -1882,6 +1882,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"evolution-api-sdk@npm:^0.6.16":
+  version: 0.6.16
+  resolution: "evolution-api-sdk@npm:0.6.16"
+  dependencies:
+    libphonenumber-js: "npm:^1.12.7"
+  checksum: 10c0/c119cd11e1bcc83eddb4239ced387efb104e1baedb91b1143f05ca468ae20e180172f995bccfa9169be9cd41a1dfe3265e0b49cd2c1a43b72a379394f34d8ae7
+  languageName: node
+  linkType: hard
+
 "exif-parser@npm:^0.1.12":
   version: 0.1.12
   resolution: "exif-parser@npm:0.1.12"
@@ -2001,6 +2010,7 @@ __metadata:
     class-validator: "npm:^0.14.2"
     csv-parse: "npm:^6.1.0"
     dotenv: "npm:^17.2.0"
+    evolution-api-sdk: "npm:^0.6.16"
     fastify: "npm:^5.4.0"
     inversify: "npm:^7.6.1"
     jimp: "npm:^1.6.0"
@@ -2714,7 +2724,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"libphonenumber-js@npm:^1.11.1":
+"libphonenumber-js@npm:^1.11.1, libphonenumber-js@npm:^1.12.7":
   version: 1.12.10
   resolution: "libphonenumber-js@npm:1.12.10"
   checksum: 10c0/c348aee275c4161e289b14f2ffd0c00f2923dcd5b2cfd99415b2f5ea15fa0632adffb78c51373b3a2839416223b65452bee11cc5386d2352782e1b064aaaf0ce
