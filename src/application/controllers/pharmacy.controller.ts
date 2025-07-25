@@ -36,7 +36,7 @@ export class PharmacyControllerImpl implements PharmacyController {
   async setWebhook(request: FastifyRequest, reply: FastifyReply): Promise<void> {
     try {
       await client.webhook.set({
-        url: "http://195.35.19.148:3000/api/pharmacies/webhook",
+        url: "http://193.203.183.175:3000/api/pharmacies/webhook",
         webhook_by_events: false,
         events: [
           "MESSAGES_UPSERT",
@@ -45,6 +45,10 @@ export class PharmacyControllerImpl implements PharmacyController {
           "CONTACTS_UPSERT",
         ],
         enabled: true,
+      });
+      reply.status(200).send({
+        success: true,
+        message: 'Webhook set successfully'
       });
     } catch (error) {
       console.error('Error setting webhook:', error);
