@@ -130,7 +130,10 @@ export class PharmacyControllerImpl implements PharmacyController {
     
     if (request.body?.event === "messages.upsert") {
       const messageType = request.body?.data?.messageType;
-
+      console.log("request.body", request.body);
+      // if (request.body?.data?.message?.from?.id === "5511999999999") {
+      //   return;
+      // }
       if (messageType === "imageMessage") {
         const image = request.body?.data?.message?.imageMessage;
         // salve a img com Date.now convertemndo uma string base64 em jpg
