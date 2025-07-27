@@ -128,53 +128,59 @@ export class PharmacyControllerImpl implements PharmacyController {
       // console.log(request.body);
       // const pharmacy = await this.pharmacyRepository.getPharmacyByCNPJ(cnpj);
     
-    if (request.body?.event === "messages.upsert") {
-      const messageType = request.body?.data?.messageType;
-      console.log("request.body", request.body);
-      // if (request.body?.data?.message?.from?.id === "5511999999999") {
-      //   return;
-      // }
-      if (messageType === "imageMessage") {
-        const image = request.body?.data?.message?.imageMessage;
-        // salve a img com Date.now convertemndo uma string base64 em jpg
-        const imageBuffer = Buffer.from(image, "base64");
-        const imagePath = path.join(process.cwd(), "temp", `${Date.now()}.jpg`);
-        fs.writeFileSync(imagePath, imageBuffer);
-        const drugInfo = await this.drugImageProcessorService.processDrugImage(imagePath);
-        console.log("drugInfo", drugInfo);
-        // fs.unlinkSync(imagePath);
-        const response = await this.openaiService.queryProduct(drugInfo.drugInfo || '');
-        console.log("response da image", response);
-
-         await client.messages.sendText({
-          number: request.body?.data?.message?.from?.id,
-          text: 'teste 123 ',
-        });
-      } else {
-        console.log(request.body?.data?.message);
-        let messageText = request.body?.data?.message?.conversation ||
-          request.body?.data?.message?.extendedTextMessage?.text ||
-          request.body?.data?.message?.ephemeralMessage?.message?.extendedTextMessage?.text;
-        console.log(messageText);
+      if (request.body?.event === "messages.upsert") {
+        const messageType = request.body?.data?.messageType;
+        // console.log("request.body", request.body);
+        // if (request.body?.data?.key?.fromMe === true) {
+        //   return;
+        // }
+        console.log("request.body?.data", request.body?.data);
+        console.log("request.body?.data?.key", request.body?.data?.key);
         
-        const response = await this.openaiService.queryProduct(messageText || '');
-        console.log("response da messageText", response);
+        console.log("request.body?.data.message", request.body?.data.message);
+        if (request.body?.data?.key?.fromMe === true) {
+            if (messageType === "imageMessage") {
+              const image = request.body?.data?.message?.imageMessage;
+              // salve a img com Date.now convertemndo uma string base64 em jpg
+              const imageBuffer = Buffer.from(image, "base64");
+              const imagePath = path.join(process.cwd(), "temp", `${Date.now()}.jpg`);
+              fs.writeFileSync(imagePath, imageBuffer);
+              const drugInfo = await this.drugImageProcessorService.processDrugImage(imagePath);
+              console.log("drugInfo", drugInfo);
+              // fs.unlinkSync(imagePath);
+              const response = await this.openaiService.queryProduct(drugInfo.drugInfo || '');
+              console.log("response da image", response);
 
-         await client.messages.sendText({
-          number: request.body?.data?.message?.from?.id,
-          text: 'teste 123 ',
-        });
+              await client.messages.sendText({
+                number: request.body?.data?.message?.from?.id,
+                text: 'teste 123 ',
+              });
+            } else {
+              console.log(request.body?.data?.message);
+              let messageText = request.body?.data?.message?.conversation ||
+                request.body?.data?.message?.extendedTextMessage?.text ||
+                request.body?.data?.message?.ephemeralMessage?.message?.extendedTextMessage?.text;
+              console.log(messageText);
+              
+              const response = await this.openaiService.queryProduct(messageText || '');
+              console.log("response da messageText", response);
+
+              await client.messages.sendText({
+                number: request.body?.data?.message?.from?.id,
+                text: 'teste 123 ',
+              });
+            }
+        }
+        // if (messageType === "textMessage") {
+        //   const text = request.body?.data?.message?.textMessage;
+        //   console.log(text);
+        // }
+        // const message = request.body?.data?.message;
+        // const pharmacy = await this.pharmacyRepository.getPharmacyByCNPJ(message?.from?.id);
+        // if (pharmacy) {
+        //   await this.pharmacyRepository.updatePharmacy(pharmacy.id, { lastMessage: message } as any);
+        // }
       }
-      // if (messageType === "textMessage") {
-      //   const text = request.body?.data?.message?.textMessage;
-      //   console.log(text);
-      // }
-      const message = request.body?.data?.message;
-      // const pharmacy = await this.pharmacyRepository.getPharmacyByCNPJ(message?.from?.id);
-      // if (pharmacy) {
-      //   await this.pharmacyRepository.updatePharmacy(pharmacy.id, { lastMessage: message } as any);
-      // }
-    }
     } catch (error) {
       console.error('Error fetching pharmacy by CNPJ:', error);
       reply.status(500).send({
