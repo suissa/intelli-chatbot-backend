@@ -18,7 +18,7 @@ import { MessageQueueManager } from './infrastructure/messaging/message-queue-ma
 import { MessageProcessorService } from './domain/services/message-processor.service';
 
 const fastify = Fastify({
-  logger: true
+  logger: false
 });
 
 // Registrar rotas do Drugs
