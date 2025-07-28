@@ -249,7 +249,7 @@ export class OpenAIService {
       const transcription = await this.openai.audio.transcriptions.create({
         file: fs.createReadStream(audioFilePath),
         model: "gpt-4o-mini-transcribe",
-        language: "-BR",
+        language: "pt-BR",
         response_format: "json",
         temperature: 0.3,
         prompt: "Use o portugês brasileiro. Transcreva o áudio para texto, sempre tente buscar algum nome de remédio ou algum número inteiro, para o áudio, sem nenhum outro texto antes ou depois. Se não conseguir transcrever, retorne 'Não foi possível transcrever o áudio'.",
