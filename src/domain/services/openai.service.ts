@@ -63,9 +63,17 @@ export class OpenAIService {
         no Nome retorne apenas o nome do produto sem ordem numerica
         
         **TEXTO DE VENDA:**
-        [Crie um texto persuasivo tentando vender um produto correlacionado junto com o produto pesquisado. Seja um ótimo vendedor, use emojis, destaque benefícios, seja convincente mas honesto]
+        [Crie um texto persuasivo tentando vender um produto correlacionado 
+        junto com o produto pesquisado, cite o preço dos 2 produtos após citar seus nomes. Utilize o nome do produto pesquisado e o 
+        nome do produto correlacionado no texto. Não use a palavra "correlacionado" 
+        no texto. Não use a palavra "produto" no texto.
+        
+        Seja um ótimo vendedor, use emojis, destaque benefícios, seja convincente mas honesto]
         
         Use muitos emojis relevantes e seja muito persuasivo como um excelente vendedor!
+
+        No final pergunte se deseja comprar o produto pesquisado ou o combo dos 2 produtos.
+        indique que na compra dos 2 produtos, o cliente ganha um desconto de 10%.
       `;
 
       const response = await this.openai.chat.completions.create({
