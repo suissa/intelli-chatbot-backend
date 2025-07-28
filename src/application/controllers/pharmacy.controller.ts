@@ -197,7 +197,7 @@ export class PharmacyControllerImpl implements PharmacyController {
           
           console.log('🧠 Histórico carregado:', this.chatHistoryMap[number]);
           if (messageType === "imageMessage") {
-            console.log("request.body?.data?.message", request.body?.data?.message);
+            // console.log("request.body?.data?.message", request.body?.data?.message);
             const image = request.body?.data?.message?.base64;
             // console.log("request.body?.data?.message?.imageMessage", request.body?.data?.message?.imageMessage);
             // console.log("image", image);
@@ -215,6 +215,8 @@ export class PharmacyControllerImpl implements PharmacyController {
             console.log("response da image", response);
             history.push({ role: 'assistant', content: response?.content || '', name: 'assistant' }); // ✅ adiciona input do usuário
             console.log("history image", history);
+            
+            this.chatHistoryMap[number] = history;
             await client.messages.sendText({
               number: '5515991957645',
               text: response?.content || 'teste 123 ',
@@ -224,7 +226,7 @@ export class PharmacyControllerImpl implements PharmacyController {
             if (this.lastBase64Audio === request.body?.data?.message?.base64) {
               return;
             }
-            console.log("request.body?.data?.message", request.body?.data?.message);
+            // console.log("request.body?.data?.message", request.body?.data?.message);
             const image = request.body?.data?.message?.base64;
             this.lastBase64Audio = image;
             // console.log("request.body?.data?.message?.imageMessage", request.body?.data?.message?.imageMessage);
@@ -239,13 +241,15 @@ export class PharmacyControllerImpl implements PharmacyController {
             const audioConverter = new AudioConverter();
             const mp3Path = await audioConverter.convertToMp3(oggPath);
             const drugInfo = await this.openaiService.transcribeAudio(mp3Path.convertedPath);
-            console.log("drugInfo", drugInfo);
+            console.log("audioMessage drugInfo", drugInfo);
             history.push({ role: 'user', content: drugInfo || '', name: 'user' }); // ✅ adiciona input do usuário
             // fs.unlinkSync(imagePath);
             const response = await this.openaiService.queryProduct(drugInfo || '', history);
             console.log("response da image", response);
             history.push({ role: 'assistant', content: response?.content || '', name: 'assistant' }); // ✅ adiciona input do usuário
             console.log("history audio", history);
+            
+            this.chatHistoryMap[number] = history;
             await client.messages.sendText({
               number: '5515991957645',
               text: response?.content || 'teste 123 ',
