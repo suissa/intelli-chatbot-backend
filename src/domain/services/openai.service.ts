@@ -374,6 +374,7 @@ export class OpenAIService {
       ...history,
       { role: 'user', content: userMessage, name: 'user' }
     ];
+    console.log("promptMessages", promptMessages);
     const functions = [
       {
         name: 'check_inventory',
