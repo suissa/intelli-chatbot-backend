@@ -723,9 +723,9 @@ Responda à próxima mensagem do cliente com base no histórico da conversa.
     📦 Possuímos os seguintes produtos em estoque:
     ${listaProdutos}
     
-    Se você ainda não encontrou o que procura, posso te sugerir alguns medicamentos que costumam ajudar bastante nesse caso, tudo bem? 😊
+    *Se você ainda não encontrou o que procura, posso te sugerir alguns medicamentos que costumam ajudar bastante nesse caso, tudo bem? *😊  
     
-    Agora, se você já encontrou, poderia me enviar o nome completo do produto copiando e colando aqui? Assim consigo verificar direitinho pra você.
+    *Agora, se você já encontrou, poderia me enviar o nome completo do produto copiando e colando aqui? Assim consigo verificar direitinho pra você.*🚀
     `.trim();
     
       return {
