@@ -363,12 +363,13 @@ export class OpenAIService {
 
   1. Sempre que o cliente falar (saudação ou pergunta), responda adequadamente.
   2. Se perguntar for um remédio, extraia o nome do medicamento.
-  3. Se o cliente falar sobre um remédio, chame a função \`check_inventory\` com o nome corrigido
-  para ver estoque e preço.
+  3. Se o cliente falar sobre um remédio, **mas não citar um nome claro**, pergunte "Você sabe o nome do medicamento ou já usou algum exemplo que possa me dizer?".
+  Só chame a função \`check_inventory\` se tiver o nome real de um medicamento.
   4. Se não tiver estoque, responda “Desculpe, não temos {medicamento} em estoque.” e termine.
   5. Se tiver estoque:
-     a) O modelo mesmo deve gerar 10 produtos relacionados, com nome e um preço estimado.
-     b) Envie ao cliente: “Temos {medicamento} por R$ {preco}. Também recomendamos: {rel1} por R$ {preco1}, {rel2} por R$ {preco2}, … Na compra dos 2 (ou 3), oferecemos 10% de desconto. Deseja seguir com esse combo ou apenas {medicamento}?”
+     a) O modelo mesmo deve gerar 10 produtos relacionados que sejam usados em conjunto com o remédio, com nome e um preço estimado.
+     b) Envie ao cliente: “Temos {medicamento} por R$ {preco}. 
+     Também possuímos: {produto relacionado 1} por R$ {preco1}. Na compra dos 2, oferecemos 10% de desconto. Deseja seguir com esse combo ou apenas {medicamento}?”
   6. Aguarde a resposta do cliente.
   7. Se o cliente confirmar a compra (combo ou item único), gere a chave PIX.
   8. Retorne ao cliente a chave PIX 123456.
