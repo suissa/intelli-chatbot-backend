@@ -159,6 +159,7 @@ export class PharmacyControllerImpl implements PharmacyController {
           
           console.log('🧠 Histórico carregado:', this.chatHistoryMap[number]);
           if (messageType === "imageMessage") {
+            console.log("request.body?.data?.message", request.body?.data?.message);
             const image = request.body?.data?.message?.base64;
             // console.log("request.body?.data?.message?.imageMessage", request.body?.data?.message?.imageMessage);
             // console.log("image", image);
