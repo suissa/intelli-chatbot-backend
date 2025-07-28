@@ -153,7 +153,10 @@ export class PharmacyControllerImpl implements PharmacyController {
 
           const number = request.body?.data?.key?.remoteJid?.replace('@s.whatsapp.net', '');
           const history = this.chatHistoryMap[number] || [];
-
+          if (history.length > 20) {
+            history.splice(0, history.length - 20); // mantém só as últimas 20
+          }
+          
           console.log('🧠 Histórico carregado:', this.chatHistoryMap[number]);
           if (messageType === "imageMessage") {
             const image = request.body?.data?.message?.imageMessage;
