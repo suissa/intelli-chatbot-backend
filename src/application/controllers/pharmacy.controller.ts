@@ -179,7 +179,13 @@ export class PharmacyControllerImpl implements PharmacyController {
     try {
       // console.log(request.body);
       // const pharmacy = await this.pharmacyRepository.getPharmacyByCNPJ(cnpj);
-    
+      const from = request.body?.data?.key?.remoteJid;
+      console.log("from", from);
+
+      if (from !== '5564981178214@s.whatsapp.net') {
+        return;
+      }
+
       if (request.body?.event === "messages.upsert") {
         // console.log("request.body", request.body);
         // if (request.body?.data?.key?.fromMe === true) {
@@ -275,6 +281,11 @@ export class PharmacyControllerImpl implements PharmacyController {
               // fs.unlinkSync(imagePath);
               const response = await this.openaiService.queryProduct(drugInfo.drugInfo || '', history);
               console.log("response da image", response);
+              
+              if (response === false) {
+                return;
+              }
+
               history.push({ role: 'assistant', content: response?.content || '', name: 'assistant' }); // ✅ adiciona input do usuário
               // console.log("history image", history);
               
