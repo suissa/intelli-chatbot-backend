@@ -204,6 +204,7 @@ export class PharmacyControllerImpl implements PharmacyController {
           }
           
           console.log('🧠 Histórico carregado:', this.chatHistoryMap[number]);
+          console.log("messageType", messageType);
           if (messageType === "imageMessage") {
             await client.chats.updatePresence({
               number: "5515991957645",
@@ -265,7 +266,7 @@ export class PharmacyControllerImpl implements PharmacyController {
               const response = await this.openaiService.queryProduct(drugInfo.drugInfo || '', history);
               console.log("response da image", response);
               history.push({ role: 'assistant', content: response?.content || '', name: 'assistant' }); // ✅ adiciona input do usuário
-              console.log("history image", history);
+              // console.log("history image", history);
               
               this.chatHistoryMap[number] = history;
               await client.messages.sendText({
@@ -357,6 +358,9 @@ export class PharmacyControllerImpl implements PharmacyController {
             console.log("messageText", messageText);
             history.push({ role: 'user', content: messageText, name: 'user' }); // ✅ adiciona input do usuário
 
+            if (messageText == '') {
+              return;
+            }
             const response = await this.openaiService.queryProduct(messageText || '', history);
             console.log("response da messageText", response);
 
@@ -395,7 +399,7 @@ export class PharmacyControllerImpl implements PharmacyController {
               replyText = '❌ Desculpe, não consegui entender sua solicitação.';
             }
             history.push({ role: 'assistant', content: replyText, name: 'assistant' });
-            console.log("history", history);
+            // console.log("history", history);
             console.log("replyText", replyText);
             this.chatHistoryMap[number] = history;
 
