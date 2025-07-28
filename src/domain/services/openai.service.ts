@@ -800,21 +800,21 @@ Responda à próxima mensagem do cliente com base no histórico da conversa.
 
   Crie um texto de venda persuasivo e carismático para o cliente para vender um combo de 
   ${nomePrincipal} e ${nomeComplementar} com 10% de desconto.
-  
+
   deve iniciar com:
-  'Pensando especialmente em você criei essa oferta única:  
-  que tal levar o ${nomePrincipal} (R$ ${precoPrincipal.toFixed(2).replace('.', ',')}) junto com o ${nomeComplementar} (R$ ${precoComplementar.toFixed(2).replace('.', ',')})?'
+  '📢*Pensando especialmente em você criei essa oferta única:  
+  que tal levar o _${nomePrincipal}_ (R$ ${precoPrincipal.toFixed(2).replace('.', ',')}) junto com _${nomeComplementar}_ (R$ ${precoComplementar.toFixed(2).replace('.', ',')})?*'
   
   [Explique qual o benefício da combinação entre eles]  
   [adicione aqui o texto de venda]
 
   adicione obrigatoriamente: 
-  💡 Essa combinação foi escolhida a dedo com carinho só pra você.
-  💰 E o melhor: levando os dois agora, você ganha **10% de desconto no total**.
+  💡 _Essa combinação foi escolhida a dedo com carinho só pra você._ \n
+  💰 _E o melhor: levando os dois agora, você ganha *10% de desconto no total*._
 
   finalize a mnensagem com o seguinte texto:
-  'Você gostaria de aproveitar essa promoção exclusiva e levar o ${nomePrincipal} + ${nomeComplementar}, totalizando R$ ${precoTotal.toFixed(2).replace('.', ',')}?  
-  *Essa condição é exclusiva para essa conversa.*'
+  '🤔*Você gostaria de aproveitar essa promoção exclusiva e levar o ${nomePrincipal} + ${nomeComplementar}, totalizando R$ ${precoTotal.toFixed(2).replace('.', ',')}?*'  
+  '\n\n⚠️*Essa condição é exclusiva para essa conversa.*'
     `.trim();
 
     const response = await this.openai.chat.completions.create({
