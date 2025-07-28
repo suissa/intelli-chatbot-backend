@@ -36,96 +36,6 @@ export class OpenAIService {
 
 
 
-  async searchProductAndCorrelations(productName: string): Promise<any> {
-    try {
-      console.log('🔍 searchProductAndCorrelations Pesquisando produto e correlações...', productName);
-      
-      const prompt = `
-        Você é um excelente vendedor de farmácia, experiente, carismático e muito persuasivo.
-
-        Produto pesquisado: ${productName}
-
-        🛑 IMPORTANTE:
-        - Você deve usar **exatamente o nome do produto pesquisado acima** como o primeiro item da sugestão.
-        - Você **não pode** inventar um segundo nome para ele.
-        - O segundo item deve ser um **complementar real**, **não pode ser um medicamento da mesma categoria**.
-
-        ---
-
-        **CARACTERÍSTICAS DO PRODUTO:**
-
-        [Liste as características principais do ${productName} de forma clara e objetiva]
-
-        **PRODUTOS CORRELACIONADOS:**
-
-        [Nome do item complementar] - [Preço] - [Categoria]
-
-        (Não use bullet ou numeração no nome)
-
-        **TEXTO DE VENDA:**
-
-        Pensando especialmente em você criei essa oferta única: 
-        que tal levar o ${productName} (R$ [preço do produto pesquisado]) junto com o [nome do item complementar] (R$ [preço do correlato])?
-
-        Eles se complementam perfeitamente e ajudam a acelerar seu bem-estar!  
-        💡 Essa combinação foi escolhida a dedo com carinho só pra você.
-        [Explique qual o benefício da combinação entre eles]
-        💰 E o melhor: levando os dois agora, você ganha **10% de desconto no total**.
-
-        Você gostaria de aproveitar essa promoção exclusiva e levar o ${productName} + [nome do correlato], totalizando R$ [valor com desconto]?  
-        *Essa condição é exclusiva para essa conversa.*
-      `;
-      console.log("searchProductAndCorrelations prompt", prompt);
-      const response = await this.openai.chat.completions.create({
-        model: "gpt-4o-mini",
-        messages: [
-          {
-            role: "system",
-            content: "Você é um vendedor de farmácia experiente, persuasivo e muito bom em identificar necessidades dos clientes e sugerir produtos complementares."
-          },
-          {
-            role: "user",
-            content: prompt
-          }
-        ],
-        max_tokens: 1500,
-      });
-
-      const responseContent = response.choices[0]?.message?.content;
-      
-      if (!responseContent) {
-        throw new Error('Resposta vazia da OpenAI');
-      }
-
-            console.log('✅ Análise de produto e correlações gerada com sucesso');
-      console.log('🔍 Resposta:', responseContent);
-      
-      // Extrair as seções da resposta usando regex
-      const caracteristicasMatch = responseContent.match(/\*\*CARACTERÍSTICAS DO PRODUTO:\*\*\s*([\s\S]*?)(?=\*\*PRODUTOS CORRELACIONADOS:\*\*)/i);
-      const produtosMatch = responseContent.match(/\*\*PRODUTOS CORRELACIONADOS:\*\*\s*([\s\S]*?)(?=\*\*TEXTO DE VENDA:\*\*)/i);
-      const textoMatch = responseContent.match(/\*\*TEXTO DE VENDA:\*\*\s*([\s\S]*?)$/i);
-      
-      const caracteristicasDoProduto = caracteristicasMatch ? caracteristicasMatch[1]!.trim() : 'Não encontrado';
-      const produtosCorrelacionados = produtosMatch ? produtosMatch[1]!.trim() : 'Não encontrado';
-      const textoDeVenda = textoMatch ? textoMatch[1]!.trim() : 'Não encontrado';
-      
-      console.log('🔍 Características:', caracteristicasDoProduto);
-      console.log('🔍 Produtos correlacionados:', produtosCorrelacionados);
-      console.log('🔍 Texto de venda:', textoDeVenda);
-      
-      // Retornar como objeto estruturado (como em Python)
-      return {
-        caracteristicasDoProduto,
-        produtosCorrelacionados,
-        textoDeVenda
-      };
-      
-    } catch (error) {
-      console.error('❌ Erro ao pesquisar produto e correlações:', error);
-      throw error;
-    }
-  }
-
   normalize(raw: string): string {
     return raw
       .normalize("NFKD")
@@ -358,6 +268,98 @@ export class OpenAIService {
       }
     } catch (error) {
       console.error('❌ Erro ao transcrever áudio do buffer:', error);
+      throw error;
+    }
+  }
+
+  
+
+  async searchProductAndCorrelations(productName: string): Promise<any> {
+    try {
+      console.log('🔍 searchProductAndCorrelations Pesquisando produto e correlações...', productName);
+      
+      const prompt = `
+        Você é um excelente vendedor de farmácia, experiente, carismático e muito persuasivo.
+
+        Produto pesquisado: ${productName}
+
+        🛑 IMPORTANTE:
+        - Você deve usar **exatamente o nome do produto pesquisado acima** como o primeiro item da sugestão.
+        - Você **não pode** inventar um segundo nome para ele.
+        - O segundo item deve ser um **complementar real**, **não pode ser um medicamento da mesma categoria**.
+
+        ---
+        
+        **CARACTERÍSTICAS DO PRODUTO:**
+
+        [Liste as características principais do ${productName} de forma clara e objetiva]
+
+        **PRODUTOS CORRELACIONADOS:**
+
+        [Nome do item complementar] - [Preço] - [Categoria]
+
+        (Não use bullet ou numeração no nome)
+
+        **TEXTO DE VENDA:**
+
+        Pensando especialmente em você criei essa oferta única: 
+        que tal levar o ${productName} (R$ [preço do produto pesquisado]) junto com o [nome do item complementar] (R$ [preço do correlato])?
+
+        Eles se complementam perfeitamente e ajudam a acelerar seu bem-estar!  
+        💡 Essa combinação foi escolhida a dedo com carinho só pra você.
+        [Explique qual o benefício da combinação entre eles]
+        💰 E o melhor: levando os dois agora, você ganha **10% de desconto no total**.
+
+        Você gostaria de aproveitar essa promoção exclusiva e levar o ${productName} + [nome do correlato], totalizando R$ [valor com desconto]?  
+        *Essa condição é exclusiva para essa conversa.*
+      `;
+      console.log("searchProductAndCorrelations prompt", prompt);
+      const response = await this.openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [
+          {
+            role: "system",
+            content: "Você é um vendedor de farmácia experiente, persuasivo e muito bom em identificar necessidades dos clientes e sugerir produtos complementares."
+          },
+          {
+            role: "user",
+            content: prompt
+          }
+        ],
+        max_tokens: 1500,
+      });
+
+      const responseContent = response.choices[0]?.message?.content;
+      
+      if (!responseContent) {
+        throw new Error('Resposta vazia da OpenAI');
+      }
+
+            console.log('✅ Análise de produto e correlações gerada com sucesso');
+      console.log('🔍 Resposta:', responseContent);
+      
+      // Extrair as seções da resposta usando regex
+      const caracteristicasMatch = responseContent.match(/\*\*CARACTERÍSTICAS DO PRODUTO:\*\*\s*([\s\S]*?)(?=\*\*PRODUTOS CORRELACIONADOS:\*\*)/i);
+      const produtosMatch = responseContent.match(/\*\*PRODUTOS CORRELACIONADOS:\*\*\s*([\s\S]*?)(?=\*\*TEXTO DE VENDA:\*\*)/i);
+      const textoMatch = responseContent.match(/\*\*TEXTO DE VENDA:\*\*\s*([\s\S]*?)$/i);
+      
+      const caracteristicasDoProduto = caracteristicasMatch ? caracteristicasMatch[1]!.trim() : 'Não encontrado';
+      const produtosCorrelacionados = produtosMatch ? produtosMatch[1]!.trim() : 'Não encontrado';
+      const textoDeVenda = textoMatch ? textoMatch[1]!.trim() : 'Não encontrado';
+      
+      console.log('🔍 Características:', caracteristicasDoProduto);
+      console.log('🔍 Produtos correlacionados:', produtosCorrelacionados);
+      console.log('🔍 Texto de venda:', textoDeVenda);
+      
+      // Retornar como objeto estruturado (como em Python)
+      return {
+        caracteristicasDoProduto,
+        produtosCorrelacionados,
+        textoDeVenda
+      };
+      
+    } catch (error) {
+      console.error('❌ Erro ao pesquisar produto e correlações:', error);
       throw error;
     }
   }
