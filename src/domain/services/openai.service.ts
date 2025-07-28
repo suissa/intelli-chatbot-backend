@@ -206,6 +206,38 @@ export class OpenAIService {
     }
   }
 
+  async extractPixInformation(extractedText: string): Promise<any> {
+    const prompt = `
+    Analise o texto: '${this.normalize(extractedText)}'
+    Verificar se existe o texto: 'comprovante de transferência'
+    Se existir, me retorne o valor monetário, após R$, 
+    procure os dados contidos na seção: Destino ou Para, retorne a primeira linha com texto.
+    Por exemplo: a linha pode conter o label: Nome ou apenas um nome de pessoa ou empresa.
+    Se não existir, me retorne 'Não foi possível encontrar o número da chave pix'.
+
+    retorne o seguinte formato:
+    {
+      "valor": valor_monetario,
+      "destino": destino_ou_para
+    }
+    `
+    const response = await this.openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        {
+          role: "system",
+          content: "Você é um especialista em extração de informações de pix"
+        },
+        {
+          role: "user",
+          content: prompt
+        }
+      ],
+      max_tokens: 1000,
+    });
+    const responseContent = response.choices[0]?.message?.content;
+    return responseContent;
+  }
   async createSpeech(text: string) {
     console.log("createSpeech text", text);
     const fs = await import('fs');

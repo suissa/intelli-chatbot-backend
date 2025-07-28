@@ -49,7 +49,11 @@ export class PharmacyControllerImpl implements PharmacyController {
     @inject(TYPES.TextProcessorService) private textProcessorService: TextProcessorService
   ) {}
 
-  
+  // async processPixImage(imagePath: string): Promise<void> {
+  //   const drugInfo = await this.drugImageProcessorService.processPixImage(imagePath);
+  //   console.log("drugInfo", drugInfo);
+  // }
+
   async setWebhook(request: FastifyRequest, reply: FastifyReply): Promise<void> {
     try {
       await client.webhook.set({
@@ -206,6 +210,25 @@ export class PharmacyControllerImpl implements PharmacyController {
             const caption = request.body?.data?.message?.imageMessage?.caption || '';
             const imagePath = path.join(process.cwd(), "temp", `${Date.now()}.jpg`);
             fs.writeFileSync(imagePath, imageBuffer);
+
+            const pixInfo = await this.openaiService.extractPixInformation(imagePath);
+            console.log("pixInfo", pixInfo);
+
+            if (pixInfo.valor) {
+              history.push({ role: 'user', content: pixInfo.valor, name: 'user' }); // ✅ adiciona input do usuário
+              await client.messages.sendText({
+                number: '5515991957645',
+                text: 'Pagamento confirmado! Valor: R$ ' + pixInfo.valor + '. Muito obrigado.',
+              });
+              return;
+            }
+
+            await client.messages.sendText({
+              number: '5515991957645',
+              text: 'Não foi possível identificar o pagamento. Tente novamente.',
+            });
+            return;
+
             const drugInfo = await this.drugImageProcessorService.processDrugImage(imagePath);
             console.log("drugInfo", drugInfo);
             history.push({ role: 'user', content: drugInfo.drugInfo || '', name: 'user' }); // ✅ adiciona input do usuário
