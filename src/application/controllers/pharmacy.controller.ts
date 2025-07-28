@@ -260,7 +260,7 @@ export class PharmacyControllerImpl implements PharmacyController {
               duration: 10000,
               delay: 10000,
             });
-            console.log("request.body?.data?.message", request.body?.data?.message);
+            console.log("request.body?.data", request.body?.data);
             const image = request.body?.data?.message?.base64;
             // console.log("request.body?.data?.message?.imageMessage", request.body?.data?.message?.imageMessage);
             // console.log("image", image);
