@@ -38,12 +38,12 @@ export interface PharmacyController {
 
 }
 
-let pixValue = 20.00;
 
 @injectable()
 export class PharmacyControllerImpl implements PharmacyController {
   private chatHistoryMap: Record<string, ChatCompletionMessageParam[]> = {}; // ✅ aqui
   private lastBase64Audio: string = '';
+  private pixValue = 20.00;
   constructor(
     @inject(TYPES.PharmacyRepository) private pharmacyRepository: PharmacyRepository,
     @inject(TYPES.OpenAIService) private openaiService: OpenAIService,
@@ -216,8 +216,8 @@ export class PharmacyControllerImpl implements PharmacyController {
             const pix = await this.drugImageProcessorService.processPixImage(imagePath);
             console.log("pix", pix);
             console.log("pix.pixInfo.valor", pix.pixInfo.valor);
-            console.log("pixValue", pixValue);
-            if (Number(pix.pixInfo.valor) === Number(pixValue)) {
+            console.log("pixValue", this.pixValue);
+            if (Number(pix.pixInfo.valor) === Number(this.pixValue)) {
               console.log("PIX PAGO CARAIIIII");
               // history.push({ role: 'user', content: pixInfo.valor, name: 'user' }); // ✅ adiciona input do usuário
               await client.messages.sendText({
