@@ -69,7 +69,7 @@ export class OpenAIService {
 
         Eles se complementam perfeitamente e ajudam a acelerar seu bem-estar!  
         💡 Essa combinação foi escolhida a dedo com carinho só pra você.
-
+        [Explique qual o benefício da combinação entre eles]
         💰 E o melhor: levando os dois agora, você ganha **10% de desconto no total**.
 
         Você gostaria de aproveitar essa promoção exclusiva e levar o ${productName} + [nome do correlato], totalizando R$ [valor com desconto]?  
@@ -411,21 +411,26 @@ export class OpenAIService {
   ): { trigger: boolean; medicamento?: string } {
     const negativeTrigger = /(não|só|apenas|prefiro só|quero só|vou querer só|não quero|nem quero|nem preciso)/i.test(userMessage);
 
-    const lastAssistantIndex = [...history].reverse().findIndex((m) =>
-      m.role === 'assistant' &&
-      m.content?.toString().toLowerCase().startsWith('pensando especialmente')
-    );
+    
+    const lastAssistantMessage = [...history].reverse().find(m => m.role === 'assistant');
 
-    if (negativeTrigger && lastAssistantIndex !== -1) {
-      const assistantIdx = history.length - 1 - lastAssistantIndex;
-      const lastUserBeforeAssistant = [...history.slice(0, assistantIdx)]
-        .reverse()
-        .find((m) => m.role === 'user');
+    const isLastMsgOfertaCombo = lastAssistantMessage?.content
+      ?.toString()
+      .toLowerCase()
+      .startsWith('pensando especialmente');
 
-      if (lastUserBeforeAssistant?.content) {
-        return { trigger: true, medicamento: lastUserBeforeAssistant.content.toString() };
+      if (negativeTrigger && isLastMsgOfertaCombo) {
+        // busca a mensagem do user anterior à última do assistant
+        const lastAssistantIndex = history.lastIndexOf(lastAssistantMessage!);
+        const previousUserMessage = [...history.slice(0, lastAssistantIndex)].reverse().find(m => m.role === 'user');
+    
+        if (previousUserMessage?.content) {
+          return {
+            trigger: true,
+            medicamento: previousUserMessage.content.toString().trim()
+          };
+        }
       }
-    }
 
     return { trigger: false };
   }
@@ -434,7 +439,7 @@ export class OpenAIService {
     const respostas = {
       tecnico: `Anotado: seguiremos com ${medicamento} — R$ ${preco.toFixed(2)}. Compra registrada com sucesso.`,
       caloroso: `Claro! Vamos só de ${medicamento} então, por R$ ${preco.toFixed(2)}. Qualquer coisa estou aqui! 😊`,
-      direto: `${medicamento} por R$ ${preco.toFixed(2)}. Pedido confirmado.`
+      direto: `OK! ${medicamento} por R$ ${preco.toFixed(2)}. Pedido confirmado.`
     };
   
     const estilos = Object.keys(respostas);
