@@ -367,10 +367,12 @@ export class PharmacyControllerImpl implements PharmacyController {
             
             const hasChavePix = response?.content?.toLowerCase().includes('chave pix');
             
-            console.log("hasChavePix", hasChavePix);
+            console.log("hasChavePix text", hasChavePix);
             if (hasChavePix) {
               const regexValorPix = /(?:R\$|reais)?\s?([\d,.]{2,})/gi;
+              console.log("regexValorPix", regexValorPix);
               const match = response?.content?.match(regexValorPix);
+              console.log("match", match);
               if (match) {
                 this.pixValue = Number(match[0].replace('R$', '').replace('reais', '').replace(',', '.'));
               }
@@ -403,6 +405,7 @@ export class PharmacyControllerImpl implements PharmacyController {
             console.log("replyText", replyText);
             this.chatHistoryMap[number] = history;
 
+            
             await client.messages.sendText({
               number: '5515991957645', // || request.body?.data?.key.remoteJid,
               text: replyText || 'teste 123 ',
