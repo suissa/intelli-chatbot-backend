@@ -9,6 +9,9 @@ import path from 'path';
 import fs from 'fs';
 import { OpenAIService } from '../../domain/services/openai.service';
 import axios from 'axios';
+import { OpenAI } from 'openai';
+
+type ChatCompletionMessageParam = OpenAI.Chat.Completions.ChatCompletionMessageParam;
 
 const client = new EvolutionClient({
   serverUrl: "http://193.203.183.175:8080/",
@@ -36,6 +39,8 @@ export interface PharmacyController {
 
 @injectable()
 export class PharmacyControllerImpl implements PharmacyController {
+  private chatHistoryMap: Record<string, ChatCompletionMessageParam[]> = {}; // ✅ aqui
+
   constructor(
     @inject(TYPES.PharmacyRepository) private pharmacyRepository: PharmacyRepository,
     @inject(TYPES.OpenAIService) private openaiService: OpenAIService,
@@ -43,6 +48,7 @@ export class PharmacyControllerImpl implements PharmacyController {
     @inject(TYPES.TextProcessorService) private textProcessorService: TextProcessorService
   ) {}
 
+  
   async setWebhook(request: FastifyRequest, reply: FastifyReply): Promise<void> {
     try {
       await client.webhook.set({
@@ -144,6 +150,10 @@ export class PharmacyControllerImpl implements PharmacyController {
           
           console.log("request.body?.data.message", request.body?.data.message);
           console.log("request.body?.data.messageType", request.body?.data.messageType);
+
+          const number = request.body?.data?.key?.remoteJid?.replace('@s.whatsapp.net', '');
+          const history = this.chatHistoryMap[number] || [];
+
           if (messageType === "imageMessage") {
             const image = request.body?.data?.message?.imageMessage;
             // salve a img com Date.now convertemndo uma string base64 em jpg
@@ -166,7 +176,7 @@ export class PharmacyControllerImpl implements PharmacyController {
             const messageText = request.body?.data?.message?.conversation;
             console.log("messageText", messageText);
             
-            const response = await this.openaiService.queryProduct(messageText || '');
+            const response = await this.openaiService.queryProduct(messageText || '', history);
             console.log("response da messageText", response);
 
             let replyText = '';
@@ -177,12 +187,16 @@ export class PharmacyControllerImpl implements PharmacyController {
             } else if (response && 'content' in response) {
               // é um objeto com campo content
               replyText = response.content || '';
+              
             } else {
               replyText = '❌ Desculpe, não consegui entender sua solicitação.';
             }
+            history.push({ role: 'assistant', content: replyText, name: 'assistant' });
+
+            console.log("replyText", replyText);
             await client.messages.sendText({
               number: '5515991957645', // || request.body?.data?.key.remoteJid,
-              text: replyText,
+              text: replyText || 'teste 123 ',
             });
           }
           // else {
@@ -213,7 +227,7 @@ export class PharmacyControllerImpl implements PharmacyController {
         // }
       }
     } catch (error) {
-      console.error('Error fetching pharmacy by CNPJ:', error);
+      console.error('Error webhook:', error);
       reply.status(500).send({
         success: false,
         error: 'Internal server error',
