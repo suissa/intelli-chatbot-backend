@@ -208,9 +208,9 @@ export class OpenAIService {
 
   async extractPixInformation(extractedText: string): Promise<any> {
     const prompt = `
-    Analise o texto: '${this.normalize(extractedText)}'
+    Analise o texto: '${extractedText}'
     Verificar se existe o texto: 'comprovante de transferência'
-    Se existir, me retorne o valor monetário, após R$, 
+    Se existir, me retorne o valor monetário, após R$ (lembre que está no formato brasileiro), 
     procure os dados contidos na seção: Destino ou Para, retorne a primeira linha com texto.
     Por exemplo: a linha pode conter o label: Nome ou apenas um nome de pessoa ou empresa.
     Se não existir, me retorne 'Não foi possível encontrar o número da chave pix'.
