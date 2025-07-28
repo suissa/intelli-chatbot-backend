@@ -388,21 +388,17 @@ Siga rigorosamente este fluxo em cada mensagem:
   - Interprete como uma resposta à sua pergunta anterior sobre lembrar algum medicamento.
   - Não reinicie a conversa. Em vez disso, ofereça sugestões proativas:  
     “Sem problemas, posso te sugerir alguns medicamentos comuns para isso, tudo bem?”
-
+- Somente use uma saudação se for a primeira mensagem do cliente.
 - ❌ Nunca diga frases genéricas como “Como posso ajudar você hoje?” se o histórico mostra que o atendimento já começou.
 
 ---
-
-Histórico da conversa até agora:
-{flatHistory}
-
-Agora responda à próxima mensagem do cliente com base nesse histórico.
 `.trim()
     };
   
     // Monta o histórico completo
     const promptMessages: ChatCompletionMessageParam[] = [
       systemPrompt,
+      ...history,
       { role: 'user', content: userMessage, name: 'user' }
     ];
     console.log("promptMessages", promptMessages);
