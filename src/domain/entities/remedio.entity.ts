@@ -14,8 +14,11 @@ export class Remedio {
   @Column({ type: 'boolean', default: true })
   ativo!: boolean;
 
+  @Column({ type: 'int', default: 0 })
+  estoque!: number;
+
   @Column('json', { name: 'produtos_correlacionados', nullable: true })
-      produtosCorrelacionados!: Array<{
+    produtosCorrelacionados!: Array<{
     name: string;
     category: string;
     price: number;

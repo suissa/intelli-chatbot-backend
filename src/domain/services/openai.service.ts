@@ -494,7 +494,7 @@ export class OpenAIService {
       produtosLimpos.map(remedio => this.drugsRepository.searchDrugs(remedio))
     );
 
-    console.log("produtosCorrelacionadosArray", produtosCorrelacionadosArray);
+    // console.log("produtosCorrelacionadosArray", produtosCorrelacionadosArray);
     console.log("produtosLimpos", produtosLimpos);
     // console.log("linhasBrutas", linhasBrutas);
   
@@ -653,7 +653,7 @@ Responda à próxima mensagem do cliente com base no histórico da conversa.
       
       const products = await this.drugsRepository.searchDrugs(nomeRemedio);
 
-      console.log("searchDrugs products", products);
+      console.log("searchDrugs products", products[0]);
       if (products.length > 0) {
         if (products[0]?.produtosCorrelacionados == null) {
           const productsCorrelacionados = await this.searchProductAndCorrelations(nomeRemedio || '');
