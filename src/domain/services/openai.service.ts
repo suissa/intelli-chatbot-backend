@@ -371,13 +371,14 @@ Siga rigorosamente este fluxo em cada mensagem:
 3. Se o cliente mencionar diretamente o nome de um medicamento (mesmo com erro), corrija o nome e chame a função \`check_inventory\` com o nome corrigido.
 4. Se o medicamento **não estiver em estoque**, responda:  
    “Desculpe, não temos {medicamento} em estoque.”
-5. Se o medicamento **estiver disponível**:
-   a) Crie até 3 produtos relacionados (ex: usados em conjunto ou substitutos), com nomes e preços estimados.  
-   b) Responda com algo como:  
-   “Temos {medicamento} por R$ {preco}. Também recomendamos: {rel1} por R$ {preco1}, {rel2} por R$ {preco2}. Na compra em conjunto, damos 10% de desconto. Deseja seguir com o combo ou apenas {medicamento}?”
-6. Se o cliente responder com algo como:
+5. Se o cliente responder com algo como:
    - “quero esse”, “quero sim”, “pode ser”, “esse mesmo”, ou apenas repetir o nome do remédio
    - Você deve entender que o cliente está confirmando o medicamento mencionado anteriormente
+6. Se o medicamento **estiver disponível**:
+   - Busque em sua inteligência para encontrar produtos relacionados, com nomes e preços estimados.  
+   - escolha o produto relacionado que mais se correlaciona ao medicamento que o cliente está buscando
+   - Responda com algo como:  
+   “Temos {medicamento} por R$ {preco}. Também recomendamos: {rel1} por R$ {preco1}, {rel2} por R$ {preco2}. Na compra em conjunto, damos 10% de desconto. Deseja seguir com o combo ou apenas {medicamento}?”
 
 Então gere a resposta final com a chave PIX e finalize a conversa:
 “Perfeito! Para concluir sua compra, use a chave PIX: 123456.”
@@ -458,10 +459,33 @@ Então gere a resposta final com a chave PIX e finalize a conversa:
             found: true
           };
         }
+
         const lista = products
           .map((p) => `• ${p.nome} – R$ ${p.preco.toFixed(2).replace('.', ',')}`)
           .join('\n');
 
+        if (products[0]?.nome) {
+          const productsCorrelacionados = await this.searchProductAndCorrelations(products[0]?.nome || '');
+          products[0]!.produtosCorrelacionados = productsCorrelacionados;
+          const produto = products[0];
+          const correlacionado = produto?.produtosCorrelacionados[0]; // Pega o primeiro correlacionado para o exemplo
+          
+          const textoVenda = await this.generateVendaPersuasiva(
+            produto?.nome || '',
+            correlacionado?.name || '',
+            produto?.preco || 0,
+            correlacionado?.price || 0
+          );
+          console.log("VENHAA textoVenda", textoVenda);
+          // Agora envie textoVenda como resposta final ao usuário (ou inclua junto do seu objeto de retorno)
+          return {
+            role: 'assistant',
+            name: 'assistant',
+            content: textoVenda,
+            produto,
+            found: true
+          };
+        }
         return {
           role: 'assistant',
           name: 'assistant',
