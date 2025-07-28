@@ -216,7 +216,10 @@ export class OpenAIService {
       instructions: "Use um tom de voz amigável e acessível, como se estivesse falando com um amigo.",
     });
     console.log("createSpeech mp3", mp3);
+    
     const buffer = Buffer.from(await mp3.arrayBuffer());
+    const base64Audio = buffer.toString('base64');
+    return base64Audio;
     const filename = `temp/speech-${Date.now()}.mp3`;
     console.log("createSpeech filename", filename);
     await fs.promises.writeFile(filename, buffer);
