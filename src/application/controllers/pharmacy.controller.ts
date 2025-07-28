@@ -38,7 +38,7 @@ export interface PharmacyController {
 
 }
 
-let pixValue = 0;
+let pixValue = 20.00;
 
 @injectable()
 export class PharmacyControllerImpl implements PharmacyController {
@@ -217,7 +217,7 @@ export class PharmacyControllerImpl implements PharmacyController {
             console.log("pix", pix);
             console.log("pix.pixInfo.valor", pix.pixInfo.valor);
             console.log("pixValue", pixValue);
-            if (pix.pixInfo.valor === Number(pixValue)) {
+            if (Number(pix.pixInfo.valor) === Number(pixValue)) {
               console.log("PIX PAGO CARAIIIII");
               // history.push({ role: 'user', content: pixInfo.valor, name: 'user' }); // ✅ adiciona input do usuário
               await client.messages.sendText({
