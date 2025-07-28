@@ -873,6 +873,16 @@ Responda à próxima mensagem do cliente com base no histórico da conversa.
     
       // 🟢 SE já mostramos a lista antes, agora podemos sugerir a venda do combo
       if (jaListouProdutos) {
+        if (products.length === 1) {
+          return {
+            role: 'assistant',
+            name: 'assistant',
+            content: `👩🏻‍🦰 Adiquira agora o ${products[0]?.nome} por R$ ${products[0]?.preco?.toFixed(2).replace('.', ',')}
+            Basta enviar o PIX para a chave: 123456 e enviar o comprovante aqui. Você tem 10 minutos para fazer o pagamento.
+            `,
+          } satisfies ChatCompletionMessageParam;
+        }
+
         const produto = products[0];
         const productsCorrelacionados = await this.searchProductAndCorrelations(produto?.nome || '');
     
@@ -893,6 +903,8 @@ Responda à próxima mensagem do cliente com base no histórico da conversa.
         .map((p, index) => `${index + 1}. ${p.nome} – R$ ${p.preco.toFixed(2).replace('.', ',')}`)
         .join('\n');
     
+
+
       const retornoListaProdutos = `
     📦 Possuímos os seguintes produtos em estoque:
     ${listaProdutos}
