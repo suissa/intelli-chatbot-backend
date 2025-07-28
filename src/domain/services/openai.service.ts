@@ -276,7 +276,9 @@ export class OpenAIService {
   
 
   async searchProductAndCorrelations(productName: string): Promise<any> {
+    console.log("searchProductAndCorrelations productName", productName);
     const prompt = `
+
       Você é um excelente vendedor de farmácia.
 
       Produto pesquisado: ${productName}
@@ -309,7 +311,7 @@ export class OpenAIService {
       });
   
       const content = response.choices[0]?.message?.content || '';
-  
+      console.log("searchProductAndCorrelations content", content);
       const produtosMatch = content.match(/\*\*PRODUTOS CORRELACIONADOS:\*\*\s*([\s\S]*)$/i);
       const produtosCorrelacionadosRaw = produtosMatch ? produtosMatch[1]!.trim() : '';
   
@@ -627,84 +629,69 @@ Responda à próxima mensagem do cliente com base no histórico da conversa.
       const args = functionCall ? JSON.parse(functionCall.arguments) : {};
       const nomeRemedio = args.medicamento || '';
       const nomeLower = nomeRemedio.toLowerCase();
-
+    
       const termosBanidos = ['analgésico', 'remédio', 'dor', 'medicamento', 'remedinho'];
-      
       if (!nomeRemedio || termosBanidos.some(t => nomeLower.includes(t))) {
         return {
           role: 'assistant',
           name: 'assistant',
-          content: `🤔 Poderia me informar o nome de algum medicamento que você já usou ou conhece? Assim posso verificar o estoque pra você.`
+          content: `🤔 Poderia me informar o nome de algum medicamento que você já usou ou conhece? Assim posso verificar o estoque pra você.`,
         } satisfies ChatCompletionMessageParam;
       }
-      
+    
       const products = await this.drugsRepository.searchDrugs(nomeRemedio);
-
       console.log("searchDrugs products", products[0]);
-      if (products.length > 0) {
-        if (products[0]?.produtosCorrelacionados == null) {
-          const productsCorrelacionados = await this.searchProductAndCorrelations(nomeRemedio || '');
-          console.log("null searchProductAndCorrelations productsCorrelacionados", productsCorrelacionados);
-          // products[0]!.produtosCorrelacionados = productsCorrelacionados;
-          // const produto = products[0];
-          // const correlacionado = produto?.produtosCorrelacionados[0]; // Pega o primeiro correlacionado para o exemplo
-          
-          const textoVenda = productsCorrelacionados.textoDeVenda;
-          
-          // await this.generateVendaPersuasiva(
-          //   produto?.nome || '',
-          //   correlacionado?.name || '',
-          //   produto?.preco || 0,
-          //   correlacionado?.price || 0
-          // );
-          console.log("VENHAA textoVenda", textoVenda);
-          // Agora envie textoVenda como resposta final ao usuário (ou inclua junto do seu objeto de retorno)
-          return {
-            role: 'assistant',
-            name: 'assistant',
-            content: textoVenda,
-            produto: products[0],
-            found: true
-          };
-        }
-
-        const lista = products
-          .map((p) => `• ${p.nome} – R$ ${p.preco.toFixed(2).replace('.', ',')}`)
-          .join('\n');
-          console.log(" products 2", products);
-        console.log("lista products", lista);
-        if (products[0]?.nome) {
-          const productsCorrelacionados = await this.searchProductAndCorrelations(products[0]?.nome || '');
-          // products[0]!.produtosCorrelacionados = productsCorrelacionados;
-          const produto = products[0];
-          // const correlacionado = produto?.produtosCorrelacionados[0]; // Pega o primeiro correlacionado para o exemplo
-          
-          const textoVenda = productsCorrelacionados.textoDeVenda;
-          console.log("VENHAA textoVenda2", textoVenda);
-          // Agora envie textoVenda como resposta final ao usuário (ou inclua junto do seu objeto de retorno)
-          return {
-            role: 'assistant',
-            name: 'assistant',
-            content: textoVenda,
-            produto,
-            found: true
-          };
-        }
+    
+      if (products.length === 0) {
         return {
           role: 'assistant',
           name: 'assistant',
-          content: `📦 Produtos encontrados:\n${lista}`
+          content: `❌ Desculpe, não temos ${nomeRemedio} em estoque.`
         } satisfies ChatCompletionMessageParam;
-
       }
-      const fallbackMessage = `❌ Desculpe, não temos ${nomeRemedio} em estoque.`;
-  
+    
+      const lastAssistantMessage = history.reverse().find(msg => msg.role === 'assistant')?.content || '';
+    
+      const jaListouProdutos = lastAssistantMessage.toString().includes("Possuímos os seguintes produtos em estoque");
+    
+      // 🟢 SE já mostramos a lista antes, agora podemos sugerir a venda do combo
+      if (jaListouProdutos) {
+        const produto = products[0];
+        const productsCorrelacionados = await this.searchProductAndCorrelations(produto?.nome || '');
+    
+        const textoVenda = productsCorrelacionados.textoDeVenda;
+        console.log("VENDA textoVenda FINAL:", textoVenda);
+    
+        return {
+          role: 'assistant',
+          name: 'assistant',
+          content: textoVenda,
+          produto,
+          found: true
+        };
+      }
+    
+      // 🟡 CASO CONTRÁRIO: exibir lista e pedir confirmação para prosseguir depois
+      const listaProdutos = products
+        .map((p) => `• ${p.nome} – R$ ${p.preco.toFixed(2).replace('.', ',')}`)
+        .join('\n');
+    
+      const retornoListaProdutos = `
+    📦 Possuímos os seguintes produtos em estoque:
+    ${listaProdutos}
+    
+    Se você ainda não encontrou o que procura, posso te sugerir alguns medicamentos que costumam ajudar bastante nesse caso, tudo bem? 😊
+    
+    Agora, se você já encontrou, poderia me enviar o nome completo do produto copiando e colando aqui? Assim consigo verificar direitinho pra você.
+    `.trim();
+    
       return {
         role: 'assistant',
         name: 'assistant',
-        content: fallbackMessage
+        content: retornoListaProdutos,
       } satisfies ChatCompletionMessageParam;
     }
+    
     return response?.choices[0]?.message;
   }
 

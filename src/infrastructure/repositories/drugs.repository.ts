@@ -1,5 +1,5 @@
 import { injectable } from 'inversify';
-import { Repository, Like, Raw } from 'typeorm';
+import { Repository, Like, Raw, MoreThan } from 'typeorm';
 import { Remedio } from '../../domain/entities/remedio.entity';
 import { AppDataSource } from '../database/typeorm.config';
 
@@ -72,7 +72,9 @@ export class DrugsRepository implements IDrugsRepository {
       
       // Buscar apenas na coluna nome
       const remedios = await this.repository.find({
-        where: { nome: Raw(alias => `LOWER(${alias}) LIKE LOWER(:t)`, { t: `%${cleanTerm.toLowerCase()}%` }) },
+        where: { nome: Raw(alias => `LOWER(${alias}) LIKE LOWER(:t)`, { t: `%${cleanTerm.toLowerCase()}%` }),
+        estoque: Raw(alias => `${alias} > 0`),
+      },
         order: { nome: 'ASC' },
         take: 10 // Limitar a 10 resultados
       });
