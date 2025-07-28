@@ -154,6 +154,7 @@ export class PharmacyControllerImpl implements PharmacyController {
           const number = request.body?.data?.key?.remoteJid?.replace('@s.whatsapp.net', '');
           const history = this.chatHistoryMap[number] || [];
 
+          console.log('🧠 Histórico carregado:', this.chatHistoryMap[number]);
           if (messageType === "imageMessage") {
             const image = request.body?.data?.message?.imageMessage;
             // salve a img com Date.now convertemndo uma string base64 em jpg
@@ -173,6 +174,7 @@ export class PharmacyControllerImpl implements PharmacyController {
           } 
           
           if (messageType === "conversation") {
+
             const messageText = request.body?.data?.message?.conversation;
             console.log("messageText", messageText);
             history.push({ role: 'user', content: messageText, name: 'user' }); // ✅ adiciona input do usuário
@@ -195,37 +197,14 @@ export class PharmacyControllerImpl implements PharmacyController {
             history.push({ role: 'assistant', content: replyText, name: 'assistant' });
             console.log("history", history);
             console.log("replyText", replyText);
+            this.chatHistoryMap[number] = history;
+
             await client.messages.sendText({
               number: '5515991957645', // || request.body?.data?.key.remoteJid,
               text: replyText || 'teste 123 ',
             });
           }
-          // else {
-            
-          //   console.log(request.body?.data?.message);
-          //   let messageText = request.body?.data?.message?.conversation ||
-          //     request.body?.data?.message?.extendedTextMessage?.text ||
-          //     request.body?.data?.message?.ephemeralMessage?.message?.extendedTextMessage?.text;
-          //   console.log(messageText);
-            
-          //   const response = await this.openaiService.queryProduct(messageText || '');
-          //   console.log("response da messageText", response);
-
-          //   await client.messages.sendText({
-          //     number: request.body?.data?.message?.from?.id,
-          //     text: 'teste 123 ',
-          //   });
-          // }
         }
-        // if (messageType === "textMessage") {
-        //   const text = request.body?.data?.message?.textMessage;
-        //   console.log(text);
-        // }
-        // const message = request.body?.data?.message;
-        // const pharmacy = await this.pharmacyRepository.getPharmacyByCNPJ(message?.from?.id);
-        // if (pharmacy) {
-        //   await this.pharmacyRepository.updatePharmacy(pharmacy.id, { lastMessage: message } as any);
-        // }
       }
     } catch (error) {
       console.error('Error webhook:', error);
