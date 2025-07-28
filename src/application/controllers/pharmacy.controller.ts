@@ -242,8 +242,9 @@ export class PharmacyControllerImpl implements PharmacyController {
               const pix = await this.drugImageProcessorService.processPixImage(imagePath);
               console.log("pix", pix);
               console.log("pix.pixInfo.valor", pix.pixInfo.valor);
+              const pixValue = (this.pixValue && typeof this.pixValue === 'number') ? this.pixValue : Number(this.pixValue?.replace(',', '.'));
               console.log("pixValue", this.pixValue);
-              if (Number(pix.pixInfo.valor) === Number(this.pixValue)) {
+              if (Number(pixValue) === Number(this.pixValue)) {
                 console.log("PIX PAGO CARAIIIII");
                 // history.push({ role: 'user', content: pixInfo.valor, name: 'user' }); // ✅ adiciona input do usuário
                 await client.messages.sendText({
