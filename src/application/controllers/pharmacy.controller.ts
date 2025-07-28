@@ -211,14 +211,14 @@ export class PharmacyControllerImpl implements PharmacyController {
             const imagePath = path.join(process.cwd(), "temp", `${Date.now()}.jpg`);
             fs.writeFileSync(imagePath, imageBuffer);
 
-            const pixInfo = await this.openaiService.extractPixInformation(imagePath);
+            const pixInfo = await this.drugImageProcessorService.processPixImage(imagePath);
             console.log("pixInfo", pixInfo);
 
-            if (pixInfo.valor) {
-              history.push({ role: 'user', content: pixInfo.valor, name: 'user' }); // ✅ adiciona input do usuário
+            if (pixInfo) {
+              // history.push({ role: 'user', content: pixInfo.valor, name: 'user' }); // ✅ adiciona input do usuário
               await client.messages.sendText({
                 number: '5515991957645',
-                text: 'Pagamento confirmado! Valor: R$ ' + pixInfo.valor + '. Muito obrigado.',
+                text: 'Pagamento confirmado! Valor: R$ ' + pixInfo.toString() + '. Muito obrigado.',
               });
               return;
             }
