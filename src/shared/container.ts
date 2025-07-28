@@ -53,6 +53,7 @@ container.bind<DrugImageProcessorService>(TYPES.DrugImageProcessorService).to(Dr
 container.bind<TextProcessorService>(TYPES.TextProcessorService).to(TextProcessorServiceImpl);
 container.bind<OCRService>(TYPES.OCRService).to(OCRService);
 container.bind<OpenAIService>(TYPES.OpenAIService).to(OpenAIService);
+
 container.bind<MessageProcessorService>(TYPES.MessageProcessorService).to(MessageProcessorService);
 
 // Message Queue

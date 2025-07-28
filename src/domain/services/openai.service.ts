@@ -1,8 +1,9 @@
-import { injectable } from 'inversify';
+import { inject, injectable } from 'inversify';
 import OpenAI from 'openai';
 import { z } from 'zod';
 import { DrugsRepository } from '../../infrastructure/repositories/drugs.repository';
 import { ChatCompletionMessageParam } from "openai/resources/chat/completions";
+import { TYPES } from '../../shared/types';
 
 // Schema Zod para extração de informações de remédios
 const DrugsInformationExtraction = z.object({
@@ -22,13 +23,14 @@ const DrugsInformationExtraction = z.object({
 @injectable()
 export class OpenAIService {
   private openai: OpenAI;
-  private drugsRepository: DrugsRepository;
-  constructor() {
+  constructor(
+    @inject(TYPES.DrugsRepository) private drugsRepository: DrugsRepository
+  ) {
     console.log('🔑 OPENAI_API_KEY utilizada:', process.env.OPENAI_API_KEY); 
     this.openai = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY || 'sk-your-api-key-here',
     });
-    this.drugsRepository = new DrugsRepository();
+    // this.drugsRepository = drugsRepository;
   }
 
   async searchProductAndCorrelations(productName: string): Promise<any> {
