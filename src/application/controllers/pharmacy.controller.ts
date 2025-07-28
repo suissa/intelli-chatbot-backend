@@ -11,7 +11,7 @@ import fs from 'fs';
 import { OpenAIService } from '../../domain/services/openai.service';
 import axios from 'axios';
 import { OpenAI } from 'openai';
-
+import { SpeechEstimator } from '../../domain/services/speech-estimator';
 type ChatCompletionMessageParam = OpenAI.Chat.Completions.ChatCompletionMessageParam;
 
 const client = new EvolutionClient({
@@ -248,10 +248,10 @@ export class PharmacyControllerImpl implements PharmacyController {
             // console.log("response da image", response);
             history.push({ role: 'assistant', content: response?.content || '', name: 'assistant' }); // ✅ adiciona input do usuário
             // console.log("history audio", history);
-            const hasChavePix = response?.content?.includes('chave pix');
+            const hasChavePix = response?.content?.toLowerCase().includes('chave pix');
             
+            console.log("hasChavePix", hasChavePix);
             if (hasChavePix) {
-              console.log("hasChavePix", hasChavePix);
               
               await client.chats.updatePresence({
                 number: "5515991957645",
@@ -266,11 +266,14 @@ export class PharmacyControllerImpl implements PharmacyController {
               return;
             }
 
+            const delayOfSpeech = SpeechEstimator.estimateTranscriptionTime(response?.content || '');
+            console.log("delayOfSpeech", delayOfSpeech);
+
             await client.chats.updatePresence({
               number: "5515991957645",
               presence: "recording",
-              duration: 30000,
-              delay: 30000,
+              duration: delayOfSpeech,
+              delay: delayOfSpeech,
             }); 
             const speech = await this.openaiService.createSpeech(response?.content || '');
             console.log("speech", speech.substring(0, 100));

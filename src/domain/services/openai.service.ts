@@ -248,7 +248,7 @@ export class OpenAIService {
       
       const transcription = await this.openai.audio.transcriptions.create({
         file: fs.createReadStream(audioFilePath),
-        model: "gpt-4o-transcribe",
+        model: "gpt-4o-mini-transcribe",
         language: "pt",
         response_format: "json",
         temperature: 0.0,
