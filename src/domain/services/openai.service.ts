@@ -909,6 +909,16 @@ Responda à próxima mensagem do cliente com base no histórico da conversa.
         .join('\n');
     
 
+        if (products.length === 1) {
+          return {
+            role: 'assistant',
+            name: 'assistant',
+            content: `👩🏻‍🦰 Adiquira agora o ${products[0]?.nome} por R$ ${products[0]?.preco?.toFixed(2).replace('.', ',')}
+            Basta enviar o PIX para a chave: 123456 e enviar o comprovante aqui. Você tem 10 minutos para fazer o pagamento.
+            `,
+          } satisfies ChatCompletionMessageParam;
+        }
+
 
       const retornoListaProdutos = `
     📦 Possuímos os seguintes produtos em estoque:
