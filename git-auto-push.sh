@@ -10,3 +10,5 @@ if ! git diff --cached --quiet; then
 else
   echo "[INFO] Nada para commitar."
 fi
+
+echo "[DEBUG] Script rodou às $(date)" >> logs.txt
