@@ -46,6 +46,55 @@ export class OpenAIService {
   }
   
   async extractDrugInformation(extractedText: string): Promise<any> {
+    const prompt = `Me retorne APENAS o nome comercial ou genérico desse remédio: '${this.normalize(extractedText)}', 
+    retorne o nome mais parecido com o contido no texto: '${this.normalize(extractedText)}' 
+    sem nenhum tipo de outra informação.
+    `
+    console.log('🔍 Prompt:', prompt);
+    try {
+      console.log('🔍 Extraindo informações de remédio com OpenAI...');
+      
+      const response = await this.openai.chat.completions.create({
+        model: "gpt-4o",
+        temperature: 0.0,
+        top_p: 0.0,
+        messages: [
+          {
+            role: "system",
+            content: "você é um especialista em extração de informações de remédios e um atendente de farmácia"
+          },
+          {
+            role: "user",
+            content: prompt	
+          }
+        ],
+        // response_format: { type: "json_object" },
+        max_tokens: 1000,
+      });
+
+      const responseContent = response.choices[0]?.message?.content;
+      
+      if (!responseContent) {
+        throw new Error('Resposta vazia da OpenAI');
+      }
+
+      // Parsear o JSON da resposta
+      // const parsedResponse = JSON.parse(responseContent);
+      
+      // Validar com o schema Zod
+      // const drugs_information = DrugsInformationExtraction.parse(parsedResponse);
+      
+      console.log('✅ Informações extraídas com sucesso:', responseContent  );
+      
+      return responseContent;
+      
+    } catch (error) {
+      console.error('❌ Erro ao extrair informações com OpenAI:', error);
+      throw error;
+    }
+  }
+
+  async extractDrugInformationComplete(extractedText: string): Promise<any> {
     const prompt = `me de as informações desse remédio: '${this.normalize(extractedText)}', com as seguintes informações: NomeComercial, NomeGenérico, Fabricante, Indicação, Dosagem, Contraindicação, Interação, ModoDeUso, DuraçãoDoEfeito, Categoria, Observações.
             Monte a resposta como se estivesse vendendo-o e ao final pergunte se é realmente o remédio que o cliente deseja. Utilize vários emojis para tornar a resposta mais atrativa.
             Limite a resposta a 200-300 palavras.
