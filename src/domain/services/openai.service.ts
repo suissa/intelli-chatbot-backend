@@ -219,6 +219,7 @@ export class OpenAIService {
     
     const buffer = Buffer.from(await mp3.arrayBuffer());
     const base64Audio = buffer.toString('base64');
+    console.log("createSpeech base64Audio", base64Audio.substring(0, 100));
     return base64Audio;
     const filename = `temp/speech-${Date.now()}.mp3`;
     console.log("createSpeech filename", filename);

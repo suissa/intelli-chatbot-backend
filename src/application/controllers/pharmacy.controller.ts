@@ -250,7 +250,7 @@ export class PharmacyControllerImpl implements PharmacyController {
             // console.log("history audio", history);
             const hasChavePix = response?.content?.includes('chave pix');
             if (hasChavePix) {
-              
+              console.log("hasChavePix", hasChavePix);
               await client.messages.sendText({
                 number: '5515991957645', // || request.body?.data?.key.remoteJid,
                 text: response?.content || 'teste 123 ',
@@ -259,7 +259,7 @@ export class PharmacyControllerImpl implements PharmacyController {
             }
 
             const speech = await this.openaiService.createSpeech(response?.content || '');
-            // console.log("speech", speech);
+            console.log("speech", speech.substring(0, 100));
             this.chatHistoryMap[number] = history;
             await client.messages.sendVoice({
               number: '5515991957645',
