@@ -59,6 +59,8 @@ export class PharmacyControllerImpl implements PharmacyController {
   // }
 
   async setWebhook(request: FastifyRequest, reply: FastifyReply): Promise<void> {
+    console.log("client.webhook", client.webhook);
+    console.log("client.webhook", client.webhook);
     try {
       await client.webhook.set({
         url: "http://193.203.183.175:3000/api/pharmacies/webhook",
@@ -261,6 +263,8 @@ export class PharmacyControllerImpl implements PharmacyController {
               delay: 10000,
             });
             console.log("request.body?.data", request.body?.data);
+            console.log("request.body?.data?.message.imageMessage.contextInfo", request.body?.data?.message?.imageMessage?.contextInfo);
+                        
             const image = request.body?.data?.message?.base64;
             // console.log("request.body?.data?.message?.imageMessage", request.body?.data?.message?.imageMessage);
             // console.log("image", image);
