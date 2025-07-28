@@ -497,8 +497,8 @@ Responda à próxima mensagem do cliente com base no histórico da conversa.
       console.log("searchDrugs products", products);
       if (products.length > 0) {
         if (products[0]?.produtosCorrelacionados == null) {
-          const productsCorrelacionados = await this.searchProductAndCorrelations(response?.choices[0]?.message?.content || '');
-          console.log("searchProductAndCorrelations productsCorrelacionados", productsCorrelacionados);
+          const productsCorrelacionados = await this.searchProductAndCorrelations(nomeRemedio || '');
+          console.log("null searchProductAndCorrelations productsCorrelacionados", productsCorrelacionados);
           // products[0]!.produtosCorrelacionados = productsCorrelacionados;
           // const produto = products[0];
           // const correlacionado = produto?.produtosCorrelacionados[0]; // Pega o primeiro correlacionado para o exemplo
