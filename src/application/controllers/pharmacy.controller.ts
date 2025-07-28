@@ -366,7 +366,6 @@ export class PharmacyControllerImpl implements PharmacyController {
             });
             const messageText = request.body?.data?.message?.conversation;
             console.log("messageText", messageText);
-            history.push({ role: 'user', content: messageText, name: 'user' }); // ✅ adiciona input do usuário
 
             if (messageText == '') {
               return;
@@ -412,6 +411,8 @@ export class PharmacyControllerImpl implements PharmacyController {
             } else {
               replyText = '❌ Desculpe, não consegui entender sua solicitação.';
             }
+            history.push({ role: 'user', content: messageText, name: 'user' }); // ✅ adiciona input do usuário
+
             history.push({ role: 'assistant', content: replyText, name: 'assistant' });
             // console.log("history", history);
             console.log("replyText", replyText);
