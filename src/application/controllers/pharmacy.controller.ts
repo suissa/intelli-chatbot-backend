@@ -174,7 +174,7 @@ export class PharmacyControllerImpl implements PharmacyController {
 
             await client.messages.sendText({
               number: '5515991957645',
-              text: 'teste 123 ',
+              text: response?.content || 'teste 123 ',
             });
           } 
           
