@@ -276,102 +276,76 @@ export class OpenAIService {
   
 
   async searchProductAndCorrelations(productName: string): Promise<any> {
+    const prompt = `
+      Você é um excelente vendedor de farmácia.
+
+      Produto pesquisado: ${productName}
+
+      🛑 IMPORTANTE:
+      - Os itens devem ser **complementares reais** do produto pesquisado, **não da mesma categoria**.
+      - Liste exatamente **20 produtos complementares**, no formato:
+        Nome - R$ preço - Categoria
+      - Não use números no nome do produto.
+      - Não use bullet ou numeração no nome.
+      ---
+
+      **PRODUTOS CORRELACIONADOS:**
+      [Nome] - [Preço] - [Categoria]
+      `.trim();
     try {
-      console.log('🔍 searchProductAndCorrelations Pesquisando produto e correlações: ', productName);
-      
-      const prompt = `
-        Você é um excelente vendedor de farmácia, experiente, carismático e muito persuasivo.
-
-        Produto pesquisado: ${productName}
-
-        🛑 IMPORTANTE:
-        - Você deve usar **exatamente o nome do produto pesquisado acima** como o primeiro item da sugestão.
-        - Você **não pode** inventar um segundo nome para ele.
-        - O segundo item deve ser um **complementar real**, **não pode ser um medicamento da mesma categoria**.
-        - Faça uma lista de 20 produtos correlacionados, mas não use produtos da mesma categoria.
-
-        ---
-        
-
-        **CARACTERÍSTICAS DO PRODUTO:**
-
-        [Liste as características principais do ${productName} de forma clara e objetiva]
-
-        **PRODUTOS CORRELACIONADOS:**
-
-        [Nome do item complementar] - [Preço] - [Categoria]
-
-        (Não use bullet ou numeração no nome)
-
-        **TEXTO DE VENDA:**
-
-        Pensando especialmente em você criei essa oferta única: 
-        que tal levar o ${productName} (R$ [preço do produto pesquisado]) junto com o [nome do item complementar] (R$ [preço do correlato])?
-
-        Eles se complementam perfeitamente e ajudam a acelerar seu bem-estar!  
-        💡 Essa combinação foi escolhida a dedo com carinho só pra você.
-        [Explique qual o benefício da combinação entre eles]
-        💰 E o melhor: levando os dois agora, você ganha **10% de desconto no total**.
-
-        Você gostaria de aproveitar essa promoção exclusiva e levar o ${productName} + [nome do correlato], totalizando R$ [valor com desconto]?  
-        *Essa condição é exclusiva para essa conversa.*
-      `;
-      console.log("searchProductAndCorrelations prompt", prompt);
       const response = await this.openai.chat.completions.create({
         model: "gpt-4o-mini",
         messages: [
           {
             role: "system",
-            content: "Você é um vendedor de farmácia experiente, persuasivo e muito bom em identificar necessidades dos clientes e sugerir produtos complementares."
+            content: "Você é um vendedor de farmácia que sugere produtos complementares úteis e não semelhantes ao produto principal."
           },
           {
             role: "user",
             content: prompt
           }
         ],
-        max_tokens: 1500,
+        max_tokens: 1200,
       });
-
-      const responseContent = response.choices[0]?.message?.content;
-      
-      if (!responseContent) {
-        throw new Error('Resposta vazia da OpenAI');
+  
+      const content = response.choices[0]?.message?.content || '';
+  
+      const produtosMatch = content.match(/\*\*PRODUTOS CORRELACIONADOS:\*\*\s*([\s\S]*)$/i);
+      const produtosCorrelacionadosRaw = produtosMatch ? produtosMatch[1]!.trim() : '';
+  
+      console.log('🔍 Produtos correlacionados RAW:', produtosCorrelacionadosRaw);
+  
+      const encontrados = await this.searchMultipleDrugsFromString(produtosCorrelacionadosRaw);
+      console.log("searchProductAndCorrelations encontrados", encontrados);
+      if (!encontrados || encontrados.length === 0) {
+        return { textoDeVenda: `❌ Nenhum produto complementar disponível em estoque.` };
       }
-
-            console.log('✅ Análise de produto e correlações gerada com sucesso');
-      console.log('🔍 Resposta:', responseContent);
+      const principal = (await this.drugsRepository.searchDrugs(productName))[0];
+      const complementar = encontrados[0];
+  
+      const precoPrincipal = principal?.preco || 0;
+      const precoComplementar = complementar?.preco || 0;
+      const precoTotal = (precoPrincipal + precoComplementar) * 0.9;
       
-      // Extrair as seções da resposta usando regex
-      const caracteristicasMatch = responseContent.match(/\*\*CARACTERÍSTICAS DO PRODUTO:\*\*\s*([\s\S]*?)(?=\*\*PRODUTOS CORRELACIONADOS:\*\*)/i);
-      const produtosMatch = responseContent.match(/\*\*PRODUTOS CORRELACIONADOS:\*\*\s*([\s\S]*?)(?=\*\*TEXTO DE VENDA:\*\*)/i);
-      const textoMatch = responseContent.match(/\*\*TEXTO DE VENDA:\*\*\s*([\s\S]*?)$/i);
-      
-      const caracteristicasDoProduto = caracteristicasMatch ? caracteristicasMatch[1]!.trim() : 'Não encontrado';
-      const produtosCorrelacionados = produtosMatch ? produtosMatch[1]!.trim() : 'Não encontrado';
-      const textoDeVenda = textoMatch ? textoMatch[1]!.trim() : 'Não encontrado';
-      
-      console.log('🔍 Características:', caracteristicasDoProduto);
-      console.log('🔍 Produtos correlacionados:', produtosCorrelacionados);
-      console.log('🔍 Texto de venda:', textoDeVenda);
-      
-
-      // const produtosCorrelacionadosArray = produtosCorrelacionados.split('\n').map(item => item.trim());
-      // console.log('🔍 Produtos correlacionados array:', produtosCorrelacionadosArray);
-
-      const produtosCorrelacionadosArray = await this.searchMultipleDrugsFromString(produtosCorrelacionados);
-      console.log('🔍 Produtos correlacionados array:', produtosCorrelacionadosArray);
-
-      // Retornar como objeto estruturado (como em Python)
+      // Chamar novo prompt para gerar texto de venda
+      const textoDeVenda = await this.gerarTextoVendaPersuasiva(
+        principal ? principal.nome : productName,
+        precoPrincipal,
+        complementar ? complementar.nome : '',
+        complementar ? precoComplementar : 0,
+        precoTotal
+      );
+  
       return {
-        caracteristicasDoProduto,
-        produtosCorrelacionados,
+        produtoPrincipal: principal,
+        produtoComplementar: complementar,
         textoDeVenda
       };
-      
     } catch (error) {
-      console.error('❌ Erro ao pesquisar produto e correlações:', error);
+      console.error('❌ Erro ao buscar produtos correlacionados:', error);
       throw error;
     }
+
   }
 
   gerarRespostaConfirmacao({
@@ -470,9 +444,9 @@ export class OpenAIService {
     return null;
   }
 
-  async searchMultipleDrugsFromString(input: string): Promise<Remedio[] | null> {
+  async searchMultipleDrugsFromString(input: string): Promise<any | null> {
     const results: any[] = [];
-  
+    console.log("searchMultipleDrugsFromString input", input);
     // const lines = input.split('\n').map(line => line.trim()).filter(Boolean);
     const cleanWords = [
       "com", "sem", "para", "de", "do", "da", "dos", "das",
@@ -487,7 +461,7 @@ export class OpenAIService {
         .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // remove acentos
         .replace(/[^\w\s]/g, "") // remove pontuação
         .split(" ")
-        .filter(palavra => !cleanWords.includes(palavra) && palavra.length > 1);
+        .filter(palavra => !cleanWords.includes(palavra) && palavra.length > 1)
     
       return palavras.join(" ");
     }
@@ -507,8 +481,11 @@ export class OpenAIService {
     console.log("produtosCorrelacionadosArray", produtosCorrelacionadosArray);
     console.log("produtosLimpos", produtosLimpos);
     // console.log("linhasBrutas", linhasBrutas);
-  
-    return produtosCorrelacionadosArray;
+    const produtosAchados = produtosCorrelacionadosArray
+    ?.filter((p: any) => p?.length > 0)
+
+    const produtosEmEstoque = produtosAchados?.filter((p: any) => p.estoque > 0);
+    return produtosEmEstoque;
   }
 
   async queryProduct(userMessage: string, history: ChatCompletionMessageParam[] = []) {
@@ -777,29 +754,50 @@ Responda à próxima mensagem do cliente com base no histórico da conversa.
   }
   
 
-  async generateVendaPersuasiva(produto: string, correlacionado: string, preco: number, precoCorrelacionado: number): Promise<string> {
+  async gerarTextoVendaPersuasiva(
+    nomePrincipal: string,
+    precoPrincipal: number,
+    nomeComplementar: string,
+    precoComplementar: number,
+    precoTotal: number
+  ): Promise<string> {
     const prompt = `
-    Você é um vendedor sênior de farmácia muito persuasivo e empático.
-    Monte um texto curto e objetivo, incentivando o cliente a levar tanto ${produto} quanto ${correlacionado}, explicando rapidamente o benefício de cada um.
-    Explique que, levando os dois, o cliente recebe 10% de desconto no valor total (R$ ${(preco + precoCorrelacionado).toFixed(2)}), e informe o preço já com desconto.
-    Seja amigável, use alguns emojis e sempre termine perguntando: "Posso reservar esse combo para você?"
-    `;
-    
-    const totalComDesconto = ((preco + precoCorrelacionado) * 0.9).toFixed(2);
-  
-    const openaiResp = await this.openai.chat.completions.create({
-      model: "gpt-4o-mini",
+  Produto principal: ${nomePrincipal} (R$ ${precoPrincipal.toFixed(2).replace('.', ',')})  
+  Complementar: ${nomeComplementar} (R$ ${precoComplementar.toFixed(2).replace('.', ',')})  
+  Preço com desconto: R$ ${precoTotal.toFixed(2).replace('.', ',')}
+
+  ---
+
+  **TEXTO DE VENDA:**
+
+  Pensando especialmente em você criei essa oferta única:  
+  que tal levar o ${nomePrincipal} (R$ ${precoPrincipal.toFixed(2).replace('.', ',')}) junto com o ${nomeComplementar} (R$ ${precoComplementar.toFixed(2).replace('.', ',')})?
+
+  Eles se complementam perfeitamente e ajudam a acelerar seu bem-estar!  
+  💡 Essa combinação foi escolhida a dedo com carinho só pra você.  
+  [Explique qual o benefício da combinação entre eles]  
+  💰 E o melhor: levando os dois agora, você ganha **10% de desconto no total**.
+
+  Você gostaria de aproveitar essa promoção exclusiva e levar o ${nomePrincipal} + ${nomeComplementar}, totalizando R$ ${precoTotal.toFixed(2).replace('.', ',')}?  
+  *Essa condição é exclusiva para essa conversa.*
+    `.trim();
+
+    const response = await this.openai.chat.completions.create({
+      model: 'gpt-4o-mini',
       messages: [
-        { role: "system", content: "Você é um vendedor de farmácia persuasivo, cordial e eficiente." },
-        { role: "user", content: prompt + 
-          `\nProduto principal: ${produto} (R$ ${preco.toFixed(2)})\nProduto correlacionado: ${correlacionado} (R$ ${precoCorrelacionado.toFixed(2)})\nValor total com desconto: R$ ${totalComDesconto}` 
+        {
+          role: 'system',
+          content: 'Você é um vendedor de farmácia especialista em escrever textos de venda persuasivos e carismáticos.'
+        },
+        {
+          role: 'user',
+          content: prompt
         }
       ],
-      max_tokens: 300,
-      temperature: 0.7,
+      max_tokens: 600,
     });
-  
-    return openaiResp.choices[0]?.message?.content || 'Não consegui gerar o texto de venda.';
+
+    return response.choices[0]?.message?.content?.trim() || '⚠️ Não foi possível gerar o texto de venda.';
   }
   
 } 

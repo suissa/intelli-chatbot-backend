@@ -822,27 +822,27 @@ async function start() {
     await initializeDatabase();
     
     // Inicializar RabbitMQ
-    console.log('🐰 Inicializando RabbitMQ...');
-    const rabbitMQConnection = Container.get<RabbitMQConnection>(TYPES.RabbitMQConnection);
-    await rabbitMQConnection.connect();
+    // console.log('🐰 Inicializando RabbitMQ...');
+    // const rabbitMQConnection = Container.get<RabbitMQConnection>(TYPES.RabbitMQConnection);
+    // await rabbitMQConnection.connect();
     
     // Inicializar Message Queue Manager
-    console.log('📨 Inicializando Message Queue Manager...');
-    try {
-      const messageQueueManager = Container.get<MessageQueueManager>(TYPES.MessageQueueManager);
-      console.log('✅ MessageQueueManager obtido do container');
+    // console.log('📨 Inicializando Message Queue Manager...');
+    // try {
+    //   const messageQueueManager = Container.get<MessageQueueManager>(TYPES.MessageQueueManager);
+    //   console.log('✅ MessageQueueManager obtido do container');
       
-      console.log('🔄 Inicializando consumers...');
-      await messageQueueManager.initializeConsumers();
-      console.log('✅ Consumers inicializados');
+    //   console.log('🔄 Inicializando consumers...');
+    //   await messageQueueManager.initializeConsumers();
+    //   console.log('✅ Consumers inicializados');
       
-      console.log('🔄 Inicializando producers...');
-      await messageQueueManager.initializeProducers();
-      console.log('✅ Producers inicializados');
-    } catch (error) {
-      console.error('❌ Erro ao inicializar Message Queue Manager:', error);
-      throw error;
-    }
+    //   console.log('🔄 Inicializando producers...');
+    //   await messageQueueManager.initializeProducers();
+    //   console.log('✅ Producers inicializados');
+    // } catch (error) {
+    //   console.error('❌ Erro ao inicializar Message Queue Manager:', error);
+    //   throw error;
+    // }
     
     // Registrar CORS
     await fastify.register(cors, {
@@ -881,14 +881,14 @@ async function start() {
     process.on('SIGINT', async () => {
       console.log('\n🛑 Recebido SIGINT, fechando servidor...');
       await closeDatabase();
-      await rabbitMQConnection.disconnect();
+      // await rabbitMQConnection.disconnect();
       process.exit(0);
     });
     
     process.on('SIGTERM', async () => {
       console.log('\n🛑 Recebido SIGTERM, fechando servidor...');
       await closeDatabase();
-      await rabbitMQConnection.disconnect();
+      // await rabbitMQConnection.disconnect();
       process.exit(0);
     });
     
