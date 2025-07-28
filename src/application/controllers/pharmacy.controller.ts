@@ -170,7 +170,7 @@ export class PharmacyControllerImpl implements PharmacyController {
             console.log("response da messageText", response);
 
             await client.messages.sendText({
-              number: request.body?.data?.message?.from?.id,
+              number: '5515991957645', // || request.body?.data?.key.remoteJid,
               text: 'teste 123 ',
             });
           }
