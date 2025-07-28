@@ -71,13 +71,27 @@ export class DrugsRepository implements IDrugsRepository {
       const cleanTerm = String(term).replace(/[\n\r\t]/g, ' ').trim();
       
       // Buscar apenas na coluna nome
-      const remedios = await this.repository.find({
-        where: { nome: Raw(alias => `LOWER(${alias}) LIKE LOWER(:t)`, { t: `%${cleanTerm.toLowerCase()}%` }),
-        estoque: Raw(alias => `${alias} > 0`),
-      },
-        order: { nome: 'ASC' },
-        take: 10 // Limitar a 10 resultados
-      });
+      // const remedios = await this.repository.find({
+      //   where: { nome: Raw(alias => `LOWER(${alias}) LIKE LOWER(:t)`, { t: `%${cleanTerm.toLowerCase()}%` }),
+      //   estoque: Raw(alias => `${alias} > 0`),
+      // },
+      //   order: { nome: 'ASC' },
+      //   take: 10 // Limitar a 10 resultados
+      // });
+      const remedios = await this.repository
+        .createQueryBuilder('remedio')
+        .select('DISTINCT ON (LOWER(remedio.nome)) remedio.id', 'id')
+        .addSelect('remedio.nome', 'nome')
+        .addSelect('remedio.estoque', 'estoque')
+        .addSelect('remedio.preco', 'preco')
+        .where('LOWER(remedio.nome) LIKE :nome', { nome: `%${cleanTerm.toLowerCase()}%` })
+        .andWhere('remedio.estoque > 0')
+        .orderBy('LOWER(remedio.nome)', 'ASC')   // grupo
+        .addOrderBy('remedio.preco', 'ASC')      // dentro do grupo, o menor preço primeiro
+        .addOrderBy('remedio.id', 'ASC')         // para desempate final
+        .limit(10)
+        .getRawMany();
+
 
       console.log(`🔍 Encontrados ${remedios.length} remédios para o termo "${cleanTerm}"`);
       return remedios;
