@@ -648,6 +648,12 @@ export class OpenAIService {
   }
 
   async queryProduct(userMessage: string, history: ChatCompletionMessageParam[] = []) {
+    
+    if (history[history.length - 2]?.role === 'user' && history[history.length - 2]?.content == userMessage ||
+      history[history.length - 1]?.role === 'user' && history[history.length - 1]?.content == userMessage 
+    ) {
+      return false;
+    }
     const flatHistory = history
       .map((msg) => `${msg.role === 'user' ? 'Cliente' : 'Atendente'}: ${msg.content}`)
       .join('\n');

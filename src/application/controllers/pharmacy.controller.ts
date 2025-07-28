@@ -373,7 +373,10 @@ export class PharmacyControllerImpl implements PharmacyController {
             const response = await this.openaiService.queryProduct(messageText || '', history);
             console.log("response da messageText", response);
 
-            
+            if (response === false) {
+              return;
+            }
+
             const hasChavePix = response?.content?.toLowerCase().includes('chave pix');
             
             console.log("hasChavePix text", hasChavePix);
