@@ -9,8 +9,7 @@ import fs from 'fs';
 export interface DrugImageProcessorService {
   processPixImage(imagePath: string): Promise<{
     success: boolean;
-    drugInfo?: any;
-    presentation?: string;
+    pixInfo?: any;
     error?: string;
   }>;
   processDrugImage(imagePath: string): Promise<{
@@ -38,8 +37,7 @@ export class DrugImageProcessorServiceImpl implements DrugImageProcessorService 
   
   async processPixImage(imagePath: string): Promise<{
     success: boolean;
-    drugInfo?: any;
-    presentation?: string;
+    pixInfo?: any;
     error?: string;
   }> {
     try {
@@ -64,8 +62,7 @@ export class DrugImageProcessorServiceImpl implements DrugImageProcessorService 
       
       return {
         success: true,
-        drugInfo: drugName,
-        presentation: ''
+        pixInfo:  typeof drugName === 'string' ? JSON.parse(drugName) : drugName, //teste se for string execute JSON.parse(drugName)
       };
 
     } catch (error) {
