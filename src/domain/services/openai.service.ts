@@ -230,6 +230,7 @@ export class OpenAIService {
         model: "gpt-4o-transcribe",
         language: "pt",
         response_format: "json",
+        prompt: "Transcreva o áudio para texto, sempre tente buscar algum nome de remédio para o áudio, sem nenhum outro texto antes ou depois. Se não conseguir transcrever, retorne 'Não foi possível transcrever o áudio'.",
       });
       console.log('🔍 Transcription:', transcription);
       let transcribedText = transcription.text;
