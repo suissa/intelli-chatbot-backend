@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { DrugsRepository } from '../../infrastructure/repositories/drugs.repository';
 import { ChatCompletionMessageParam } from "openai/resources/chat/completions";
 import { TYPES } from '../../shared/types';
+import { Remedio } from '../entities/remedio.entity';
 
 // Schema Zod para extração de informações de remédios
 const DrugsInformationExtraction = z.object({
@@ -458,7 +459,18 @@ export class OpenAIService {
     return respostas[escolhido];
   }
 
-  async searchMultipleDrugsFromString(input: string): Promise<any[]> {
+  async firstDrugFound(produtos: string[]): Promise<Remedio[] | null> {
+    for (const remedio of produtos) {
+      const resultado = await this.drugsRepository.searchDrugs(remedio);
+      console.log(`🔍 Encontrados ${resultado.length} remédios para o termo "${remedio}"`);
+      if (resultado.length > 0) {
+        return resultado; // retorna o primeiro que tem algo
+      }
+    }
+    return null;
+  }
+
+  async searchMultipleDrugsFromString(input: string): Promise<Remedio[] | null> {
     const results: any[] = [];
   
     // const lines = input.split('\n').map(line => line.trim()).filter(Boolean);
@@ -490,11 +502,9 @@ export class OpenAIService {
       return limparNomeProduto(raw || '');
     });
 
-    const produtosCorrelacionadosArray = await Promise.all(
-      produtosLimpos.map(remedio => this.drugsRepository.searchDrugs(remedio))
-    );
+    const produtosCorrelacionadosArray = await this.firstDrugFound(produtosLimpos);
 
-    // console.log("produtosCorrelacionadosArray", produtosCorrelacionadosArray);
+    console.log("produtosCorrelacionadosArray", produtosCorrelacionadosArray);
     console.log("produtosLimpos", produtosLimpos);
     // console.log("linhasBrutas", linhasBrutas);
   
