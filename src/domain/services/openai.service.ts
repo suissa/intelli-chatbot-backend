@@ -362,12 +362,112 @@ export class OpenAIService {
     }
   }
 
+  gerarRespostaConfirmacao({
+    medicamento,
+    precoMedicamento,
+    correlato,
+    precoCorrelato,
+  }: {
+    medicamento: string;
+    precoMedicamento: number;
+    correlato: string;
+    precoCorrelato: number;
+  }): string {
+    const respostas = {
+      tecnico: `
+  Perfeito! Anotado: vamos seguir apenas com a ${medicamento} — R$ ${precoMedicamento.toFixed(2)}.
+  
+  Apenas informando: o item complementar sugerido, ${correlato}, também está disponível em estoque por R$ ${precoCorrelato.toFixed(2)}, caso deseje incluí-lo mais tarde.
+  
+  Confirma a compra somente de ${medicamento}? 💳
+      `.trim(),
+  
+      caloroso: `
+  Tudo bem! 😊 Vamos de ${medicamento} então, que está saindo por R$ ${precoMedicamento.toFixed(2)}.
+  
+  Só para lembrar: o ${correlato} também está disponível (R$ ${precoCorrelato.toFixed(2)}) e foi pensado especialmente para complementar seu cuidado. Mas claro, você escolhe o que for melhor pra você. 💕
+  
+  Posso seguir com ${medicamento} para você?
+      `.trim(),
+  
+      direto: `
+  Entendido. Só ${medicamento}, por R$ ${precoMedicamento.toFixed(2)}, certo?
+  
+  O ${correlato} também está disponível (R$ ${precoCorrelato.toFixed(2)}), mas não será incluído.
+  
+  Confirmo o pedido de ${medicamento}?
+      `.trim(),
+    };
+  
+    const estilos = Object.keys(respostas);
+    const escolhido = estilos[Math.floor(Math.random() * estilos.length)] as keyof typeof respostas;
+    return respostas[escolhido];
+  }
+
+  
+  generateSingleItemResponseFromHistory(
+    userMessage: string,
+    history: ChatCompletionMessageParam[]
+  ): { trigger: boolean; medicamento?: string } {
+    const negativeTrigger = /(não|só|apenas|prefiro só|quero só|vou querer só|não quero|nem quero|nem preciso)/i.test(userMessage);
+
+    const lastAssistantIndex = [...history].reverse().findIndex((m) =>
+      m.role === 'assistant' &&
+      m.content?.toString().toLowerCase().startsWith('pensando especialmente')
+    );
+
+    if (negativeTrigger && lastAssistantIndex !== -1) {
+      const assistantIdx = history.length - 1 - lastAssistantIndex;
+      const lastUserBeforeAssistant = [...history.slice(0, assistantIdx)]
+        .reverse()
+        .find((m) => m.role === 'user');
+
+      if (lastUserBeforeAssistant?.content) {
+        return { trigger: true, medicamento: lastUserBeforeAssistant.content.toString() };
+      }
+    }
+
+    return { trigger: false };
+  }
+
+  gerarRespostaSomentePrincipal(medicamento: string, preco: number): string {
+    const respostas = {
+      tecnico: `Anotado: seguiremos com ${medicamento} — R$ ${preco.toFixed(2)}. Compra registrada com sucesso.`,
+      caloroso: `Claro! Vamos só de ${medicamento} então, por R$ ${preco.toFixed(2)}. Qualquer coisa estou aqui! 😊`,
+      direto: `${medicamento} por R$ ${preco.toFixed(2)}. Pedido confirmado.`
+    };
+  
+    const estilos = Object.keys(respostas);
+    const escolhido = estilos[Math.floor(Math.random() * estilos.length)] as keyof typeof respostas;
+    return respostas[escolhido];
+  }
+
   async queryProduct(userMessage: string, history: ChatCompletionMessageParam[] = []) {
     const flatHistory = history
       .map((msg) => `${msg.role === 'user' ? 'Cliente' : 'Atendente'}: ${msg.content}`)
       .join('\n');
 
-      console.log("flatHistory", flatHistory);
+    console.log("flatHistory", flatHistory);
+    const singleItemCheck = this.generateSingleItemResponseFromHistory(userMessage, history);
+
+    if (singleItemCheck.trigger) {
+      const remedio = singleItemCheck.medicamento!;
+      const produts = await this.drugsRepository.searchDrugs(remedio);
+    
+      if (produts.length > 0) {
+        const produto = produts[0];
+        console.log("produto", produto);
+        if (produto?.nome) {
+          const resposta = this.gerarRespostaSomentePrincipal(produto?.nome || '', produto?.preco || 0);
+          return {
+            role: 'assistant',
+            name: 'assistant',
+            content: resposta,
+          } satisfies ChatCompletionMessageParam;
+        }
+      }
+    }
+      
     const systemPrompt: ChatCompletionMessageParam = {
       role: 'system',
       name: 'system',
