@@ -355,7 +355,10 @@ export class OpenAIService {
   Você é um vendedor sênior de farmácia. Siga este fluxo: 
   1. Sempre que o cliente falar (saudação ou pergunta), responda adequadamente.
   2. Se perguntar por um remédio, extraia o nome do medicamento.
-  3. Se o cliente falar sobre um remédio, chame a função \`check_inventory\` 
+  3. Se o cliente falar sobre um remédio, mas corrija o nome do remédio caso venha errado
+  tipo: "paracetamnol" 
+  deve ser corrigido para: "paracetamol"
+  chame a função \`check_inventory\` com o nome corrigido
   para ver estoque e preço, mas se não for um remédio, pesquise por remédios relacionados
   a sua necessidade.
   4. Se não tiver estoque, responda “Desculpe, não temos {medicamento} em estoque.” e termine.
@@ -400,10 +403,10 @@ export class OpenAIService {
 
     if (response?.choices[0]?.finish_reason === 'function_call') {
       const functionCall = response.choices[0]?.message?.function_call;
-const args = functionCall ? JSON.parse(functionCall.arguments) : {};
-const nomeRemedio = args.medicamento || '';
+      const args = functionCall ? JSON.parse(functionCall.arguments) : {};
+      const nomeRemedio = args.medicamento || '';
 
-const products = await this.drugsRepository.searchDrugs(nomeRemedio);
+      const products = await this.drugsRepository.searchDrugs(nomeRemedio);
 
       
       if (products.length > 0) {
@@ -430,7 +433,13 @@ const products = await this.drugsRepository.searchDrugs(nomeRemedio);
         return products;
 
       }
-      return response?.choices[0]?.message;
+      const fallbackMessage = `❌ Desculpe, não temos ${nomeRemedio} em estoque.`;
+  
+      return {
+        role: 'assistant',
+        name: 'assistant',
+        content: fallbackMessage
+      } satisfies ChatCompletionMessageParam;
     }
     return response?.choices[0]?.message;
   }
