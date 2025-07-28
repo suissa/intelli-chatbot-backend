@@ -257,7 +257,7 @@ export class PharmacyControllerImpl implements PharmacyController {
                 number: "5515991957645",
                 presence: "composing",
                 duration: 5000,
-                // delay: 5000,
+                delay: 5000,
               });
               await client.messages.sendText({
                 number: '5515991957645', // || request.body?.data?.key.remoteJid,
@@ -270,7 +270,7 @@ export class PharmacyControllerImpl implements PharmacyController {
               number: "5515991957645",
               presence: "recording",
               duration: 5000,
-              // delay: 5000,
+              delay: 5000,
             }); 
             const speech = await this.openaiService.createSpeech(response?.content || '');
             console.log("speech", speech.substring(0, 100));
