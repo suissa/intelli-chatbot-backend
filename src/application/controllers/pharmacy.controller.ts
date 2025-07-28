@@ -226,8 +226,8 @@ export class PharmacyControllerImpl implements PharmacyController {
             const oggPath = await this.saveOggFile(image);
             // const caption = request.body?.data?.message?.imageMessage?.caption || '';
             // const imagePath = path.join(process.cwd(), "temp", `${Date.now()}.jpg`);
-            const transcription = await this.openaiService.transcribeAudio(oggPath);
-            console.log("transcription", transcription);
+            // const transcription = await this.openaiService.transcribeAudio(oggPath);
+            // console.log("transcription", transcription);
             // fs.writeFileSync(imagePath, imageBuffer);
             const audioConverter = new AudioConverter();
             const mp3Path = await audioConverter.convertToMp3(oggPath);
