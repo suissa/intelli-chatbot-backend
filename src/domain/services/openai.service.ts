@@ -276,7 +276,7 @@ export class OpenAIService {
 
   async searchProductAndCorrelations(productName: string): Promise<any> {
     try {
-      console.log('🔍 searchProductAndCorrelations Pesquisando produto e correlações...', productName);
+      console.log('🔍 searchProductAndCorrelations Pesquisando produto e correlações: ', productName);
       
       const prompt = `
         Você é um excelente vendedor de farmácia, experiente, carismático e muito persuasivo.
@@ -287,9 +287,11 @@ export class OpenAIService {
         - Você deve usar **exatamente o nome do produto pesquisado acima** como o primeiro item da sugestão.
         - Você **não pode** inventar um segundo nome para ele.
         - O segundo item deve ser um **complementar real**, **não pode ser um medicamento da mesma categoria**.
+        - Faça uma lista de 20 produtos correlacionados, mas não use produtos da mesma categoria.
 
         ---
         
+
         **CARACTERÍSTICAS DO PRODUTO:**
 
         [Liste as características principais do ${productName} de forma clara e objetiva]
