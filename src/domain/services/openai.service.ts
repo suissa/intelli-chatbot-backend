@@ -702,8 +702,8 @@ Responda à próxima mensagem do cliente com base no histórico da conversa.
         const produto = products[0];
         const productsCorrelacionados = await this.searchProductAndCorrelations(produto?.nome || '');
     
-        const textoVenda = productsCorrelacionados.textoDeVenda;
-        console.log("VENDA textoVenda FINAL:", textoVenda);
+        const textoVenda = productsCorrelacionados.textoDeVenda.replace('**TEXTO DE VENDA:**', '').replace('*', '').trim();
+        console.log("VENDA texto Venda FINAL:", textoVenda);
     
         return {
           role: 'assistant',
@@ -798,18 +798,23 @@ Responda à próxima mensagem do cliente com base no histórico da conversa.
 
   ---
 
-  **TEXTO DE VENDA:**
-
-  Pensando especialmente em você criei essa oferta única:  
-  que tal levar o ${nomePrincipal} (R$ ${precoPrincipal.toFixed(2).replace('.', ',')}) junto com o ${nomeComplementar} (R$ ${precoComplementar.toFixed(2).replace('.', ',')})?
-
-  Eles se complementam perfeitamente e ajudam a acelerar seu bem-estar!  
-  💡 Essa combinação foi escolhida a dedo com carinho só pra você.  
+  Crie um texto de venda persuasivo e carismático para o cliente para vender um combo de 
+  ${nomePrincipal} e ${nomeComplementar} com 10% de desconto.
+  
+  deve iniciar com:
+  'Pensando especialmente em você criei essa oferta única:  
+  que tal levar o ${nomePrincipal} (R$ ${precoPrincipal.toFixed(2).replace('.', ',')}) junto com o ${nomeComplementar} (R$ ${precoComplementar.toFixed(2).replace('.', ',')})?'
+  
   [Explique qual o benefício da combinação entre eles]  
+  [adicione aqui o texto de venda]
+
+  adicione obrigatoriamente: 
+  💡 Essa combinação foi escolhida a dedo com carinho só pra você.
   💰 E o melhor: levando os dois agora, você ganha **10% de desconto no total**.
 
-  Você gostaria de aproveitar essa promoção exclusiva e levar o ${nomePrincipal} + ${nomeComplementar}, totalizando R$ ${precoTotal.toFixed(2).replace('.', ',')}?  
-  *Essa condição é exclusiva para essa conversa.*
+  finalize a mnensagem com o seguinte texto:
+  'Você gostaria de aproveitar essa promoção exclusiva e levar o ${nomePrincipal} + ${nomeComplementar}, totalizando R$ ${precoTotal.toFixed(2).replace('.', ',')}?  
+  *Essa condição é exclusiva para essa conversa.*'
     `.trim();
 
     const response = await this.openai.chat.completions.create({
