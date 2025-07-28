@@ -294,6 +294,7 @@ export class PharmacyControllerImpl implements PharmacyController {
             // fs.unlinkSync(imagePath);
             const response = await this.openaiService.queryProduct(drugInfo || '', history);
             // console.log("response da image", response);
+            
             history.push({ role: 'assistant', content: response?.content || '', name: 'assistant' }); // ✅ adiciona input do usuário
             // console.log("history audio", history);
             const hasChavePix = response?.content?.toLowerCase().includes('chave pix');

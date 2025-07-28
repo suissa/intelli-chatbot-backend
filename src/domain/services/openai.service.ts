@@ -276,7 +276,14 @@ export class OpenAIService {
       model: "gpt-4o-mini-tts",
       voice: "nova",
       input: text,
-      instructions: "Use um tom de voz amigável e acessível, como se estivesse falando com um amigo.",
+      instructions: `Crie o áudio usando português brasileiro.
+      Use um tom de voz amigável e acessível, como se estivesse falando 
+      com um amigo.
+      Os valores monetários estão em R$ (reais).
+      Se tiver 1 letra sozinha, fale a letra pela sua fonética individual.
+      Se ler a letra G sozinha, fale grama. Exemplo 1g = 1 grama.
+      Se ler a letra M sozinha, fale miligrama. Exemplo 1mg = 1 miligrama.
+      Se ler CAPS, fale CAPSULAS`,
     });
     // console.log("createSpeech mp3", mp3);
     
@@ -713,8 +720,11 @@ Siga este fluxo de atendimento com atenção:
 
 
 7. **Se o cliente confirmar a compra (ex: "quero esse", "sim", "ok", "desejo", "quero", "quero comprar", "quero comprar esse", "quero comprar esse combo")**  
-   - Gere a resposta final com a chave PIX:  
-     “Perfeito! Para concluir sua compra, use a chave PIX: 123456.”
+  - Gere a resposta final com a chave PIX e o valor do item:  
+    “Perfeito! Para concluir sua compra, use a chave PIX: 123456.”  
+    - Inclua também o **valor exato do item mencionado na última mensagem que você mesmo enviou ao cliente**, incluindo o nome do produto.  
+    - Exemplo: “Perfeito! Para concluir sua compra de *Dipirona 1G 10CPR NATULAB* (R$ 22,29), use a chave PIX: 123456.”  
+    - Não invente um valor — use o valor exato da última sugestão que você enviou no atendimento.
 
 
 **REGRAS ESSENCIAIS**:
