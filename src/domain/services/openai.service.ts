@@ -981,10 +981,6 @@ Responda à próxima mensagem do cliente com base no histórico da conversa.
   
   [Explique qual o benefício da combinação entre eles em um texto curto e direto]  
 
-  adicione obrigatoriamente: 
-  💡  _Essa combinação foi escolhida a dedo com carinho só pra você._ \n
-  💰  _E o melhor: levando os dois agora, você ganha *10% de desconto no total*._
-
   finalize a mnensagem com o seguinte texto:
   '🤔 **Você gostaria de aproveitar essa promoção exclusiva e levar o ${nomePrincipal} + ${nomeComplementar}, totalizando R$ ${precoTotal.toFixed(2).replace('.', ',')}?**'  
   '\n\n⚠️ **Essa condição é exclusiva para essa conversa.**'
@@ -1002,7 +998,7 @@ Responda à próxima mensagem do cliente com base no histórico da conversa.
           content: prompt
         }
       ],
-      max_tokens: 600,
+      max_tokens: 200,
     });
 
     return response.choices[0]?.message?.content?.trim() || '⚠️ Não foi possível gerar o texto de venda.';
