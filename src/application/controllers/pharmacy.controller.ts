@@ -231,7 +231,7 @@ export class PharmacyControllerImpl implements PharmacyController {
         
         // console.log("request.body?.data.message", request.body?.data.message);
         if (request.body?.data?.key?.remoteJid?.includes("@g.us")) {
-          console.log("Skipping group message");
+          // console.log("Skipping group message");
           return;
         }
         const pushName = request.body?.data?.pushName;
@@ -455,10 +455,7 @@ export class PharmacyControllerImpl implements PharmacyController {
                 number: '5515991957645', // || request.body?.data?.key.remoteJid,
                 text: lastPromo || 'teste 123 ',
               });
-              // const response = await this.openaiService.queryProduct(lastPromo || '', history);
-              // console.log("response da lastPromo", response);
-              // history.push({ role: 'assistant', content: response?.content || '', name: 'assistant' }); // ✅ adiciona input do usuário
-              // this.chatHistoryMap[number] = history;
+              
             }
 
             const response = await this.openaiService.queryProduct(messageText || '', history);
