@@ -43,13 +43,15 @@ export interface PharmacyController {
 export class PharmacyControllerImpl implements PharmacyController {
   private chatHistoryMap: Record<string, ChatCompletionMessageParam[]> = {}; // ✅ aqui
   private lastBase64Audio: string = '';
-  private pixValue = 20.00;
+  private pixValue: number = 0;
   constructor(
     @inject(TYPES.PharmacyRepository) private pharmacyRepository: PharmacyRepository,
     @inject(TYPES.OpenAIService) private openaiService: OpenAIService,
     @inject(TYPES.DrugImageProcessorService) private drugImageProcessorService: DrugImageProcessorService,
     @inject(TYPES.TextProcessorService) private textProcessorService: TextProcessorService
-  ) {}
+  ) {
+    this.pixValue = 20.00;
+  }
 
   // async processPixImage(imagePath: string): Promise<void> {
   //   const drugInfo = await this.drugImageProcessorService.processPixImage(imagePath);
