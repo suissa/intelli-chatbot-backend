@@ -8,14 +8,14 @@ import { Container } from './shared/container';
 import { TYPES } from './shared/types';
 import { swaggerConfig, swaggerUiConfig } from './shared/swagger.config';
 import { initializeDatabase, closeDatabase } from './infrastructure/database/typeorm.config';
-import { DrugsController } from './application/controllers/drugs.controller';
-import { AttendantController } from './application/controllers/attendant.controller';
+// import { DrugsController } from './application/controllers/drugs.controller';
+// import { AttendantController } from './application/controllers/attendant.controller';
 import { PharmacyController } from './application/controllers/pharmacy.controller';
-import { AttendanceController } from './application/controllers/attendance.controller';
-import { MessageQueueController } from './application/controllers/message-queue.controller';
+// import { AttendanceController } from './application/controllers/attendance.controller';
+// import { MessageQueueController } from './application/controllers/message-queue.controller';
 import { RabbitMQConnection } from './infrastructure/messaging/rabbitmq-connection';
 import { MessageQueueManager } from './infrastructure/messaging/message-queue-manager';
-import { MessageProcessorService } from './domain/services/message-processor.service';
+// import { MessageProcessorService } from './domain/services/message-processor.service';
 
 const fastify = Fastify({
   logger: false
@@ -23,139 +23,139 @@ const fastify = Fastify({
 
 // Registrar rotas do Drugs
 async function registerDrugsRoutes() {
-  const drugsController = Container.get<DrugsController>(TYPES.DrugsController);
+  // const drugsController = Container.get<DrugsController>(TYPES.DrugsController);
 
-  // GET /api/drugs - Listar todos os remédios
-  fastify.get('/api/drugs', {
-    schema: {
-      tags: ['Drugs'],
-      summary: 'Listar todos os medicamentos',
-      description: 'Retorna uma lista de todos os medicamentos cadastrados',
-      response: {
-        200: {
-          description: 'Lista de medicamentos',
-          type: 'object',
-          properties: {
-            success: { type: 'boolean' },
-            data: { type: 'array' },
-            count: { type: 'number' },
-            message: { type: 'string' }
-          }
-        },
-        500: {
-          type: 'object',
-          properties: {
-            success: { type: 'boolean' },
-            error: { type: 'string' },
-            message: { type: 'string' }
-          }
-        }
-      }
-    }
-  }, async (request, reply) => {
-    await drugsController.getAllDrugs(request, reply);
-  });
+  // // GET /api/drugs - Listar todos os remédios
+  // fastify.get('/api/drugs', {
+  //   schema: {
+  //     tags: ['Drugs'],
+  //     summary: 'Listar todos os medicamentos',
+  //     description: 'Retorna uma lista de todos os medicamentos cadastrados',
+  //     response: {
+  //       200: {
+  //         description: 'Lista de medicamentos',
+  //         type: 'object',
+  //         properties: {
+  //           success: { type: 'boolean' },
+  //           data: { type: 'array' },
+  //           count: { type: 'number' },
+  //           message: { type: 'string' }
+  //         }
+  //       },
+  //       500: {
+  //         type: 'object',
+  //         properties: {
+  //           success: { type: 'boolean' },
+  //           error: { type: 'string' },
+  //           message: { type: 'string' }
+  //         }
+  //       }
+  //     }
+  //   }
+  // }, async (request, reply) => {
+  //   await drugsController.getAllDrugs(request, reply);
+  // });
 
-  // GET /api/drugs/:id - Buscar remédio por ID
-  fastify.get('/api/drugs/:id', async (request, reply) => {
-    await drugsController.getDrugById(request as any, reply);
-  });
+  // // GET /api/drugs/:id - Buscar remédio por ID
+  // fastify.get('/api/drugs/:id', async (request, reply) => {
+  //   await drugsController.getDrugById(request as any, reply);
+  // });
 
-  // GET /api/drugs/search?q=termo - Buscar remédios
-  fastify.get('/api/drugs/search', async (request, reply) => {
-    await drugsController.searchDrugs(request as any, reply);
-  });
+  // // GET /api/drugs/search?q=termo - Buscar remédios
+  // fastify.get('/api/drugs/search', async (request, reply) => {
+  //   await drugsController.searchDrugs(request as any, reply);
+  // });
 
-  // GET /api/drugs/active - Remédios ativos
-  fastify.get('/api/drugs/active', async (request, reply) => {
-    await drugsController.getActiveDrugs(request, reply);
-  });
+  // // GET /api/drugs/active - Remédios ativos
+  // fastify.get('/api/drugs/active', async (request, reply) => {
+  //   await drugsController.getActiveDrugs(request, reply);
+  // });
 }
 
 // Registrar rotas do Attendant
 async function registerAttendantRoutes() {
-  const attendantController = Container.get<AttendantController>(TYPES.AttendantController);
+  // const attendantController = Container.get<AttendantController>(TYPES.AttendantController);
 
-  // GET /api/attendants - Listar todos os atendentes
-  fastify.get('/api/attendants', {
-    schema: {
-      tags: ['Attendants'],
-      summary: 'Listar todos os atendentes',
-      description: 'Retorna uma lista de todos os atendentes cadastrados',
-      response: {
-        200: {
-          description: 'Lista de atendentes',
-          type: 'object',
-          properties: {
-            success: { type: 'boolean' },
-            data: { type: 'array' },
-            count: { type: 'number' },
-            message: { type: 'string' }
-          }
-        },
-        500: {
-          type: 'object',
-          properties: {
-            success: { type: 'boolean' },
-            error: { type: 'string' },
-            message: { type: 'string' }
-          }
-        }
-      }
-    }
-  }, async (request, reply) => {
-    await attendantController.getAllAttendants(request, reply);
-  });
+  // // GET /api/attendants - Listar todos os atendentes
+  // fastify.get('/api/attendants', {
+  //   schema: {
+  //     tags: ['Attendants'],
+  //     summary: 'Listar todos os atendentes',
+  //     description: 'Retorna uma lista de todos os atendentes cadastrados',
+  //     response: {
+  //       200: {
+  //         description: 'Lista de atendentes',
+  //         type: 'object',
+  //         properties: {
+  //           success: { type: 'boolean' },
+  //           data: { type: 'array' },
+  //           count: { type: 'number' },
+  //           message: { type: 'string' }
+  //         }
+  //       },
+  //       500: {
+  //         type: 'object',
+  //         properties: {
+  //           success: { type: 'boolean' },
+  //           error: { type: 'string' },
+  //           message: { type: 'string' }
+  //         }
+  //       }
+  //     }
+  //   }
+  // }, async (request, reply) => {
+  //   await attendantController.getAllAttendants(request, reply);
+  // });
 
-  // GET /api/attendants/:id - Buscar atendente por ID
-  fastify.get('/api/attendants/:id', async (request, reply) => {
-    await attendantController.getAttendantById(request as any, reply);
-  });
+  // // GET /api/attendants/:id - Buscar atendente por ID
+  // fastify.get('/api/attendants/:id', async (request, reply) => {
+  //   await attendantController.getAttendantById(request as any, reply);
+  // });
 
-  // GET /api/attendants/pharmacy/:pharmacyId - Atendentes por farmácia
-  fastify.get('/api/attendants/pharmacy/:pharmacyId', async (request, reply) => {
-    await attendantController.getAttendantsByPharmacy(request as any, reply);
-  });
+  // // GET /api/attendants/pharmacy/:pharmacyId - Atendentes por farmácia
+  // fastify.get('/api/attendants/pharmacy/:pharmacyId', async (request, reply) => {
+  //   await attendantController.getAttendantsByPharmacy(request as any, reply);
+  // });
 
-  // GET /api/attendants/active - Atendentes ativos
-  fastify.get('/api/attendants/active', async (request, reply) => {
-    await attendantController.getActiveAttendants(request, reply);
-  });
+  // // GET /api/attendants/active - Atendentes ativos
+  // fastify.get('/api/attendants/active', async (request, reply) => {
+  //   await attendantController.getActiveAttendants(request, reply);
+  // });
 
-  // GET /api/attendants/voice/:voice - Atendentes por voz
-  fastify.get('/api/attendants/voice/:voice', async (request, reply) => {
-    await attendantController.getAttendantsByVoice(request as any, reply);
-  });
+  // // GET /api/attendants/voice/:voice - Atendentes por voz
+  // fastify.get('/api/attendants/voice/:voice', async (request, reply) => {
+  //   await attendantController.getAttendantsByVoice(request as any, reply);
+  // });
 
-  // GET /api/attendants/profile/:profile - Atendentes por perfil
-  fastify.get('/api/attendants/profile/:profile', async (request, reply) => {
-    await attendantController.getAttendantsByProfile(request as any, reply);
-  });
+  // // GET /api/attendants/profile/:profile - Atendentes por perfil
+  // fastify.get('/api/attendants/profile/:profile', async (request, reply) => {
+  //   await attendantController.getAttendantsByProfile(request as any, reply);
+  // });
 
-  // POST /api/attendants - Criar atendente
-  fastify.post('/api/attendants', async (request, reply) => {
-    await attendantController.createAttendant(request, reply);
-  });
+  // // POST /api/attendants - Criar atendente
+  // fastify.post('/api/attendants', async (request, reply) => {
+  //   await attendantController.createAttendant(request, reply);
+  // });
 
-  // PUT /api/attendants/:id - Atualizar atendente
-  fastify.put('/api/attendants/:id', async (request, reply) => {
-    await attendantController.updateAttendant(request as any, reply);
-  });
+  // // PUT /api/attendants/:id - Atualizar atendente
+  // fastify.put('/api/attendants/:id', async (request, reply) => {
+  //   await attendantController.updateAttendant(request as any, reply);
+  // });
 
-  // DELETE /api/attendants/:id - Deletar atendente
-  fastify.delete('/api/attendants/:id', async (request, reply) => {
-    await attendantController.deleteAttendant(request as any, reply);
-  });
+  // // DELETE /api/attendants/:id - Deletar atendente
+  // fastify.delete('/api/attendants/:id', async (request, reply) => {
+  //   await attendantController.deleteAttendant(request as any, reply);
+  // });
 
-  // PATCH /api/attendants/:id/activate - Ativar atendente
-  fastify.patch('/api/attendants/:id/activate', async (request, reply) => {
-    await attendantController.activateAttendant(request as any, reply);
-  });
+  // // PATCH /api/attendants/:id/activate - Ativar atendente
+  // fastify.patch('/api/attendants/:id/activate', async (request, reply) => {
+  //   await attendantController.activateAttendant(request as any, reply);
+  // });
 
-  // PATCH /api/attendants/:id/deactivate - Desativar atendente
-  fastify.patch('/api/attendants/:id/deactivate', async (request, reply) => {
-    await attendantController.deactivateAttendant(request as any, reply);
-  });
+  // // PATCH /api/attendants/:id/deactivate - Desativar atendente
+  // fastify.patch('/api/attendants/:id/deactivate', async (request, reply) => {
+  //   await attendantController.deactivateAttendant(request as any, reply);
+  // });
 }
 
 // Registrar rotas do Pharmacy
@@ -259,339 +259,339 @@ async function registerPharmacyRoutes() {
 
 // Registrar rotas do Attendance
 async function registerAttendanceRoutes() {
-  const attendanceController = Container.get<AttendanceController>(TYPES.AttendanceController);
+  // const attendanceController = Container.get<AttendanceController>(TYPES.AttendanceController);
 
-  // GET /api/attendances - Listar todos os atendimentos
-  fastify.get('/api/attendances', {
-    schema: {
-      tags: ['Attendances'],
-      summary: 'Listar todos os atendimentos',
-      description: 'Retorna uma lista de todos os atendimentos cadastrados',
-      response: {
-        200: {
-          description: 'Lista de atendimentos',
-          type: 'object',
-          properties: {
-            success: { type: 'boolean' },
-            data: { type: 'array' },
-            count: { type: 'number' },
-            message: { type: 'string' }
-          }
-        },
-        500: {
-          type: 'object',
-          properties: {
-            success: { type: 'boolean' },
-            error: { type: 'string' },
-            message: { type: 'string' }
-          }
-        }
-      }
-    }
-  }, async (request, reply) => {
-    await attendanceController.getAllAttendances(request, reply);
-  });
+  // // GET /api/attendances - Listar todos os atendimentos
+  // fastify.get('/api/attendances', {
+  //   schema: {
+  //     tags: ['Attendances'],
+  //     summary: 'Listar todos os atendimentos',
+  //     description: 'Retorna uma lista de todos os atendimentos cadastrados',
+  //     response: {
+  //       200: {
+  //         description: 'Lista de atendimentos',
+  //         type: 'object',
+  //         properties: {
+  //           success: { type: 'boolean' },
+  //           data: { type: 'array' },
+  //           count: { type: 'number' },
+  //           message: { type: 'string' }
+  //         }
+  //       },
+  //       500: {
+  //         type: 'object',
+  //         properties: {
+  //           success: { type: 'boolean' },
+  //           error: { type: 'string' },
+  //           message: { type: 'string' }
+  //         }
+  //       }
+  //     }
+  //   }
+  // }, async (request, reply) => {
+  //   await attendanceController.getAllAttendances(request, reply);
+  // });
 
-  // GET /api/attendances/:id - Buscar atendimento por ID
-  fastify.get('/api/attendances/:id', async (request, reply) => {
-    await attendanceController.getAttendanceById(request as any, reply);
-  });
+  // // GET /api/attendances/:id - Buscar atendimento por ID
+  // fastify.get('/api/attendances/:id', async (request, reply) => {
+  //   await attendanceController.getAttendanceById(request as any, reply);
+  // });
 
-  // GET /api/attendances/pharmacy/:pharmacyId - Atendimentos por farmácia
-  fastify.get('/api/attendances/pharmacy/:pharmacyId', async (request, reply) => {
-    await attendanceController.getAttendancesByPharmacy(request as any, reply);
-  });
+  // // GET /api/attendances/pharmacy/:pharmacyId - Atendimentos por farmácia
+  // fastify.get('/api/attendances/pharmacy/:pharmacyId', async (request, reply) => {
+  //   await attendanceController.getAttendancesByPharmacy(request as any, reply);
+  // });
 
-  // GET /api/attendances/attendant/:attendantId - Atendimentos por atendente
-  fastify.get('/api/attendances/attendant/:attendantId', async (request, reply) => {
-    await attendanceController.getAttendancesByAttendant(request as any, reply);
-  });
+  // // GET /api/attendances/attendant/:attendantId - Atendimentos por atendente
+  // fastify.get('/api/attendances/attendant/:attendantId', async (request, reply) => {
+  //   await attendanceController.getAttendancesByAttendant(request as any, reply);
+  // });
 
-  // GET /api/attendances/status/:status - Atendimentos por status
-  fastify.get('/api/attendances/status/:status', async (request, reply) => {
-    await attendanceController.getAttendancesByStatus(request as any, reply);
-  });
+  // // GET /api/attendances/status/:status - Atendimentos por status
+  // fastify.get('/api/attendances/status/:status', async (request, reply) => {
+  //   await attendanceController.getAttendancesByStatus(request as any, reply);
+  // });
 
-  // GET /api/attendances/type/:type - Atendimentos por tipo
-  fastify.get('/api/attendances/type/:type', async (request, reply) => {
-    await attendanceController.getAttendancesByType(request as any, reply);
-  });
+  // // GET /api/attendances/type/:type - Atendimentos por tipo
+  // fastify.get('/api/attendances/type/:type', async (request, reply) => {
+  //   await attendanceController.getAttendancesByType(request as any, reply);
+  // });
 
-  // GET /api/attendances/pending - Atendimentos pendentes
-  fastify.get('/api/attendances/pending', async (request, reply) => {
-    await attendanceController.getPendingAttendances(request, reply);
-  });
+  // // GET /api/attendances/pending - Atendimentos pendentes
+  // fastify.get('/api/attendances/pending', async (request, reply) => {
+  //   await attendanceController.getPendingAttendances(request, reply);
+  // });
 
-  // GET /api/attendances/active - Atendimentos ativos
-  fastify.get('/api/attendances/active', async (request, reply) => {
-    await attendanceController.getActiveAttendances(request, reply);
-  });
+  // // GET /api/attendances/active - Atendimentos ativos
+  // fastify.get('/api/attendances/active', async (request, reply) => {
+  //   await attendanceController.getActiveAttendances(request, reply);
+  // });
 
-  // GET /api/attendances/completed - Atendimentos finalizados
-  fastify.get('/api/attendances/completed', async (request, reply) => {
-    await attendanceController.getCompletedAttendances(request, reply);
-  });
+  // // GET /api/attendances/completed - Atendimentos finalizados
+  // fastify.get('/api/attendances/completed', async (request, reply) => {
+  //   await attendanceController.getCompletedAttendances(request, reply);
+  // });
 
-  // GET /api/attendances/date-range?startDate=2024-01-01&endDate=2024-12-31 - Atendimentos por período
-  fastify.get('/api/attendances/date-range', async (request, reply) => {
-    await attendanceController.getAttendancesByDateRange(request as any, reply);
-  });
+  // // GET /api/attendances/date-range?startDate=2024-01-01&endDate=2024-12-31 - Atendimentos por período
+  // fastify.get('/api/attendances/date-range', async (request, reply) => {
+  //   await attendanceController.getAttendancesByDateRange(request as any, reply);
+  // });
 
-  // POST /api/attendances - Criar atendimento
-  fastify.post('/api/attendances', {
-    schema: {
-      tags: ['Attendances'],
-      summary: 'Criar novo atendimento com processamento de remédios',
-      description: 'Cria um novo atendimento e processa o texto para identificar remédios automaticamente',
-      body: {
-        type: 'object',
-        properties: {
-          nome: { type: 'string', description: 'Nome do cliente' },
-          telefone_cliente: { type: 'string', description: 'Telefone do cliente' },
-          telefone_farmacia: { type: 'string', description: 'Telefone da farmácia' },
-          data_hora: { type: 'string', format: 'date-time', description: 'Data e hora do atendimento' },
-          tipo: { type: 'string', enum: ['ia', 'humano'], description: 'Tipo de atendimento' },
-          pergunta: { type: 'string', description: 'Pergunta ou descrição do cliente (será processada para identificar remédios)' },
-          resposta: { type: 'string', description: 'Resposta do atendimento' },
-          farmacia_id: { type: 'string', format: 'uuid', description: 'ID da farmácia' },
-          atendente_id: { type: 'string', format: 'uuid', description: 'ID do atendente' }
-        },
-        required: ['nome', 'telefone_cliente', 'telefone_farmacia', 'data_hora', 'pergunta']
-      },
-      response: {
-        201: {
-          description: 'Atendimento criado com sucesso',
-          type: 'object',
-          properties: {
-            success: { type: 'boolean' },
-            data: {
-              type: 'object',
-              properties: {
-                attendance: { type: 'object' },
-                drugInfo: { type: 'object' },
-                presentation: { type: 'string' }
-              }
-            },
-            message: { type: 'string' }
-          }
-        },
-        500: {
-          description: 'Erro interno',
-          type: 'object',
-          properties: {
-            success: { type: 'boolean' },
-            error: { type: 'string' },
-            message: { type: 'string' }
-          }
-        }
-      }
-    }
-  }, async (request, reply) => {
-    await attendanceController.createAttendance(request, reply);
-  });
+  // // POST /api/attendances - Criar atendimento
+  // fastify.post('/api/attendances', {
+  //   schema: {
+  //     tags: ['Attendances'],
+  //     summary: 'Criar novo atendimento com processamento de remédios',
+  //     description: 'Cria um novo atendimento e processa o texto para identificar remédios automaticamente',
+  //     body: {
+  //       type: 'object',
+  //       properties: {
+  //         nome: { type: 'string', description: 'Nome do cliente' },
+  //         telefone_cliente: { type: 'string', description: 'Telefone do cliente' },
+  //         telefone_farmacia: { type: 'string', description: 'Telefone da farmácia' },
+  //         data_hora: { type: 'string', format: 'date-time', description: 'Data e hora do atendimento' },
+  //         tipo: { type: 'string', enum: ['ia', 'humano'], description: 'Tipo de atendimento' },
+  //         pergunta: { type: 'string', description: 'Pergunta ou descrição do cliente (será processada para identificar remédios)' },
+  //         resposta: { type: 'string', description: 'Resposta do atendimento' },
+  //         farmacia_id: { type: 'string', format: 'uuid', description: 'ID da farmácia' },
+  //         atendente_id: { type: 'string', format: 'uuid', description: 'ID do atendente' }
+  //       },
+  //       required: ['nome', 'telefone_cliente', 'telefone_farmacia', 'data_hora', 'pergunta']
+  //     },
+  //     response: {
+  //       201: {
+  //         description: 'Atendimento criado com sucesso',
+  //         type: 'object',
+  //         properties: {
+  //           success: { type: 'boolean' },
+  //           data: {
+  //             type: 'object',
+  //             properties: {
+  //               attendance: { type: 'object' },
+  //               drugInfo: { type: 'object' },
+  //               presentation: { type: 'string' }
+  //             }
+  //           },
+  //           message: { type: 'string' }
+  //         }
+  //       },
+  //       500: {
+  //         description: 'Erro interno',
+  //         type: 'object',
+  //         properties: {
+  //           success: { type: 'boolean' },
+  //           error: { type: 'string' },
+  //           message: { type: 'string' }
+  //         }
+  //       }
+  //     }
+  //   }
+  // }, async (request, reply) => {
+  //   await attendanceController.createAttendance(request, reply);
+  // });
 
-  // POST /api/attendances/process-drug-image - Processar imagem de remédio
-  fastify.post('/api/attendances/process-drug-image', {
-    schema: {
-      tags: ['Attendances'],
-      summary: 'Processar imagem de remédio com OCR e IA',
-      description: 'Recebe uma imagem de remédio, extrai texto com OCR, busca no banco e gera apresentação com OpenAI',
-      consumes: ['multipart/form-data'],
-      response: {
-        200: {
-          description: 'Remédio processado com sucesso',
-          type: 'object',
-          properties: {
-            success: { type: 'boolean' },
-            data: {
-              type: 'object',
-              properties: {
-                drugInfo: { type: 'object' },
-                presentation: { type: 'string' }
-              }
-            },
-            message: { type: 'string' }
-          }
-        },
-        400: {
-          description: 'Erro na requisição',
-          type: 'object',
-          properties: {
-            success: { type: 'boolean' },
-            error: { type: 'string' },
-            message: { type: 'string' }
-          }
-        },
-        404: {
-          description: 'Remédio não encontrado',
-          type: 'object',
-          properties: {
-            success: { type: 'boolean' },
-            error: { type: 'string' },
-            message: { type: 'string' }
-          }
-        },
-        500: {
-          description: 'Erro interno',
-          type: 'object',
-          properties: {
-            success: { type: 'boolean' },
-            error: { type: 'string' },
-            message: { type: 'string' }
-          }
-        }
-      }
-    }
-  }, async (request, reply) => {
-    await attendanceController.processDrugImage(request, reply);
-  });
+  // // POST /api/attendances/process-drug-image - Processar imagem de remédio
+  // fastify.post('/api/attendances/process-drug-image', {
+  //   schema: {
+  //     tags: ['Attendances'],
+  //     summary: 'Processar imagem de remédio com OCR e IA',
+  //     description: 'Recebe uma imagem de remédio, extrai texto com OCR, busca no banco e gera apresentação com OpenAI',
+  //     consumes: ['multipart/form-data'],
+  //     response: {
+  //       200: {
+  //         description: 'Remédio processado com sucesso',
+  //         type: 'object',
+  //         properties: {
+  //           success: { type: 'boolean' },
+  //           data: {
+  //             type: 'object',
+  //             properties: {
+  //               drugInfo: { type: 'object' },
+  //               presentation: { type: 'string' }
+  //             }
+  //           },
+  //           message: { type: 'string' }
+  //         }
+  //       },
+  //       400: {
+  //         description: 'Erro na requisição',
+  //         type: 'object',
+  //         properties: {
+  //           success: { type: 'boolean' },
+  //           error: { type: 'string' },
+  //           message: { type: 'string' }
+  //         }
+  //       },
+  //       404: {
+  //         description: 'Remédio não encontrado',
+  //         type: 'object',
+  //         properties: {
+  //           success: { type: 'boolean' },
+  //           error: { type: 'string' },
+  //           message: { type: 'string' }
+  //         }
+  //       },
+  //       500: {
+  //         description: 'Erro interno',
+  //         type: 'object',
+  //         properties: {
+  //           success: { type: 'boolean' },
+  //           error: { type: 'string' },
+  //           message: { type: 'string' }
+  //         }
+  //       }
+  //     }
+  //   }
+  // }, async (request, reply) => {
+  //   await attendanceController.processDrugImage(request, reply);
+  // });
 
-  // GET /api/attendances/search-product - Pesquisar produto e correlações
-  fastify.get<{
-    Querystring: { productName: string }
-  }>('/api/attendances/search-product', {
-    schema: {
-      tags: ['Attendances'],
-      summary: 'Pesquisar produto e suas correlações',
-      description: 'Recebe o nome de um produto, busca suas características e produtos correlacionados',
-      querystring: {
-        type: 'object',
-        properties: {
-          productName: { type: 'string', description: 'Nome do produto a ser pesquisado' }
-        },
-        required: ['productName']
-      },
-      response: {
-        200: {
-          description: 'Produto e correlações encontrados com sucesso',
-          type: 'object',
-          properties: {
-            success: { type: 'boolean' },
-            data: {
-              type: 'object',
-              properties: {
-                product: {
-                  type: 'object',
-                  properties: {
-                    name: { type: 'string' },
-                    caracteristicasDoProduto: { type: 'string' },
-                    produtosCorrelacionados: { type: 'string' },
-                    textoDeVenda: { type: 'string' }
-                  },
-                  required: ['name', 'textoDeVenda']
-                },
-                analysis: { type: 'string' },
-                availableProducts: { type: 'number' }
-              },
-              required: ['product']
-            },
-            message: { type: 'string' }
-          }
-        },
-        400: {
-          description: 'Erro na requisição',
-          type: 'object',
-          properties: {
-            success: { type: 'boolean' },
-            error: { type: 'string' },
-            message: { type: 'string' }
-          }
-        },
-        404: {
-          description: 'Produto não encontrado',
-          type: 'object',
-          properties: {
-            success: { type: 'boolean' },
-            error: { type: 'string' },
-            message: { type: 'string' }
-          }
-        },
-        500: {
-          description: 'Erro interno',
-          type: 'object',
-          properties: {
-            success: { type: 'boolean' },
-            error: { type: 'string' },
-            message: { type: 'string' }
-          }
-        }
-      }
-    }
-  }, async (request, reply) => {
-    await attendanceController.searchProductAndCorrelations(request, reply);
-  });
+  // // GET /api/attendances/search-product - Pesquisar produto e correlações
+  // fastify.get<{
+  //   Querystring: { productName: string }
+  // }>('/api/attendances/search-product', {
+  //   schema: {
+  //     tags: ['Attendances'],
+  //     summary: 'Pesquisar produto e suas correlações',
+  //     description: 'Recebe o nome de um produto, busca suas características e produtos correlacionados',
+  //     querystring: {
+  //       type: 'object',
+  //       properties: {
+  //         productName: { type: 'string', description: 'Nome do produto a ser pesquisado' }
+  //       },
+  //       required: ['productName']
+  //     },
+  //     response: {
+  //       200: {
+  //         description: 'Produto e correlações encontrados com sucesso',
+  //         type: 'object',
+  //         properties: {
+  //           success: { type: 'boolean' },
+  //           data: {
+  //             type: 'object',
+  //             properties: {
+  //               product: {
+  //                 type: 'object',
+  //                 properties: {
+  //                   name: { type: 'string' },
+  //                   caracteristicasDoProduto: { type: 'string' },
+  //                   produtosCorrelacionados: { type: 'string' },
+  //                   textoDeVenda: { type: 'string' }
+  //                 },
+  //                 required: ['name', 'textoDeVenda']
+  //               },
+  //               analysis: { type: 'string' },
+  //               availableProducts: { type: 'number' }
+  //             },
+  //             required: ['product']
+  //           },
+  //           message: { type: 'string' }
+  //         }
+  //       },
+  //       400: {
+  //         description: 'Erro na requisição',
+  //         type: 'object',
+  //         properties: {
+  //           success: { type: 'boolean' },
+  //           error: { type: 'string' },
+  //           message: { type: 'string' }
+  //         }
+  //       },
+  //       404: {
+  //         description: 'Produto não encontrado',
+  //         type: 'object',
+  //         properties: {
+  //           success: { type: 'boolean' },
+  //           error: { type: 'string' },
+  //           message: { type: 'string' }
+  //         }
+  //       },
+  //       500: {
+  //         description: 'Erro interno',
+  //         type: 'object',
+  //         properties: {
+  //           success: { type: 'boolean' },
+  //           error: { type: 'string' },
+  //           message: { type: 'string' }
+  //         }
+  //       }
+  //     }
+  //   }
+  // }, async (request, reply) => {
+  //   await attendanceController.searchProductAndCorrelations(request, reply);
+  // });
   
-  // PUT /api/attendances/:id - Atualizar atendimento
-  fastify.put('/api/attendances/:id', async (request, reply) => {
-    await attendanceController.updateAttendance(request as any, reply);
-  });
+  // // PUT /api/attendances/:id - Atualizar atendimento
+  // fastify.put('/api/attendances/:id', async (request, reply) => {
+  //   await attendanceController.updateAttendance(request as any, reply);
+  // });
 
-  // DELETE /api/attendances/:id - Deletar atendimento
-  fastify.delete('/api/attendances/:id', async (request, reply) => {
-    await attendanceController.deleteAttendance(request as any, reply);
-  });
+  // // DELETE /api/attendances/:id - Deletar atendimento
+  // fastify.delete('/api/attendances/:id', async (request, reply) => {
+  //   await attendanceController.deleteAttendance(request as any, reply);
+  // });
 
-  // PATCH /api/attendances/:id/start - Iniciar atendimento
-  fastify.patch('/api/attendances/:id/start', async (request, reply) => {
-    await attendanceController.startAttendance(request as any, reply);
-  });
+  // // PATCH /api/attendances/:id/start - Iniciar atendimento
+  // fastify.patch('/api/attendances/:id/start', async (request, reply) => {
+  //   await attendanceController.startAttendance(request as any, reply);
+  // });
 
-  // PATCH /api/attendances/:id/complete - Finalizar atendimento
-  fastify.patch('/api/attendances/:id/complete', async (request, reply) => {
-    await attendanceController.completeAttendance(request as any, reply);
-  });
+  // // PATCH /api/attendances/:id/complete - Finalizar atendimento
+  // fastify.patch('/api/attendances/:id/complete', async (request, reply) => {
+  //   await attendanceController.completeAttendance(request as any, reply);
+  // });
 
-  // PATCH /api/attendances/:id/cancel - Cancelar atendimento
-  fastify.patch('/api/attendances/:id/cancel', async (request, reply) => {
-    await attendanceController.cancelAttendance(request as any, reply);
-  });
+  // // PATCH /api/attendances/:id/cancel - Cancelar atendimento
+  // fastify.patch('/api/attendances/:id/cancel', async (request, reply) => {
+  //   await attendanceController.cancelAttendance(request as any, reply);
+  // });
 
-  // POST /api/attendances/query - Rota principal de conversa com o cliente
-  fastify.post('/api/attendances/query', {
-    schema: {
-      tags: ['Attendances'],
-      summary: 'Rota principal de conversa com o cliente',
-      description: 'Recebe uma mensagem do cliente e processa usando OpenAI para gerar resposta contextualizada',
-      body: {
-        type: 'object',
-        properties: {
-          query: { type: 'string', description: 'Mensagem/query do cliente' }
-        },
-        required: ['query']
-      },
-      response: {
-        200: {
-          description: 'Query processada com sucesso',
-          type: 'object',
-          properties: {
-            success: { type: 'boolean' },
-            data: { type: 'object' },
-            message: { type: 'string' }
-          }
-        },
-        400: {
-          description: 'Erro na requisição',
-          type: 'object',
-          properties: {
-            success: { type: 'boolean' },
-            error: { type: 'string' },
-            message: { type: 'string' }
-          }
-        },
-        500: {
-          description: 'Erro interno',
-          type: 'object',
-          properties: {
-            success: { type: 'boolean' },
-            error: { type: 'string' },
-            message: { type: 'string' }
-          }
-        }
-      }
-    }
-  }, async (request, reply) => {
-    await attendanceController.query(request as any, reply);
-  });
+  // // POST /api/attendances/query - Rota principal de conversa com o cliente
+  // fastify.post('/api/attendances/query', {
+  //   schema: {
+  //     tags: ['Attendances'],
+  //     summary: 'Rota principal de conversa com o cliente',
+  //     description: 'Recebe uma mensagem do cliente e processa usando OpenAI para gerar resposta contextualizada',
+  //     body: {
+  //       type: 'object',
+  //       properties: {
+  //         query: { type: 'string', description: 'Mensagem/query do cliente' }
+  //       },
+  //       required: ['query']
+  //     },
+  //     response: {
+  //       200: {
+  //         description: 'Query processada com sucesso',
+  //         type: 'object',
+  //         properties: {
+  //           success: { type: 'boolean' },
+  //           data: { type: 'object' },
+  //           message: { type: 'string' }
+  //         }
+  //       },
+  //       400: {
+  //         description: 'Erro na requisição',
+  //         type: 'object',
+  //         properties: {
+  //           success: { type: 'boolean' },
+  //           error: { type: 'string' },
+  //           message: { type: 'string' }
+  //         }
+  //       },
+  //       500: {
+  //         description: 'Erro interno',
+  //         type: 'object',
+  //         properties: {
+  //           success: { type: 'boolean' },
+  //           error: { type: 'string' },
+  //           message: { type: 'string' }
+  //         }
+  //       }
+  //     }
+  //   }
+  // }, async (request, reply) => {
+  //   await attendanceController.query(request as any, reply);
+  // });
 }
 
 // Rota de health check
@@ -693,123 +693,123 @@ fastify.get('/', async (request, reply) => {
 
 // Registrar rotas do Message Queue
 async function registerMessageQueueRoutes() {
-  const messageQueueController = Container.get<MessageQueueController>(TYPES.MessageQueueController);
+  // const messageQueueController = Container.get<MessageQueueController>(TYPES.MessageQueueController);
 
   // GET /api/message-queue/status - Status do sistema
-  fastify.get('/api/message-queue/status', {
-    schema: {
-      tags: ['Message Queue'],
-      summary: 'Status do sistema de Message Queue',
-      description: 'Retorna o status atual do sistema de Message Queue',
-      response: {
-        200: {
-          description: 'Status do sistema',
-          type: 'object',
-          properties: {
-            success: { type: 'boolean' },
-            message: { type: 'string' },
-            timestamp: { type: 'string' },
-            queues: { type: 'object' }
-          }
-        }
-      }
-    }
-  }, async (request, reply) => {
-    await messageQueueController.getStatus(request, reply);
-  });
+  // fastify.get('/api/message-queue/status', {
+  //   schema: {
+  //     tags: ['Message Queue'],
+  //     summary: 'Status do sistema de Message Queue',
+  //     description: 'Retorna o status atual do sistema de Message Queue',
+  //     response: {
+  //       200: {
+  //         description: 'Status do sistema',
+  //         type: 'object',
+  //         properties: {
+  //           success: { type: 'boolean' },
+  //           message: { type: 'string' },
+  //           timestamp: { type: 'string' },
+  //           queues: { type: 'object' }
+  //         }
+  //       }
+  //     }
+  //   }
+  // }, async (request, reply) => {
+  //   await messageQueueController.getStatus(request, reply);
+  // });
 
-  // POST /api/message-queue/text - Enviar mensagem de texto
-  fastify.post('/api/message-queue/text', {
-    schema: {
-      tags: ['Message Queue'],
-      summary: 'Enviar mensagem de texto',
-      description: 'Envia uma mensagem de texto para processamento',
-      body: {
-        type: 'object',
-        required: ['message', 'pharmacy_phone', 'consumer_phone'],
-        properties: {
-          message: { type: 'string' },
-          pharmacy_phone: { type: 'string' },
-          consumer_phone: { type: 'string' }
-        }
-      },
-      response: {
-        200: {
-          description: 'Mensagem enviada com sucesso',
-          type: 'object',
-          properties: {
-            success: { type: 'boolean' },
-            message: { type: 'string' },
-            data: { type: 'object' }
-          }
-        }
-      }
-    }
-  }, async (request, reply) => {
-    await messageQueueController.sendTextMessage(request, reply);
-  });
+  // // POST /api/message-queue/text - Enviar mensagem de texto
+  // fastify.post('/api/message-queue/text', {
+  //   schema: {
+  //     tags: ['Message Queue'],
+  //     summary: 'Enviar mensagem de texto',
+  //     description: 'Envia uma mensagem de texto para processamento',
+  //     body: {
+  //       type: 'object',
+  //       required: ['message', 'pharmacy_phone', 'consumer_phone'],
+  //       properties: {
+  //         message: { type: 'string' },
+  //         pharmacy_phone: { type: 'string' },
+  //         consumer_phone: { type: 'string' }
+  //       }
+  //     },
+  //     response: {
+  //       200: {
+  //         description: 'Mensagem enviada com sucesso',
+  //         type: 'object',
+  //         properties: {
+  //           success: { type: 'boolean' },
+  //           message: { type: 'string' },
+  //           data: { type: 'object' }
+  //         }
+  //       }
+  //     }
+  //   }
+  // }, async (request, reply) => {
+  //   await messageQueueController.sendTextMessage(request, reply);
+  // });
 
-  // POST /api/message-queue/image - Enviar mensagem de imagem
-  fastify.post('/api/message-queue/image', {
-    schema: {
-      tags: ['Message Queue'],
-      summary: 'Enviar mensagem de imagem',
-      description: 'Envia uma mensagem de imagem para processamento',
-      body: {
-        type: 'object',
-        required: ['message', 'pharmacy_phone', 'consumer_phone'],
-        properties: {
-          message: { type: 'string' },
-          pharmacy_phone: { type: 'string' },
-          consumer_phone: { type: 'string' }
-        }
-      },
-      response: {
-        200: {
-          description: 'Mensagem enviada com sucesso',
-          type: 'object',
-          properties: {
-            success: { type: 'boolean' },
-            message: { type: 'string' },
-            data: { type: 'object' }
-          }
-        }
-      }
-    }
-  }, async (request, reply) => {
-    await messageQueueController.sendImageMessage(request, reply);
-  });
+  // // POST /api/message-queue/image - Enviar mensagem de imagem
+  // fastify.post('/api/message-queue/image', {
+  //   schema: {
+  //     tags: ['Message Queue'],
+  //     summary: 'Enviar mensagem de imagem',
+  //     description: 'Envia uma mensagem de imagem para processamento',
+  //     body: {
+  //       type: 'object',
+  //       required: ['message', 'pharmacy_phone', 'consumer_phone'],
+  //       properties: {
+  //         message: { type: 'string' },
+  //         pharmacy_phone: { type: 'string' },
+  //         consumer_phone: { type: 'string' }
+  //       }
+  //     },
+  //     response: {
+  //       200: {
+  //         description: 'Mensagem enviada com sucesso',
+  //         type: 'object',
+  //         properties: {
+  //           success: { type: 'boolean' },
+  //           message: { type: 'string' },
+  //           data: { type: 'object' }
+  //         }
+  //       }
+  //     }
+  //   }
+  // }, async (request, reply) => {
+  //   await messageQueueController.sendImageMessage(request, reply);
+  // });
 
-  // POST /api/message-queue/audio - Enviar mensagem de áudio
-  fastify.post('/api/message-queue/audio', {
-    schema: {
-      tags: ['Message Queue'],
-      summary: 'Enviar mensagem de áudio',
-      description: 'Envia uma mensagem de áudio para processamento',
-      body: {
-        type: 'object',
-        required: ['message', 'pharmacy_phone', 'consumer_phone'],
-        properties: {
-          message: { type: 'string' },
-          pharmacy_phone: { type: 'string' },
-          consumer_phone: { type: 'string' }
-        }
-      },
-      response: {
-        200: {
-          description: 'Mensagem enviada com sucesso',
-          type: 'object',
-          properties: {
-            success: { type: 'boolean' },
-            message: { type: 'string' },
-            data: { type: 'object' }
-          }
-        }
-      }
-    }
-  }, async (request, reply) => {
-    await messageQueueController.sendAudioMessage(request, reply);
-  });
+  // // POST /api/message-queue/audio - Enviar mensagem de áudio
+  // fastify.post('/api/message-queue/audio', {
+  //   schema: {
+  //     tags: ['Message Queue'],
+  //     summary: 'Enviar mensagem de áudio',
+  //     description: 'Envia uma mensagem de áudio para processamento',
+  //     body: {
+  //       type: 'object',
+  //       required: ['message', 'pharmacy_phone', 'consumer_phone'],
+  //       properties: {
+  //         message: { type: 'string' },
+  //         pharmacy_phone: { type: 'string' },
+  //         consumer_phone: { type: 'string' }
+  //       }
+  //     },
+  //     response: {
+  //       200: {
+  //         description: 'Mensagem enviada com sucesso',
+  //         type: 'object',
+  //         properties: {
+  //           success: { type: 'boolean' },
+  //           message: { type: 'string' },
+  //           data: { type: 'object' }
+  //         }
+  //       }
+  //     }
+  //   }
+  // }, async (request, reply) => {
+  //   await messageQueueController.sendAudioMessage(request, reply);
+  // });
 }
 
 // Inicializar servidor
@@ -857,11 +857,11 @@ async function start() {
     await fastify.register(swaggerUi, swaggerUiConfig);
     
     // Registrar rotas
-    await registerDrugsRoutes();
-    await registerAttendantRoutes();
+    // await registerDrugsRoutes();
+    // await registerAttendantRoutes();
     await registerPharmacyRoutes();
-    await registerAttendanceRoutes();
-    await registerMessageQueueRoutes();
+    // await registerAttendanceRoutes();
+    // await registerMessageQueueRoutes();
     
     // Iniciar servidor
     const port = process.env.PORT ? parseInt(process.env.PORT) : 3000;
