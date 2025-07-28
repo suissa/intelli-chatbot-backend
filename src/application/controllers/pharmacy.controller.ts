@@ -419,48 +419,48 @@ export class PharmacyControllerImpl implements PharmacyController {
 
             const lastPromo = this.findLastPromoAfterMatchingUserInput(this.normalizeHistory(history), messageText);
             console.log("lastPromo", lastPromo);
-            if (lastPromo) {
+            // if (lastPromo) {
 
 
             
-              const hasChavePix = lastPromo?.toLowerCase().includes('chave pix');
+            //   const hasChavePix = lastPromo?.toLowerCase().includes('chave pix');
               
-              console.log("hasChavePix text lastPromo", hasChavePix);
-              if (hasChavePix) {
-                const regexValorPix = /(?:R\$|reais)?\s?([\d,.]{2,})/gi;
-                console.log("regexValorPix", regexValorPix);
-                const match = lastPromo?.match(regexValorPix);
-                console.log("match", match);
-                if (match) {
-                  const val = (match[0].includes('R$') ? match[0] : match[1]);    
-                  this.pixValue = Number(val?.replace('R$', '').replace('reais', '').replace(',', '.'));
-                  console.log("this.pixValue", this.pixValue);
-                }
+            //   console.log("hasChavePix text lastPromo", hasChavePix);
+            //   if (hasChavePix) {
+            //     const regexValorPix = /(?:R\$|reais)?\s?([\d,.]{2,})/gi;
+            //     console.log("regexValorPix", regexValorPix);
+            //     const match = lastPromo?.match(regexValorPix);
+            //     console.log("match", match);
+            //     if (match) {
+            //       const val = (match[0].includes('R$') ? match[0] : match[1]);    
+            //       this.pixValue = Number(val?.replace('R$', '').replace('reais', '').replace(',', '.'));
+            //       console.log("this.pixValue", this.pixValue);
+            //     }
 
-                await client.chats.updatePresence({
-                  number: "5515991957645",
-                  presence: "composing",
-                  duration: 5000,
-                  delay: 5000,
-                });
-                await client.messages.sendText({
-                  number: '5515991957645', // || request.body?.data?.key.remoteJid,
-                  text: lastPromo || 'teste 123 ',
-                });
-                return;
-              }
-              await client.chats.updatePresence({
-                number: "5515991957645",
-                presence: "composing",
-                duration: 5000,
-                delay: 5000,
-              });
-              await client.messages.sendText({
-                number: '5515991957645', // || request.body?.data?.key.remoteJid,
-                text: lastPromo || 'teste 123 ',
-              });
+            //     await client.chats.updatePresence({
+            //       number: "5515991957645",
+            //       presence: "composing",
+            //       duration: 5000,
+            //       delay: 5000,
+            //     });
+            //     await client.messages.sendText({
+            //       number: '5515991957645', // || request.body?.data?.key.remoteJid,
+            //       text: lastPromo || 'teste 123 ',
+            //     });
+            //     return;
+            //   }
+            //   await client.chats.updatePresence({
+            //     number: "5515991957645",
+            //     presence: "composing",
+            //     duration: 5000,
+            //     delay: 5000,
+            //   });
+            //   await client.messages.sendText({
+            //     number: '5515991957645', // || request.body?.data?.key.remoteJid,
+            //     text: lastPromo || 'teste 123 ',
+            //   });
               
-            }
+            // }
 
             const response = await this.openaiService.queryProduct(messageText || '', history);
             console.log("response da messageText", response);
