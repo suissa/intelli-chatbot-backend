@@ -125,6 +125,43 @@ export class PharmacyControllerImpl implements PharmacyController {
     }
   }
 
+  async saveOggFile(base64String: string): Promise<string> {
+    try {
+      const fs = await import('fs');
+      const path = await import('path');
+      const tempDir = path.join(process.cwd(), 'temp');
+      const filename = `${Date.now()}.ogg`;
+      // Criar diretório temp se não existir
+      if (!fs.existsSync(tempDir)) {
+        fs.mkdirSync(tempDir, { recursive: true });
+      }
+      
+      const tempFilePath = path.join(tempDir, filename);
+      
+
+      // Verifique se base64String é uma string válida
+      if (!base64String || typeof base64String !== 'string') {
+        throw new Error('base64String inválido ou indefinido');
+      }
+  
+      // Verifique se filePath é uma string válida
+      if (!tempFilePath || typeof tempFilePath !== 'string') {
+        throw new Error('filePath inválido ou indefinido');
+      }
+  
+  
+      // Converta a string base64 para Buffer
+      const buffer = Buffer.from(base64String, 'base64');
+  
+      // Salve o arquivo
+      await fs.writeFileSync(tempFilePath, buffer);
+      console.log('Arquivo .ogg salvo com sucesso em', tempFilePath);
+      return tempFilePath;
+    } catch (err) {
+      console.error('Erro ao salvar o arquivo:', err);
+      return '';
+    }
+  }
 
   async webhook(
     request: FastifyRequest<{ Body: Record<string, any> }>,
@@ -165,6 +202,7 @@ export class PharmacyControllerImpl implements PharmacyController {
             // console.log("image", image);
             // salve a img com Date.now convertemndo uma string base64 em jpg
             const imageBuffer = Buffer.from(image, "base64");
+            const caption = request.body?.data?.message?.imageMessage?.caption || '';
             const imagePath = path.join(process.cwd(), "temp", `${Date.now()}.jpg`);
             fs.writeFileSync(imagePath, imageBuffer);
             const drugInfo = await this.drugImageProcessorService.processDrugImage(imagePath);
@@ -178,7 +216,27 @@ export class PharmacyControllerImpl implements PharmacyController {
               text: response?.content || 'teste 123 ',
             });
           } 
-          
+          if (messageType === "audioMessage") {
+            console.log("request.body?.data?.message", request.body?.data?.message);
+            const image = request.body?.data?.message?.base64;
+            // console.log("request.body?.data?.message?.imageMessage", request.body?.data?.message?.imageMessage);
+            // console.log("image", image);
+            // salve a img com Date.now convertemndo uma string base64 em jpg
+            await this.saveOggFile(image);
+            const caption = request.body?.data?.message?.imageMessage?.caption || '';
+            const imagePath = path.join(process.cwd(), "temp", `${Date.now()}.jpg`);
+            // fs.writeFileSync(imagePath, imageBuffer);
+            const drugInfo = await this.drugImageProcessorService.processDrugImage(imagePath);
+            console.log("drugInfo", drugInfo);
+            // fs.unlinkSync(imagePath);
+            const response = await this.openaiService.queryProduct(drugInfo.drugInfo || '');
+            console.log("response da image", response);
+
+            await client.messages.sendText({
+              number: '5515991957645',
+              text: response?.content || 'teste 123 ',
+            });
+          } 
 
           if (messageType === "conversation") {
 
