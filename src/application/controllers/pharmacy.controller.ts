@@ -248,11 +248,13 @@ export class PharmacyControllerImpl implements PharmacyController {
             console.log("response da image", response);
             history.push({ role: 'assistant', content: response?.content || '', name: 'assistant' }); // ✅ adiciona input do usuário
             console.log("history audio", history);
-            
+            const speech = await this.openaiService.createSpeech(response?.content || '');
+            console.log("speech", speech);
             this.chatHistoryMap[number] = history;
-            await client.messages.sendText({
+            await client.messages.sendVoice({
               number: '5515991957645',
-              text: response?.content || 'teste 123 ',
+              audio: speech,
+              encoding: true,
             });
           } 
 
