@@ -189,7 +189,13 @@ export class PharmacyControllerImpl implements PharmacyController {
         // console.log("request.body?.data?.key", request.body?.data?.key);
         
         // console.log("request.body?.data.message", request.body?.data.message);
-        if (request.body?.data?.key?.fromMe === true) {
+        if (request.body?.data?.key?.remoteJid?.includes("@g.us")) {
+          console.log("Skipping group message");
+          return;
+        }
+        const pushName = request.body?.data?.pushName;
+        console.log("pushName", pushName);
+        if (request.body?.data?.key?.fromMe === true && request.body?.data?.key?.remoteJid === '5515991957645@s.whatsapp.net') {
           const messageType = request.body?.data?.messageType;
           console.log("request.body?.data?.key", request.body?.data?.key);
           // console.log("request.body?.data", request.body?.data);
