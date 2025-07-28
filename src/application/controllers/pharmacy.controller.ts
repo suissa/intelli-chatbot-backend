@@ -205,6 +205,12 @@ export class PharmacyControllerImpl implements PharmacyController {
           
           console.log('🧠 Histórico carregado:', this.chatHistoryMap[number]);
           if (messageType === "imageMessage") {
+            await client.chats.updatePresence({
+              number: "5515991957645",
+              presence: "composing",
+              duration: 10000,
+              delay: 10000,
+            });
             // console.log("request.body?.data?.message", request.body?.data?.message);
             const image = request.body?.data?.message?.base64;
             // console.log("request.body?.data?.message?.imageMessage", request.body?.data?.message?.imageMessage);
@@ -284,7 +290,7 @@ export class PharmacyControllerImpl implements PharmacyController {
               const regexValorPix = /(?:R\$|reais)?\s?([\d,.]{2,})/gi;
               const match = response?.content?.match(regexValorPix);
               if (match) {
-                pixValue = match[0].replace('R$', '').replace('reais', '').replace(',', '.');
+                this.pixValue = Number(match[0].replace('R$', '').replace('reais', '').replace(',', '.'));
               }
               await client.chats.updatePresence({
                 number: "5515991957645",
@@ -328,6 +334,28 @@ export class PharmacyControllerImpl implements PharmacyController {
             const response = await this.openaiService.queryProduct(messageText || '', history);
             console.log("response da messageText", response);
 
+            
+            const hasChavePix = response?.content?.toLowerCase().includes('chave pix');
+            
+            console.log("hasChavePix", hasChavePix);
+            if (hasChavePix) {
+              const regexValorPix = /(?:R\$|reais)?\s?([\d,.]{2,})/gi;
+              const match = response?.content?.match(regexValorPix);
+              if (match) {
+                this.pixValue = Number(match[0].replace('R$', '').replace('reais', '').replace(',', '.'));
+              }
+              await client.chats.updatePresence({
+                number: "5515991957645",
+                presence: "composing",
+                duration: 5000,
+                delay: 5000,
+              });
+              await client.messages.sendText({
+                number: '5515991957645', // || request.body?.data?.key.remoteJid,
+                text: response?.content || 'teste 123 ',
+              });
+              return;
+            }
             let replyText = '';
 
             if (Array.isArray(response)) {
