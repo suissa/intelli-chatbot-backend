@@ -222,9 +222,11 @@ export class PharmacyControllerImpl implements PharmacyController {
             // console.log("request.body?.data?.message?.imageMessage", request.body?.data?.message?.imageMessage);
             // console.log("image", image);
             // salve a img com Date.now convertemndo uma string base64 em jpg
-            await this.saveOggFile(image);
-            const caption = request.body?.data?.message?.imageMessage?.caption || '';
-            const imagePath = path.join(process.cwd(), "temp", `${Date.now()}.jpg`);
+            const oggPath = await this.saveOggFile(image);
+            // const caption = request.body?.data?.message?.imageMessage?.caption || '';
+            // const imagePath = path.join(process.cwd(), "temp", `${Date.now()}.jpg`);
+            const transcription = await this.openaiService.transcribeAudio(oggPath);
+            console.log("transcription", transcription);
             // fs.writeFileSync(imagePath, imageBuffer);
             const drugInfo = await this.drugImageProcessorService.processDrugImage(imagePath);
             console.log("drugInfo", drugInfo);
