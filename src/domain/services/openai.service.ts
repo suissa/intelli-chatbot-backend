@@ -206,6 +206,21 @@ export class OpenAIService {
     }
   }
 
+  async createSpeech(text: string) {
+    const fs = await import('fs');
+    const mp3 = await this.openai.audio.speech.create({
+      model: "gpt-4o-mini-tts",
+      voice: "nova",
+      input: text,
+      instructions: "Use um tom de voz amigável e acessível, como se estivesse falando com um amigo.",
+    });
+    console.log(mp3);
+    const buffer = Buffer.from(await mp3.arrayBuffer());
+    const filename = `temp/speech-${Date.now()}.mp3`;
+    await fs.promises.writeFile(filename, buffer);
+    return filename;
+  }
+
   async transcribeAudio(audioFilePath: string): Promise<string> {
     try {
       console.log('🎵 Iniciando transcrição de áudio...');
