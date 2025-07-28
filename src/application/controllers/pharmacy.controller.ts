@@ -226,15 +226,16 @@ export class PharmacyControllerImpl implements PharmacyController {
             console.log("assistantMessage", assistantMessage);
             const hasChavePix = assistantMessage[assistantMessage.length - 1]?.content?.toString().toLowerCase().includes('chave pix');
             console.log("hasChavePix", hasChavePix);
-            const hasFinalizaComprPossoFinalizar = assistantMessage[assistantMessage.length - 1]?.content?.toString().toLowerCase().includes('finalizar a compra para você');
+            const hasFinalizaComprPossoFinalizar = assistantMessage[assistantMessage.length - 1]?.content?.toString().toLowerCase().includes('R$');
             console.log("hasFinalizaComprPossoFinalizar", hasFinalizaComprPossoFinalizar);
             if (hasChavePix || hasFinalizaComprPossoFinalizar) {
               const regexValorPix = /(?:R\$|reais)?\s?([\d,.]{2,})/gi;
               const match = assistantMessage[assistantMessage.length - 1]?.content?.toString().match(regexValorPix);
+              console.log("hasFinalizaComprPossoFinalizar match", match);
               if (match) {
                 this.pixValue = Number(match[0].replace('R$', '').replace('reais', '').replace(',', '.'));
               }
-              
+              console.log("this.pixValue", this.pixValue);
               const pix = await this.drugImageProcessorService.processPixImage(imagePath);
               console.log("pix", pix);
               console.log("pix.pixInfo.valor", pix.pixInfo.valor);
@@ -254,23 +255,26 @@ export class PharmacyControllerImpl implements PharmacyController {
                 text: 'Não foi possível identificar o pagamento. Tente novamente.',
               });
               return;
+            } else {
+              
+              const drugInfo = await this.drugImageProcessorService.processDrugImage(imagePath);
+              console.log("drugInfo", drugInfo);
+              history.push({ role: 'user', content: drugInfo.drugInfo || '', name: 'user' }); // ✅ adiciona input do usuário
+              // console.log("history user", history);
+              // fs.unlinkSync(imagePath);
+              const response = await this.openaiService.queryProduct(drugInfo.drugInfo || '', history);
+              console.log("response da image", response);
+              history.push({ role: 'assistant', content: response?.content || '', name: 'assistant' }); // ✅ adiciona input do usuário
+              console.log("history image", history);
+              
+              this.chatHistoryMap[number] = history;
+              await client.messages.sendText({
+                number: '5515991957645',
+                text: response?.content || 'teste 123 ',
+              });
+              return;
             }
 
-            const drugInfo = await this.drugImageProcessorService.processDrugImage(imagePath);
-            console.log("drugInfo", drugInfo);
-            history.push({ role: 'user', content: drugInfo.drugInfo || '', name: 'user' }); // ✅ adiciona input do usuário
-            // console.log("history user", history);
-            // fs.unlinkSync(imagePath);
-            const response = await this.openaiService.queryProduct(drugInfo.drugInfo || '', history);
-            console.log("response da image", response);
-            history.push({ role: 'assistant', content: response?.content || '', name: 'assistant' }); // ✅ adiciona input do usuário
-            console.log("history image", history);
-            
-            this.chatHistoryMap[number] = history;
-            await client.messages.sendText({
-              number: '5515991957645',
-              text: response?.content || 'teste 123 ',
-            });
           } 
           if (messageType === "audioMessage") {
             if (this.lastBase64Audio === request.body?.data?.message?.base64) {
