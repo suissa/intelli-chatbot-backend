@@ -45,16 +45,21 @@ export class OpenAIService {
         
         Sua tarefa é:
         1. Analisar o produto pesquisado e listar suas características principais
-        2. Identificar 3-5 produtos correlacionados que normalmente são comprados em conjunto (use seu conhecimento sobre farmácia)
-        3. Criar um texto persuasivo de venda tentando vender um dos produtos correlacionados junto com o produto pesquisado
+        2. Identificar 1 correlativo que normalmente é comprado junto com o produto pesquisado 
+        (use seu conhecimento sobre farmácia, mas não escolha remédios da mesma categoria).
+        Tente achar um produto que seja complementar ao produto pesquisado, 
+        como um produto que auxilia no uso do produto pesquisado ou para outros 
+        sintomas normalmente associados ao produto pesquisado.
+        3. Criar um texto persuasivo de venda tentando vender o correlativo junto com o produto pesquisado
         
         Formato da resposta:
         **CARACTERÍSTICAS DO PRODUTO:**
         [Liste as características principais do produto pesquisado]
         
         **PRODUTOS CORRELACIONADOS:**
-        [Liste 10 produtos que são comprados em conjunto, com nome, preço e categoria] na seguinte estrutura:
+        [Liste 1 produto que são comprados em conjunto, com nome, preço e categoria] na seguinte estrutura:
         [Nome] - [Preço] - [Categoria]
+
         no Nome retorne apenas o nome do produto sem ordem numerica
         
         **TEXTO DE VENDA:**
@@ -489,15 +494,19 @@ Responda à próxima mensagem do cliente com base no histórico da conversa.
           const produto = products[0];
           const correlacionado = produto?.produtosCorrelacionados[0]; // Pega o primeiro correlacionado para o exemplo
           
-          const textoVenda = await this.generateVendaPersuasiva(
-            produto?.nome || '',
-            correlacionado?.name || '',
-            produto?.preco || 0,
-            correlacionado?.price || 0
-          );
+          const textoVenda = productsCorrelacionados.textoDeVenda;
+          
+          // await this.generateVendaPersuasiva(
+          //   produto?.nome || '',
+          //   correlacionado?.name || '',
+          //   produto?.preco || 0,
+          //   correlacionado?.price || 0
+          // );
           console.log("VENHAA textoVenda", textoVenda);
           // Agora envie textoVenda como resposta final ao usuário (ou inclua junto do seu objeto de retorno)
           return {
+            role: 'assistant',
+            name: 'assistant',
             content: textoVenda,
             produto,
             found: true
@@ -514,13 +523,8 @@ Responda à próxima mensagem do cliente com base no histórico da conversa.
           const produto = products[0];
           const correlacionado = produto?.produtosCorrelacionados[0]; // Pega o primeiro correlacionado para o exemplo
           
-          const textoVenda = await this.generateVendaPersuasiva(
-            produto?.nome || '',
-            correlacionado?.name || '',
-            produto?.preco || 0,
-            correlacionado?.price || 0
-          );
-          console.log("VENHAA textoVenda", textoVenda);
+          const textoVenda = productsCorrelacionados.textoDeVenda;
+          console.log("VENHAA textoVenda2", textoVenda);
           // Agora envie textoVenda como resposta final ao usuário (ou inclua junto do seu objeto de retorno)
           return {
             role: 'assistant',
