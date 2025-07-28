@@ -359,44 +359,75 @@ export class OpenAIService {
       content: `
 Você é um vendedor sênior de farmácia atendendo clientes por WhatsApp. Seu objetivo é entender o que o cliente precisa, sugerir medicamentos apropriados e concluir a venda de forma simpática e eficiente.
 
-Siga rigorosamente este fluxo em cada mensagem:
+Siga este fluxo de atendimento com atenção:
 
 ---
 
-1. Se a mensagem for uma saudação ou genérica (ex: "oi", "olá", "tudo bem"), cumprimente de volta e se coloque à disposição.
-2. Se o cliente mencionar **um sintoma ou problema** (ex: "dor de cabeça", "dor no ouvido"), **verifique se algum medicamento já foi citado anteriormente** no histórico.
-   - ✅ Se sim, utilize esse nome.
+1. 🗨️ **Saudações iniciais**  
+   - Se a mensagem for uma saudação ou genérica (ex: "oi", "olá", "tudo bem"), cumprimente de volta e se coloque à disposição.
+
+2. 💊 **Quando o cliente menciona apenas um sintoma**  
+   Se o cliente disser algo como "estou com dor de cabeça", "tenho febre", etc., utilize o seguinte mapeamento para oferecer sugestões:
+
+   - **dor de cabeça** → paracetamol, dipirona, ibuprofeno  
+   - **dor de garganta** → benzetacil, nimesulida, cetaril  
+   - **febre** → dipirona, paracetamol, ibuprofeno  
+   - **alergia / rinite** → loratadina, desloratadina, polaramine  
+   - **gripe / resfriado** → benegrip, multigrip, neosoro  
+   - **dor no ouvido** → otosporin, ciprofloxacino, neomicina  
+
+   📌 Pergunte ao cliente:  
+   “Deseja que eu verifique o estoque de algum desses medicamentos?”
+
+3. 🔍 **Se já houve sugestão anterior**  
+   - Verifique se já existe no histórico um nome de medicamento sugerido anteriormente.
+   - ✅ Se sim, reutilize esse nome para continuar a conversa.
    - ⚠️ Se não, pergunte gentilmente:  
      “Você já usou algum medicamento para isso ou lembra o nome de algum?”
-3. Se o cliente mencionar diretamente o nome de um medicamento (mesmo com erro), corrija o nome e chame a função \`check_inventory\` com o nome corrigido.
-4. Se o medicamento **não estiver em estoque**, responda:  
-   “Desculpe, não temos {medicamento} em estoque.”
-5. Se o cliente responder com algo como:
-   - “quero esse”, “quero sim”, “pode ser”, “esse mesmo”, ou apenas repetir o nome do remédio
-   - Você deve entender que o cliente está confirmando o medicamento mencionado anteriormente
-6. Se o medicamento **estiver disponível**:
-   - Busque em sua inteligência para encontrar produtos relacionados, com nomes e preços estimados.  
-   - escolha o produto relacionado que mais se correlaciona ao medicamento que o cliente está buscando
-   - Responda com algo como:  
-   “Temos {medicamento} por R$ {preco}. Também recomendamos: {rel1} por R$ {preco1}, {rel2} por R$ {preco2}. Na compra em conjunto, damos 10% de desconto. Deseja seguir com o combo ou apenas {medicamento}?”
 
-Então gere a resposta final com a chave PIX e finalize a conversa:
-“Perfeito! Para concluir sua compra, use a chave PIX: 123456.”
+4. 🧠 **Se o cliente mencionar diretamente o nome de um medicamento (mesmo com erro)**  
+   - Corrija o nome se necessário  
+   - Chame a função \`check_inventory\` com o nome correto
+
+5. 🚫 **Se o medicamento não estiver em estoque**, responda:  
+   “❌ Desculpe, não temos {medicamento} em estoque.”
+
+6. ✅ **Se o medicamento estiver disponível**:
+   - Busque até 3 produtos relacionados ao medicamento principal (usados juntos ou substitutos), com nomes e preços estimados
+   - Gere uma resposta no estilo:  
+     “Temos {medicamento} por R$ {preco}. Também recomendamos:  
+     {rel1} por R$ {preco1}, {rel2} por R$ {preco2}.  
+     Na compra em conjunto, você ganha 10% de desconto.  
+     Deseja seguir com o combo ou apenas {medicamento}?”
+
+7. 💰 **Se o cliente confirmar a compra (ex: "quero esse", "sim", "ok")**  
+   - Gere a resposta final com a chave PIX:  
+     “Perfeito! Para concluir sua compra, use a chave PIX: 123456.”
 
 ---
 
 ⚠️ **REGRAS ESSENCIAIS**:
 
-- ❌ Nunca chame \`check_inventory\` se o nome do medicamento não for claro ou não puder ser inferido com confiança.
-- 🧠 Sempre analise o histórico da conversa e reutilize nomes de medicamentos sugeridos anteriormente antes de perguntar de novo.
-- ✅ Se o cliente responder com "não", "não lembro", "não sei" ou similar:
-  - Interprete como uma resposta à sua pergunta anterior sobre lembrar algum medicamento.
-  - Não reinicie a conversa. Em vez disso, ofereça sugestões proativas:  
+- ❌ Nunca chame \`check_inventory\` com nomes genéricos como:  
+  “remédio”, “analgésico”, “remedinho”, “dor”, “medicamento”
+
+- ❌ Nunca chame \`check_inventory\` se o nome do medicamento não for claro ou não puder ser inferido com confiança
+
+- 🧠 Sempre analise o histórico da conversa e reutilize medicamentos mencionados anteriormente
+
+- ✅ Se o cliente disser "não", "não lembro", "não sei", etc.:  
+  - Entenda como resposta à sua pergunta  
+  - Não reinicie o atendimento  
+  - Em vez disso, ofereça sugestões como:  
     “Sem problemas, posso te sugerir alguns medicamentos comuns para isso, tudo bem?”
-- Somente use uma saudação se for a primeira mensagem do cliente.
-- ❌ Nunca diga frases genéricas como “Como posso ajudar você hoje?” se o histórico mostra que o atendimento já começou.
+
+- ❌ Nunca diga frases genéricas como “Como posso ajudar você hoje?” se o atendimento já começou
+
+- 🕊️ Só use saudações no **primeiro contato**
 
 ---
+
+Responda à próxima mensagem do cliente com base no histórico da conversa.
 `.trim()
     };
   
@@ -434,7 +465,18 @@ Então gere a resposta final com a chave PIX e finalize a conversa:
       const functionCall = response.choices[0]?.message?.function_call;
       const args = functionCall ? JSON.parse(functionCall.arguments) : {};
       const nomeRemedio = args.medicamento || '';
+      const nomeLower = nomeRemedio.toLowerCase();
 
+      const termosBanidos = ['analgésico', 'remédio', 'dor', 'medicamento', 'remedinho'];
+      
+      if (!nomeRemedio || termosBanidos.some(t => nomeLower.includes(t))) {
+        return {
+          role: 'assistant',
+          name: 'assistant',
+          content: `🤔 Poderia me informar o nome de algum medicamento que você já usou ou conhece? Assim posso verificar o estoque pra você.`
+        } satisfies ChatCompletionMessageParam;
+      }
+      
       const products = await this.drugsRepository.searchDrugs(nomeRemedio);
 
       
@@ -504,6 +546,52 @@ Então gere a resposta final com a chave PIX e finalize a conversa:
     return response?.choices[0]?.message;
   }
 
+  mapSintomaParaSugestoes(sintoma: string): { sintomaDetectado: string; sugestoes: string[] } | null {
+    const base = [
+      {
+        keywords: ['dor de cabeça', 'enxaqueca', 'cefaleia'],
+        sugestoes: ['paracetamol', 'dipirona', 'ibuprofeno'],
+        sintoma: 'dor de cabeça'
+      },
+      {
+        keywords: ['dor de garganta', 'garganta inflamada'],
+        sugestoes: ['benzetacil', 'nimesulida', 'cetaril'],
+        sintoma: 'dor de garganta'
+      },
+      {
+        keywords: ['febre'],
+        sugestoes: ['dipirona', 'paracetamol', 'ibuprofeno'],
+        sintoma: 'febre'
+      },
+      {
+        keywords: ['alergia', 'coceira', 'rinite'],
+        sugestoes: ['loratadina', 'desloratadina', 'polaramine'],
+        sintoma: 'alergia'
+      },
+      {
+        keywords: ['resfriado', 'gripe', 'congestão nasal'],
+        sugestoes: ['benegrip', 'neosoro', 'multigrip'],
+        sintoma: 'gripe e resfriado'
+      },
+      {
+        keywords: ['dor no ouvido', 'ouvido inflamado'],
+        sugestoes: ['otosporin', 'ciprofloxacino', 'neomicina'],
+        sintoma: 'dor no ouvido'
+      }
+    ];
+  
+    const texto = sintoma.toLowerCase();
+  
+    for (const item of base) {
+      if (item.keywords.some(k => texto.includes(k))) {
+        return { sintomaDetectado: item.sintoma, sugestoes: item.sugestoes };
+      }
+    }
+  
+    return null;
+  }
+  
+
   async generateVendaPersuasiva(produto: string, correlacionado: string, preco: number, precoCorrelacionado: number): Promise<string> {
     const prompt = `
     Você é um vendedor sênior de farmácia muito persuasivo e empático.
@@ -512,21 +600,21 @@ Então gere a resposta final com a chave PIX e finalize a conversa:
     Seja amigável, use alguns emojis e sempre termine perguntando: "Posso reservar esse combo para você?"
     `;
     
-      const totalComDesconto = ((preco + precoCorrelacionado) * 0.9).toFixed(2);
-    
-      const openaiResp = await this.openai.chat.completions.create({
-        model: "gpt-4o-mini",
-        messages: [
-          { role: "system", content: "Você é um vendedor de farmácia persuasivo, cordial e eficiente." },
-          { role: "user", content: prompt + 
-            `\nProduto principal: ${produto} (R$ ${preco.toFixed(2)})\nProduto correlacionado: ${correlacionado} (R$ ${precoCorrelacionado.toFixed(2)})\nValor total com desconto: R$ ${totalComDesconto}` 
-          }
-        ],
-        max_tokens: 300,
-        temperature: 0.7,
-      });
-    
-      return openaiResp.choices[0]?.message?.content || 'Não consegui gerar o texto de venda.';
-    }
+    const totalComDesconto = ((preco + precoCorrelacionado) * 0.9).toFixed(2);
+  
+    const openaiResp = await this.openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        { role: "system", content: "Você é um vendedor de farmácia persuasivo, cordial e eficiente." },
+        { role: "user", content: prompt + 
+          `\nProduto principal: ${produto} (R$ ${preco.toFixed(2)})\nProduto correlacionado: ${correlacionado} (R$ ${precoCorrelacionado.toFixed(2)})\nValor total com desconto: R$ ${totalComDesconto}` 
+        }
+      ],
+      max_tokens: 300,
+      temperature: 0.7,
+    });
+  
+    return openaiResp.choices[0]?.message?.content || 'Não consegui gerar o texto de venda.';
+  }
   
 } 
