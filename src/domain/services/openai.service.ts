@@ -38,43 +38,39 @@ export class OpenAIService {
       console.log('🔍 Pesquisando produto e correlações...');
       
       const prompt = `
-        Você é um ótimo vendedor de farmácia, experiente e persuasivo. 
+        Você é um excelente vendedor de farmácia, experiente, carismático e muito persuasivo.
 
         Produto pesquisado: ${productName}
 
-        Sua tarefa é:
-
-        1. Analisar o item pesquisado e listar suas características principais.
-        2. Identificar 1 item complementar que costuma ser comprado junto com ele. 
-          Evite medicamentos da mesma categoria.
-          Foque em itens que ajudem a potencializar, complementar ou aliviar sintomas associados.
-
-        3. Criar uma frase de venda (sem saudação), usando o seguinte formato:
+        🛑 IMPORTANTE:
+        - Você deve usar **exatamente o nome do produto pesquisado acima** como o primeiro item da sugestão.
+        - Você **não pode** inventar um segundo nome para ele.
+        - O segundo item deve ser um **complementar real**, **não pode ser um medicamento da mesma categoria**.
 
         ---
 
         **CARACTERÍSTICAS DO PRODUTO:**
 
-        [Liste as principais características de forma clara e objetiva]
+        [Liste as características principais do ${productName} de forma clara e objetiva]
 
         **PRODUTOS CORRELACIONADOS:**
 
-        [Nome do item] - [Preço] - [Categoria]
+        [Nome do item complementar] - [Preço] - [Categoria]
 
-        (Não use numeração no nome, nem bullet)
+        (Não use bullet ou numeração no nome)
 
         **TEXTO DE VENDA:**
 
-        Pensei especialmente em você: que tal levar o ${productName} (R$ [preço do produto pesquisado]) junto com o [nome do item correlato] (R$ [preço do correlato])?
+        Pensando especialmente em você criei essa oferta única: 
+        que tal levar o ${productName} (R$ [preço do produto pesquisado]) junto com o [nome do item complementar] (R$ [preço do correlato])?
 
-        Eles funcionam super bem juntos e podem acelerar muito a sua melhora.  
-        💡 Essa combinação foi pensada para otimizar seu cuidado com um toque extra de bem-estar.  
+        Eles se complementam perfeitamente e ajudam a acelerar seu bem-estar!  
+        💡 Essa combinação foi escolhida a dedo com carinho só pra você.
 
-        💰 E tem mais: levando os dois agora, você garante **10% de desconto no total**.  
+        💰 E o melhor: levando os dois agora, você ganha **10% de desconto no total**.
 
-        Você gostaria de aproveitar essa oportunidade e levar o ${productName} + [nome do correlato] com o desconto exclusivo, 
-        totalizando R$ [valor com desconto]? Essa promoção é exclusiva para você! E vale apenas para essa compra.
-
+        Você gostaria de aproveitar essa promoção exclusiva e levar o ${productName} + [nome do correlato], totalizando R$ [valor com desconto]?  
+        *Essa condição é exclusiva para essa conversa.*
       `;
 
       const response = await this.openai.chat.completions.create({
