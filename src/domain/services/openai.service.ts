@@ -461,22 +461,44 @@ export class OpenAIService {
   async searchMultipleDrugsFromString(input: string): Promise<any[]> {
     const results: any[] = [];
   
-    const lines = input.split('\n').map(line => line.trim()).filter(Boolean);
-  
-    for (const line of lines) {
-      const [rawName] = line.split('-');
-      const remedio = rawName?.trim() || '';
-  
-      try {
-        const products = await this.drugsRepository.searchDrugs(remedio);
-        results.push({ nome: remedio, resultado: products });
-      } catch (error) {
-        console.error(`Erro ao buscar: ${remedio}`, error);
-        results.push({ nome: remedio, erro: true });
-      }
+    // const lines = input.split('\n').map(line => line.trim()).filter(Boolean);
+    const cleanWords = [
+      "com", "sem", "para", "de", "do", "da", "dos", "das",
+      "extra", "super", "premium", "intenso", "leve", "forte",
+      "ação", "uso", "adulto", "infantil", "natural", "vegano",
+      "gel", "sabor", "aroma", "tipo", "versão", "creme", "gel", "gelatina", 
+      "cream", "essencia"
+      ];
+    function limparNomeProduto(nome: string): string {
+      const palavras = nome
+        .toLowerCase()
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // remove acentos
+        .replace(/[^\w\s]/g, "") // remove pontuação
+        .split(" ")
+        .filter(palavra => !cleanWords.includes(palavra) && palavra.length > 1);
+    
+      return palavras.join(" ");
     }
+
+    const linhasBrutas = input
+      .split('\n')
+      .map(l => l.trim())
+      .filter(Boolean);
+
+    const produtosLimpos = linhasBrutas.map(linha => {
+      const [raw] = linha.split('-');
+      return limparNomeProduto(raw || '');
+    });
+
+    const produtosCorrelacionadosArray = await Promise.all(
+      produtosLimpos.map(remedio => this.drugsRepository.searchDrugs(remedio))
+    );
+
+    console.log("produtosCorrelacionadosArray", produtosCorrelacionadosArray);
+    console.log("produtosLimpos", produtosLimpos);
+    // console.log("linhasBrutas", linhasBrutas);
   
-    return results;
+    return produtosCorrelacionadosArray;
   }
 
   async queryProduct(userMessage: string, history: ChatCompletionMessageParam[] = []) {
