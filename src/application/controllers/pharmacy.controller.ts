@@ -269,8 +269,8 @@ export class PharmacyControllerImpl implements PharmacyController {
             await client.chats.updatePresence({
               number: "5515991957645",
               presence: "recording",
-              duration: 5000,
-              delay: 5000,
+              duration: 30000,
+              delay: 30000,
             }); 
             const speech = await this.openaiService.createSpeech(response?.content || '');
             console.log("speech", speech.substring(0, 100));
