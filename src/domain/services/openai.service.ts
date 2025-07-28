@@ -205,7 +205,26 @@ export class OpenAIService {
       return 'Desculpe, não foi possível gerar a apresentação no momento.';
     }
   }
-
+  extractJsonPix(texto: string): { valor: string | undefined, destino: string | undefined } | null {
+    const contemComprovante = texto.toLowerCase().includes('comprovante de transferência');
+    if (!contemComprovante) return null;
+  
+    const regexValor = /(?:R\$)\s?([\d,.]+)/i;
+    const regexDestino = /(?:nome|destino)[^a-zA-Z0-9]*([A-Z\s]{5,})/i;
+  
+    const valorMatch = texto.match(regexValor);
+    const destinoMatch = texto.match(regexDestino);
+  
+    if (valorMatch && destinoMatch) {
+      const json = {
+        valor: valorMatch?.[1]?.replace(',', '.'),
+        destino: destinoMatch?.[1]?.trim()
+      };
+      return json;
+    }
+  
+    return null;
+  }
   async extractPixInformation(extractedText: string): Promise<any> {
     const prompt = `
     Analise o texto: '${extractedText}'
@@ -215,7 +234,7 @@ export class OpenAIService {
     Por exemplo: a linha pode conter o label: Nome ou apenas um nome de pessoa ou empresa.
     Se não existir, me retorne 'Não foi possível encontrar o número da chave pix'.
 
-    retorne o seguinte formato:
+    retorne EXATAMENTE APENAS o seguinte JSON:
     {
       "valor": valor_monetario,
       "destino": destino_ou_para
@@ -235,7 +254,7 @@ export class OpenAIService {
       ],
       max_tokens: 1000,
     });
-    const responseContent = response.choices[0]?.message?.content;
+    const responseContent = this.extractJsonPix(response.choices[0]?.message?.content || '');
     console.log("extractPixInformation responseContent", responseContent);
     return responseContent;
   }
