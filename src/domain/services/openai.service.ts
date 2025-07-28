@@ -34,7 +34,7 @@ export class OpenAIService {
   }
 
 
-  
+
 
   async searchProductAndCorrelations(productName: string): Promise<any> {
     try {
@@ -494,13 +494,14 @@ Responda à próxima mensagem do cliente com base no histórico da conversa.
       
       const products = await this.drugsRepository.searchDrugs(nomeRemedio);
 
-      
+      console.log("searchDrugs products", products);
       if (products.length > 0) {
         if (products[0]?.produtosCorrelacionados == null) {
           const productsCorrelacionados = await this.searchProductAndCorrelations(response?.choices[0]?.message?.content || '');
-          products[0]!.produtosCorrelacionados = productsCorrelacionados;
-          const produto = products[0];
-          const correlacionado = produto?.produtosCorrelacionados[0]; // Pega o primeiro correlacionado para o exemplo
+          console.log("searchProductAndCorrelations productsCorrelacionados", productsCorrelacionados);
+          // products[0]!.produtosCorrelacionados = productsCorrelacionados;
+          // const produto = products[0];
+          // const correlacionado = produto?.produtosCorrelacionados[0]; // Pega o primeiro correlacionado para o exemplo
           
           const textoVenda = productsCorrelacionados.textoDeVenda;
           
@@ -516,7 +517,7 @@ Responda à próxima mensagem do cliente com base no histórico da conversa.
             role: 'assistant',
             name: 'assistant',
             content: textoVenda,
-            produto,
+            produto: products[0],
             found: true
           };
         }
@@ -524,7 +525,8 @@ Responda à próxima mensagem do cliente com base no histórico da conversa.
         const lista = products
           .map((p) => `• ${p.nome} – R$ ${p.preco.toFixed(2).replace('.', ',')}`)
           .join('\n');
-        console.log("products", products);
+          console.log(" products 2", products);
+        console.log("lista products", lista);
         if (products[0]?.nome) {
           const productsCorrelacionados = await this.searchProductAndCorrelations(products[0]?.nome || '');
           // products[0]!.produtosCorrelacionados = productsCorrelacionados;
