@@ -80,10 +80,12 @@ export class DrugsRepository implements IDrugsRepository {
       // });
       const remedios = await this.repository
         .createQueryBuilder('remedio')
-        .select('DISTINCT ON (LOWER(remedio.nome)) remedio.id', 'id')
-        .addSelect('remedio.nome', 'nome')
-        .addSelect('remedio.estoque', 'estoque')
-        .addSelect('remedio.preco', 'preco')
+        .select([
+          'DISTINCT ON (LOWER(remedio.nome)) remedio.id AS id',
+          'remedio.nome AS nome',
+          'remedio.preco AS preco',
+          'remedio.estoque AS estoque',
+        ])
         .where('LOWER(remedio.nome) LIKE :nome', { nome: `%${cleanTerm.toLowerCase()}%` })
         .andWhere('remedio.estoque > 0')
         .orderBy('LOWER(remedio.nome)', 'ASC')   // grupo
@@ -92,7 +94,7 @@ export class DrugsRepository implements IDrugsRepository {
         .limit(10)
         .getRawMany();
 
-
+      console.log("remedios", remedios);
       console.log(`🔍 Encontrados ${remedios.length} remédios para o termo "${cleanTerm}"`);
       return remedios;
     } catch (error) {
