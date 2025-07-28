@@ -13,8 +13,8 @@ import { initializeDatabase, closeDatabase } from './infrastructure/database/typ
 import { PharmacyController } from './application/controllers/pharmacy.controller';
 // import { AttendanceController } from './application/controllers/attendance.controller';
 // import { MessageQueueController } from './application/controllers/message-queue.controller';
-import { RabbitMQConnection } from './infrastructure/messaging/rabbitmq-connection';
-import { MessageQueueManager } from './infrastructure/messaging/message-queue-manager';
+// import { RabbitMQConnection } from './infrastructure/messaging/rabbitmq-connection';
+// import { MessageQueueManager } from './infrastructure/messaging/message-queue-manager';
 // import { MessageProcessorService } from './domain/services/message-processor.service';
 
 const fastify = Fastify({
