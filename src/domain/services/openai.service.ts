@@ -479,11 +479,7 @@ export class OpenAIService {
     console.log("produtosCorrelacionadosArray", produtosCorrelacionadosArray);
     console.log("produtosLimpos", produtosLimpos);
     // console.log("linhasBrutas", linhasBrutas);
-    const produtosAchados = produtosCorrelacionadosArray
-    ?.filter((p: any) => p?.length > 0)
-
-    const produtosEmEstoque = produtosAchados?.filter((p: any) => p.estoque > 0);
-    return produtosEmEstoque;
+    return produtosCorrelacionadosArray;
   }
 
   async queryProduct(userMessage: string, history: ChatCompletionMessageParam[] = []) {
