@@ -362,14 +362,9 @@ export class OpenAIService {
   Se o cliente disser algo como "quero ele", use o último medicamento que você sugeriu.
 
   1. Sempre que o cliente falar (saudação ou pergunta), responda adequadamente.
-  2. Se perguntar por um remédio, extraia o nome do medicamento.
-  3. Se o cliente falar sobre um remédio, mas corrija o nome do remédio caso venha errado
-  tipo: "paracetamnol" 
-  deve ser corrigido para: "paracetamol"
-  chame a função \`check_inventory\` com o nome corrigido
-  para ver estoque e preço, mas se não for um remédio, pesquise na sua inteligência 
-  por remédios relacionados
-  a sua necessidade.
+  2. Se perguntar for um remédio, extraia o nome do medicamento.
+  3. Se o cliente falar sobre um remédio, chame a função \`check_inventory\` com o nome corrigido
+  para ver estoque e preço.
   4. Se não tiver estoque, responda “Desculpe, não temos {medicamento} em estoque.” e termine.
   5. Se tiver estoque:
      a) O modelo mesmo deve gerar 10 produtos relacionados, com nome e um preço estimado.
