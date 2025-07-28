@@ -812,6 +812,8 @@ async function registerMessageQueueRoutes() {
   // });
 }
 
+// cheio de roleffffff
+
 // Inicializar servidor
 async function start() {
   try {
