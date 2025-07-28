@@ -312,13 +312,9 @@ export class OpenAIService {
   
       const content = response.choices[0]?.message?.content || '';
       console.log("searchProductAndCorrelations content", content);
-      const produtosMatch = content.match(/\*\*PRODUTOS CORRELACIONADOS:\*\*\s*([\s\S]*)$/i);
-      const produtosCorrelacionadosRaw = produtosMatch ? produtosMatch[1]!.trim() : '';
   
-      console.log('🔍 Produtos correlacionados RAW:', produtosCorrelacionadosRaw);
-  
-      const encontrados = await this.searchMultipleDrugsFromString(produtosCorrelacionadosRaw);
-      console.log("searchProductAndCorrelations encontrados", encontrados);
+      const encontrados = await this.searchMultipleDrugsFromString(content);
+      console.log("searchMultipleDrugsFromString encontrados", encontrados);
       if (!encontrados || encontrados.length === 0) {
         return { textoDeVenda: `❌ Nenhum produto complementar disponível em estoque.` };
       }
