@@ -207,6 +207,7 @@ export class OpenAIService {
   }
 
   async createSpeech(text: string) {
+    console.log("createSpeech text", text);
     const fs = await import('fs');
     const mp3 = await this.openai.audio.speech.create({
       model: "gpt-4o-mini-tts",
@@ -214,9 +215,10 @@ export class OpenAIService {
       input: text,
       instructions: "Use um tom de voz amigável e acessível, como se estivesse falando com um amigo.",
     });
-    console.log(mp3);
+    console.log("createSpeech mp3", mp3);
     const buffer = Buffer.from(await mp3.arrayBuffer());
     const filename = `temp/speech-${Date.now()}.mp3`;
+    console.log("createSpeech filename", filename);
     await fs.promises.writeFile(filename, buffer);
     return filename;
   }

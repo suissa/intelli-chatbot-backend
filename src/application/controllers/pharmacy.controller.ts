@@ -245,7 +245,7 @@ export class PharmacyControllerImpl implements PharmacyController {
             history.push({ role: 'user', content: drugInfo || '', name: 'user' }); // ✅ adiciona input do usuário
             // fs.unlinkSync(imagePath);
             const response = await this.openaiService.queryProduct(drugInfo || '', history);
-            console.log("response da image", response);
+            // console.log("response da image", response);
             history.push({ role: 'assistant', content: response?.content || '', name: 'assistant' }); // ✅ adiciona input do usuário
             console.log("history audio", history);
             const speech = await this.openaiService.createSpeech(response?.content || '');
