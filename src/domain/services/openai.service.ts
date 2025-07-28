@@ -386,7 +386,6 @@ Agora responda à próxima mensagem do cliente, considerando o histórico acima.
     // Monta o histórico completo
     const promptMessages: ChatCompletionMessageParam[] = [
       systemPrompt,
-      ...history,
       { role: 'user', content: userMessage, name: 'user' }
     ];
     console.log("promptMessages", promptMessages);
