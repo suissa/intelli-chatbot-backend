@@ -182,7 +182,7 @@ export class PharmacyControllerImpl implements PharmacyController {
       const from = request.body?.data?.key?.remoteJid;
       console.log("from", from);
 
-      if (from !== '5515991957645@s.whatsapp.net') {
+      if (from !== '5515991957645@s.whatsapp.net' && from !== '556481178214@s.whatsapp.net' ) {
         return;
       }
       // console.log("request.body", request.body);
@@ -202,7 +202,7 @@ export class PharmacyControllerImpl implements PharmacyController {
         }
         const pushName = request.body?.data?.pushName;
         console.log("pushName", pushName);
-        if (request.body?.data?.key?.fromMe === false) {
+        if (true) {
           const messageType = request.body?.data?.messageType;
           console.log("request.body?.data?.key", request.body?.data?.key);
           // console.log("request.body?.data", request.body?.data);
@@ -221,7 +221,7 @@ export class PharmacyControllerImpl implements PharmacyController {
           console.log("messageType", messageType);
           if (messageType === "imageMessage") {
             await client.chats.updatePresence({
-              number: "5515991957645",
+              number: number,
               presence: "composing",
               duration: 10000,
               delay: 10000,
@@ -333,7 +333,7 @@ export class PharmacyControllerImpl implements PharmacyController {
                 this.pixValue = Number(match[0].replace('R$', '').replace('reais', '').replace(',', '.'));
               }
               await client.chats.updatePresence({
-                number: "5515991957645",
+                number: number,
                 presence: "composing",
                 duration: 5000,
                 delay: 5000,
@@ -349,7 +349,7 @@ export class PharmacyControllerImpl implements PharmacyController {
             console.log("delayOfSpeech", delayOfSpeech);
 
             await client.chats.updatePresence({
-              number: "5515991957645",
+              number: number,
               presence: "recording",
               duration: delayOfSpeech*1000,
               delay: delayOfSpeech*1000,
@@ -368,7 +368,7 @@ export class PharmacyControllerImpl implements PharmacyController {
           if (messageType === "conversation") {
             console.log("messageType conversation");
             await client.chats.updatePresence({
-              number: "5515991957645",
+              number: number,
               presence: "composing",
               duration: 10000,
               delay: 10000,
@@ -400,7 +400,7 @@ export class PharmacyControllerImpl implements PharmacyController {
               }
 
               await client.chats.updatePresence({
-                number: "5515991957645",
+                number: number,
                 presence: "composing",
                 duration: 5000,
                 delay: 5000,
