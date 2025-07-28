@@ -221,7 +221,7 @@ export class PharmacyControllerImpl implements PharmacyController {
           console.log("messageType", messageType);
           if (messageType === "imageMessage") {
             await client.chats.updatePresence({
-              number: "5515991957645",
+              number: "556481178214",
               presence: "composing",
               duration: 10000,
               delay: 10000,
@@ -262,14 +262,14 @@ export class PharmacyControllerImpl implements PharmacyController {
 
                 
                 await client.messages.sendText({
-                  number: '5515991957645',
+                  number: '556481178214',
                   text: 'Pagamento confirmado! Valor: R$ ' + pix.pixInfo.valor + '. Muito obrigado.',
                 });
                 return;
               }
 
               await client.messages.sendText({
-                number: '5515991957645',
+                number: '556481178214',
                 text: 'Não foi possível identificar o pagamento. Tente novamente.',
               });
               return;
@@ -283,16 +283,13 @@ export class PharmacyControllerImpl implements PharmacyController {
               const response = await this.openaiService.queryProduct(drugInfo.drugInfo || '', history);
               console.log("response da image", response);
               
-              if (response === false) {
-                return;
-              }
 
               history.push({ role: 'assistant', content: response?.content || '', name: 'assistant' }); // ✅ adiciona input do usuário
               // console.log("history image", history);
               
               this.chatHistoryMap[number] = history;
               await client.messages.sendText({
-                number: '5515991957645',
+                number: '556481178214',
                 text: response?.content || 'teste 123 ',
               });
               return;
@@ -336,13 +333,13 @@ export class PharmacyControllerImpl implements PharmacyController {
                 this.pixValue = Number(match[0].replace('R$', '').replace('reais', '').replace(',', '.'));
               }
               await client.chats.updatePresence({
-                number: "5515991957645",
+                number: "556481178214",
                 presence: "composing",
                 duration: 5000,
                 delay: 5000,
               });
               await client.messages.sendText({
-                number: '5515991957645', // || request.body?.data?.key.remoteJid,
+                number: '556481178214', // || request.body?.data?.key.remoteJid,
                 text: response?.content || 'teste 123 ',
               });
               return;
@@ -352,7 +349,7 @@ export class PharmacyControllerImpl implements PharmacyController {
             console.log("delayOfSpeech", delayOfSpeech);
 
             await client.chats.updatePresence({
-              number: "5515991957645",
+              number: "556481178214",
               presence: "recording",
               duration: delayOfSpeech*1000,
               delay: delayOfSpeech*1000,
@@ -361,7 +358,7 @@ export class PharmacyControllerImpl implements PharmacyController {
             console.log("speech", speech.substring(0, 100));
             this.chatHistoryMap[number] = history;
             await client.messages.sendVoice({
-              number: '5515991957645',
+              number: '556481178214',
               audio: speech,
               encoding: true,
             });
@@ -371,7 +368,7 @@ export class PharmacyControllerImpl implements PharmacyController {
           if (messageType === "conversation") {
             console.log("messageType conversation");
             await client.chats.updatePresence({
-              number: "5515991957645",
+              number: "556481178214",
               presence: "composing",
               duration: 10000,
               delay: 10000,
@@ -403,13 +400,13 @@ export class PharmacyControllerImpl implements PharmacyController {
               }
 
               await client.chats.updatePresence({
-                number: "5515991957645",
+                number: "556481178214",
                 presence: "composing",
                 duration: 5000,
                 delay: 5000,
               });
               await client.messages.sendText({
-                number: '5515991957645', // || request.body?.data?.key.remoteJid,
+                number: '556481178214', // || request.body?.data?.key.remoteJid,
                 text: response?.content || 'teste 123 ',
               });
               return;
@@ -435,7 +432,7 @@ export class PharmacyControllerImpl implements PharmacyController {
 
             
             await client.messages.sendText({
-              number: '5515991957645', // || request.body?.data?.key.remoteJid,
+              number: '556481178214', // || request.body?.data?.key.remoteJid,
               text: replyText || 'teste 123 ',
             });
           }
