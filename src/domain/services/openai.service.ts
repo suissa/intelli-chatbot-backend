@@ -598,15 +598,14 @@ Siga este fluxo de atendimento com atenção:
 5. 🚫 **Se o medicamento não estiver em estoque**, responda:  
    “❌ Desculpe, não temos {medicamento} em estoque.”
 
-6. ✅ **Se o medicamento estiver disponível**:
-   - Busque até 3 produtos relacionados ao medicamento principal (usados juntos ou substitutos), com nomes e preços estimados
-   - Gere uma resposta no estilo:  
-     “Temos {medicamento} por R$ {preco}. Também recomendamos:  
-     {rel1} por R$ {preco1}, {rel2} por R$ {preco2}.  
-     Na compra em conjunto, você ganha 10% de desconto.  
-     Deseja seguir com o combo ou apenas {medicamento}?”
 
-7. 💰 **Se o cliente confirmar a compra (ex: "quero esse", "sim", "ok")**  
+6. ✅ **Se o medicamento estiver disponível**:
+  - ✅ Se o cliente responder apenas com um número de 1 a 10, interprete como a escolha de um produto da lista de estoque exibida anteriormente.  
+    - Recupere o nome exato do produto listado naquela posição.  
+    - Em seguida, chame a função \`check_combo_offer\` com \`{ produtoSelecionado: "nome do produto escolhido" }\`.
+
+
+7. 💰 **Se o cliente confirmar a compra (ex: "quero esse", "sim", "ok", "desejo", "quero", "quero comprar", "quero comprar esse", "quero comprar esse combo")**  
    - Gere a resposta final com a chave PIX:  
      “Perfeito! Para concluir sua compra, use a chave PIX: 123456.”
 
@@ -657,6 +656,17 @@ Responda à próxima mensagem do cliente com base no histórico da conversa.
         },
   
       },
+      {
+        name: 'check_combo_offer',
+        description: 'Gera oferta persuasiva com produto complementar baseado no produto escolhido',
+        parameters: {
+          type: 'object',
+          properties: {
+            produtoSelecionado: { type: 'string' },
+          },
+          required: ['produtoSelecionado'],
+        }
+      }
     ];
 
     const response = await this.openai.chat.completions.create({
@@ -668,8 +678,46 @@ Responda à próxima mensagem do cliente com base no histórico da conversa.
     });
 
     if (response?.choices[0]?.finish_reason === 'function_call') {
+      
+
+
       const functionCall = response.choices[0]?.message?.function_call;
+      const functionName = functionCall?.name;
       const args = functionCall ? JSON.parse(functionCall.arguments) : {};
+
+      if (functionName === 'check_combo_offer') {
+        const nomeSelecionado = args.produtoSelecionado?.trim() || '';
+        if (!nomeSelecionado) {
+          return {
+            role: 'assistant',
+            name: 'assistant',
+            content: '❌ Ocorreu um erro ao identificar o produto selecionado. Poderia repetir o número ou nome do produto?',
+          } satisfies ChatCompletionMessageParam;
+        }
+      
+        const products = await this.drugsRepository.searchDrugs(nomeSelecionado);
+        if (products.length === 0) {
+          return {
+            role: 'assistant',
+            name: 'assistant',
+            content: `❌ Desculpe, não localizei o produto "${nomeSelecionado}" no estoque.`,
+          } satisfies ChatCompletionMessageParam;
+        }
+      
+        const produto = products[0];
+        const combo = await this.searchProductAndCorrelations(produto?.nome || '');
+      
+        const textoVenda = combo.textoDeVenda?.replace('**TEXTO DE VENDA:**', '').replace(/\*+/g, '').trim();
+      
+        return {
+          role: 'assistant',
+          name: 'assistant',
+          content: textoVenda,
+          produto,
+          found: true
+        };
+      }
+
       const nomeRemedio = args.medicamento || '';
       const nomeLower = nomeRemedio.toLowerCase();
     
@@ -716,7 +764,7 @@ Responda à próxima mensagem do cliente com base no histórico da conversa.
     
       // 🟡 CASO CONTRÁRIO: exibir lista e pedir confirmação para prosseguir depois
       const listaProdutos = products
-        .map((p) => `• ${p.nome} – R$ ${p.preco.toFixed(2).replace('.', ',')}`)
+        .map((p, index) => `${index + 1}. ${p.nome} – R$ ${p.preco.toFixed(2).replace('.', ',')}`)
         .join('\n');
     
       const retornoListaProdutos = `
@@ -725,7 +773,7 @@ Responda à próxima mensagem do cliente com base no histórico da conversa.
     
     *Se você ainda não encontrou o que procura, posso te sugerir alguns medicamentos que costumam ajudar bastante nesse caso, tudo bem? *😊  
     
-    *Agora, se você já encontrou, poderia me enviar o nome completo do produto copiando e colando aqui? Assim consigo verificar direitinho pra você.*🚀
+    Agora, se você já encontrou, envie o número do produto que você deseja comprar*🚀
     `.trim();
     
       return {
