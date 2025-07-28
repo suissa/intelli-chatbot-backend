@@ -236,6 +236,7 @@ export class OpenAIService {
       max_tokens: 1000,
     });
     const responseContent = response.choices[0]?.message?.content;
+    console.log("extractPixInformation responseContent", responseContent);
     return responseContent;
   }
   async createSpeech(text: string) {
