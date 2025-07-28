@@ -4,6 +4,8 @@ import { MessageQueuePayload } from '../../../domain/entities/message-queue.enti
 import { IMessageConsumer } from '../../../domain/services/message-queue.service';
 import { OpenAIService } from '../../../domain/services/openai.service';
 import { PharmacyResponseProducer } from '../producers/pharmacy-response-producer';
+import { TYPES } from '../../../shared/types';
+import { container } from '../../../shared/container';
 
 export class ConsumerAudioMessage implements IMessageConsumer {
   private channel: amqp.Channel;
@@ -12,7 +14,7 @@ export class ConsumerAudioMessage implements IMessageConsumer {
 
   constructor(channel: amqp.Channel) {
     this.channel = channel;
-    this.openaiService = new OpenAIService();
+    this.openaiService = container.get<OpenAIService>(TYPES.OpenAIService);
     this.pharmacyResponseProducer = new PharmacyResponseProducer(channel);
   }
 
