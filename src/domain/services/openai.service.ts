@@ -5,7 +5,7 @@ import { DrugsRepository } from '../../infrastructure/repositories/drugs.reposit
 import { ChatCompletionMessageParam } from "openai/resources/chat/completions";
 import { TYPES } from '../../shared/types';
 import { Remedio } from '../entities/remedio.entity';
-
+import { SpeechEstimator } from './speech-estimator';
 // Schema Zod para extração de informações de remédios
 const DrugsInformationExtraction = z.object({
   comercialName: z.string(),
@@ -248,11 +248,11 @@ export class OpenAIService {
       
       const transcription = await this.openai.audio.transcriptions.create({
         file: fs.createReadStream(audioFilePath),
-        model: "gpt-4o-transcribe",
-        language: "pt",
+        model: "gpt-4o-mini-transcribe",
+        language: "-BR",
         response_format: "json",
-        temperature: 0.0,
-        prompt: "Transcreva o áudio para texto, sempre tente buscar algum nome de remédio ou algum número inteiro, para o áudio, sem nenhum outro texto antes ou depois. Se não conseguir transcrever, retorne 'Não foi possível transcrever o áudio'.",
+        temperature: 0.3,
+        prompt: "Use o portugês brasileiro. Transcreva o áudio para texto, sempre tente buscar algum nome de remédio ou algum número inteiro, para o áudio, sem nenhum outro texto antes ou depois. Se não conseguir transcrever, retorne 'Não foi possível transcrever o áudio'.",
       });
       console.log('🔍 Transcription:', transcription);
       let transcribedText = transcription.text;
