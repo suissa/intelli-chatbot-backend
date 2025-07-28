@@ -176,6 +176,7 @@ export class PharmacyControllerImpl implements PharmacyController {
             });
           } 
           
+          
           if (messageType === "conversation") {
 
             const messageText = request.body?.data?.message?.conversation;
