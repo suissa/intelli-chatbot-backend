@@ -192,7 +192,7 @@ export class PharmacyControllerImpl implements PharmacyController {
               replyText = '❌ Desculpe, não consegui entender sua solicitação.';
             }
             history.push({ role: 'assistant', content: replyText, name: 'assistant' });
-
+            console.log("history", history);
             console.log("replyText", replyText);
             await client.messages.sendText({
               number: '5515991957645', // || request.body?.data?.key.remoteJid,
