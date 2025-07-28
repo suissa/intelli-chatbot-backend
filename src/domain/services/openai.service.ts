@@ -972,10 +972,11 @@ Responda à próxima mensagem do cliente com base no histórico da conversa.
 
   ---
 
-  Crie um texto que deve ser apenas 2 linhas:
+  Crie um texto que deve ser apenas 3 linhas:
   
-  '🤔 **LEVE ${nomePrincipal} (R$ ${precoPrincipal.toFixed(2).replace('.', ',')})   + ${nomeComplementar} (R$ ${precoComplementar.toFixed(2).replace('.', ',')}), com 10% OFF: só R$ ${precoTotal.toFixed(2).replace('.', ',')}?**'  
-  '\n\n⚠️ **Essa condição é exclusiva para essa conversa.**'
+  '🤔 LEVE ${nomePrincipal} (R$ ${precoPrincipal.toFixed(2).replace('.', ',')})   + ${nomeComplementar} (R$ ${precoComplementar.toFixed(2).replace('.', ',')}), com 10% OFF: *só R$ ${precoTotal.toFixed(2).replace('.', ',')}?*'  
+  \n\n❤️ _[Escreva uma frase explicando o maior benefício da combinação]_
+  '\n\n⚠️ **Essa condição é exclusiva para essa conversa. Você deseja adiquirir essa oferta?**'
     `.trim();
 
     const response = await this.openai.chat.completions.create({

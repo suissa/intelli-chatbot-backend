@@ -263,14 +263,14 @@ export class PharmacyControllerImpl implements PharmacyController {
                 
                 await client.messages.sendText({
                   number: '5515991957645',
-                  text: 'Pagamento confirmado! Valor: R$ ' + pix.pixInfo.valor + '. Muito obrigado.',
+                  text: '👩🏻‍🦰 Pagamento confirmado! Valor: R$ ' + pix.pixInfo.valor + '. Muito obrigado.',
                 });
                 return;
               }
 
               await client.messages.sendText({
                 number: '5515991957645',
-                text: 'Não foi possível identificar o pagamento. Tente novamente.',
+                text: '👩🏻‍🦰 Não foi possível identificar o pagamento. Tente novamente.',
               });
               return;
             } else {
@@ -290,7 +290,7 @@ export class PharmacyControllerImpl implements PharmacyController {
               this.chatHistoryMap[number] = history;
               await client.messages.sendText({
                 number: '5515991957645',
-                text: response?.content || 'teste 123 ',
+                text: "👩🏻‍🦰 " + response?.content || 'teste 123 ',
               });
               return;
             }
@@ -340,7 +340,7 @@ export class PharmacyControllerImpl implements PharmacyController {
               });
               await client.messages.sendText({
                 number: '5515991957645', // || request.body?.data?.key.remoteJid,
-                text: response?.content || 'teste 123 ',
+                text: "👩🏻‍🦰 " + response?.content || 'teste 123 ',
               });
               return;
             }
@@ -386,42 +386,17 @@ export class PharmacyControllerImpl implements PharmacyController {
               return;
             }
 
-            const hasChavePix = response?.content?.toLowerCase().includes('chave pix');
-            
-            console.log("hasChavePix text", hasChavePix);
-            if (hasChavePix) {
-              const regexValorPix = /(?:R\$|reais)?\s?([\d,.]{2,})/gi;
-              console.log("regexValorPix", regexValorPix);
-              const match = response?.content?.match(regexValorPix);
-              console.log("match", match);
-              if (match) {
-                this.pixValue = Number(match[1].replace('R$', '').replace('reais', '').replace(',', '.'));
-                console.log("this.pixValue", this.pixValue);
-              }
-
-              await client.chats.updatePresence({
-                number: number,
-                presence: "composing",
-                duration: 5000,
-                delay: 5000,
-              });
-              await client.messages.sendText({
-                number: '5515991957645', // || request.body?.data?.key.remoteJid,
-                text: response?.content || 'teste 123 ',
-              });
-              return;
-            }
             let replyText = '';
 
             if (Array.isArray(response)) {
               // é um array de Remedio
-              replyText = '📦 Produtos encontrados:\n' + response.map(r => `• ${r.nome}`).join('\n');
+              replyText = '👩🏻‍🦰 Produtos encontrados:\n' + response.map(r => `• ${r.nome}`).join('\n');
             } else if (response && 'content' in response) {
               // é um objeto com campo content
               replyText = response.content || '';
               
             } else {
-              replyText = '❌ Desculpe, não consegui entender sua solicitação.';
+              replyText = '👩🏻‍🦰 Desculpe, não consegui entender sua solicitação.';
             }
             history.push({ role: 'user', content: messageText, name: 'user' }); // ✅ adiciona input do usuário
 
@@ -433,7 +408,7 @@ export class PharmacyControllerImpl implements PharmacyController {
             
             await client.messages.sendText({
               number: '5515991957645', // || request.body?.data?.key.remoteJid,
-              text: replyText || 'teste 123 ',
+              text: "👩🏻‍🦰 " + replyText || 'teste 123 ',
             });
           }
         }
