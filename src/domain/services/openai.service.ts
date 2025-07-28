@@ -35,7 +35,7 @@ export class OpenAIService {
 
   async searchProductAndCorrelations(productName: string): Promise<any> {
     try {
-      console.log('🔍 Pesquisando produto e correlações...', productName);
+      console.log('🔍 searchProductAndCorrelations Pesquisando produto e correlações...', productName);
       
       const prompt = `
         Você é um excelente vendedor de farmácia, experiente, carismático e muito persuasivo.
@@ -72,7 +72,7 @@ export class OpenAIService {
         Você gostaria de aproveitar essa promoção exclusiva e levar o ${productName} + [nome do correlato], totalizando R$ [valor com desconto]?  
         *Essa condição é exclusiva para essa conversa.*
       `;
-
+      console.log("searchProductAndCorrelations prompt", prompt);
       const response = await this.openai.chat.completions.create({
         model: "gpt-4o-mini",
         messages: [
