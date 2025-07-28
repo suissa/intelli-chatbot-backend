@@ -24,6 +24,7 @@ export class OpenAIService {
   private openai: OpenAI;
   private drugsRepository: DrugsRepository;
   constructor() {
+    console.log('🔑 OPENAI_API_KEY utilizada:', process.env.OPENAI_API_KEY); 
     this.openai = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY || 'sk-your-api-key-here',
     });
