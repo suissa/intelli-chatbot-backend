@@ -37,6 +37,7 @@ const palavrasParaNumeros: Record<string, number> = {
 @injectable()
 export class OpenAIService {
   private openai: OpenAI;
+  private lastMessage: string = '';
   constructor(
     @inject(TYPES.DrugsRepository) private drugsRepository: DrugsRepository
   ) {
@@ -648,12 +649,16 @@ export class OpenAIService {
   }
 
   async queryProduct(userMessage: string, history: ChatCompletionMessageParam[] = []) {
+    if (this.lastMessage == userMessage) {
+      return false;
+    }
     
     // if (history[history.length - 2]?.role === 'user' && history[history.length - 2]?.content == userMessage ||
     //   history[history.length - 1]?.role === 'user' && history[history.length - 1]?.content == userMessage 
     // ) {
     //   return false;
     // }
+    this.lastMessage = userMessage;
     const flatHistory = history
       .map((msg) => `${msg.role === 'user' ? 'Cliente' : 'Atendente'}: ${msg.content}`)
       .join('\n');
