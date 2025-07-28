@@ -171,7 +171,7 @@ export class PharmacyControllerImpl implements PharmacyController {
             console.log("response da image", response);
 
             await client.messages.sendText({
-              number: request.body?.data?.message?.from?.id,
+              number: '5515991957645',
               text: 'teste 123 ',
             });
           } 
