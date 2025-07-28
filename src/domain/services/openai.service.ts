@@ -357,11 +357,12 @@ export class OpenAIService {
       Produto pesquisado: ${productName}
 
       🛑 IMPORTANTE:
-      - Os itens devem ser **complementares reais** do produto pesquisado, **não da mesma categoria**.
+      - "Retorne apenas produtos complementares nas categorias: Alívio de sintomas associados e Saúde preventiva ou suporte.
       - Liste exatamente **20 produtos complementares**, no formato:
         Nome - R$ preço - Categoria
       - Não use números no nome do produto.
       - Não use bullet ou numeração no nome.
+      - retorne em ordem de complementaridade, começando pelo mais complementar e terminando pelo menos complementar.
       ---
 
       **PRODUTOS CORRELACIONADOS:**
@@ -561,7 +562,7 @@ export class OpenAIService {
     const flatHistory = history
       .map((msg) => `${msg.role === 'user' ? 'Cliente' : 'Atendente'}: ${msg.content}`)
       .join('\n');
-
+    console.log("queryProduct history", history);
     console.log("flatHistory", flatHistory);
     const singleItemCheck = this.generateSingleItemResponseFromHistory(userMessage, history);
 
