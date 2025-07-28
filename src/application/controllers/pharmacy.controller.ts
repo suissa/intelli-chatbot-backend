@@ -159,7 +159,7 @@ export class PharmacyControllerImpl implements PharmacyController {
           
           console.log('🧠 Histórico carregado:', this.chatHistoryMap[number]);
           if (messageType === "imageMessage") {
-            const image = request.body?.data?.message?.imageMessage;
+            const image = request.body?.data?.message?.imageMessage?.base64;
             // salve a img com Date.now convertemndo uma string base64 em jpg
             const imageBuffer = Buffer.from(image, "base64");
             const imagePath = path.join(process.cwd(), "temp", `${Date.now()}.jpg`);
