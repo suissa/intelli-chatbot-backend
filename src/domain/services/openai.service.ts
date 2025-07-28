@@ -649,6 +649,9 @@ export class OpenAIService {
   }
 
   async queryProduct(userMessage: string, history: ChatCompletionMessageParam[] = []) {
+    
+    console.log("queryProduct this.lastMessage", this.lastMessage);
+    console.log("queryProduct userMessage", userMessage);
     if (this.lastMessage == userMessage) {
       return false;
     }
