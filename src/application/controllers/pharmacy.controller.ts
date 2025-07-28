@@ -172,6 +172,47 @@ export class PharmacyControllerImpl implements PharmacyController {
     }
   }
 
+  normalizeHistory(messages: ChatCompletionMessageParam[]): { role: string; content: string; name?: string }[] {
+    return messages.map(msg => {
+      let content = '';
+  
+      if (typeof msg.content === 'string') {
+        content = msg.content;
+      } else if (Array.isArray(msg.content)) {
+        content = msg.content.map(part => part.type === 'text' ? part.text : '').join('');
+      }
+  
+      return {
+        role: msg.role,
+        content,
+        name: (msg as any).name, // opcional
+      };
+    });
+  }
+
+  findLastPromoAfterMatchingUserInput(
+    history: { role: string; content: string; name?: string }[],
+    currentMessage: string
+  ): string | null {
+    for (let i = history.length - 1; i >= 0; i--) {
+      const userMsg = history[i];
+      if (userMsg?.role === 'user' && currentMessage.includes(userMsg?.content)) {
+        // Encontramos uma mensagem parecida, agora procuramos a próxima do assistant
+        for (let j = i + 1; j < history.length; j++) {
+          const assistantMsg = history[j];
+          if (
+            assistantMsg?.role === 'assistant' &&
+            assistantMsg?.content.includes('Pensando especialmente em você')
+          ) {
+            return assistantMsg?.content;
+          }
+        }
+        break; // para evitar encontrar múltiplos
+      }
+    }
+    return null;
+  }
+
   async webhook(
     request: FastifyRequest<{ Body: Record<string, any> }>,
     reply: FastifyReply
@@ -371,6 +412,55 @@ export class PharmacyControllerImpl implements PharmacyController {
             if (messageText == '') {
               return;
             }
+
+            const lastPromo = this.findLastPromoAfterMatchingUserInput(this.normalizeHistory(history), messageText);
+            console.log("lastPromo", lastPromo);
+            if (lastPromo) {
+
+
+            
+              const hasChavePix = lastPromo?.toLowerCase().includes('chave pix');
+              
+              console.log("hasChavePix text lastPromo", hasChavePix);
+              if (hasChavePix) {
+                const regexValorPix = /(?:R\$|reais)?\s?([\d,.]{2,})/gi;
+                console.log("regexValorPix", regexValorPix);
+                const match = lastPromo?.match(regexValorPix);
+                console.log("match", match);
+                if (match) {
+                  const val = (match[0].includes('R$') ? match[0] : match[1]);    
+                  this.pixValue = Number(val?.replace('R$', '').replace('reais', '').replace(',', '.'));
+                  console.log("this.pixValue", this.pixValue);
+                }
+
+                await client.chats.updatePresence({
+                  number: "5515991957645",
+                  presence: "composing",
+                  duration: 5000,
+                  delay: 5000,
+                });
+                await client.messages.sendText({
+                  number: '5515991957645', // || request.body?.data?.key.remoteJid,
+                  text: lastPromo || 'teste 123 ',
+                });
+                return;
+              }
+              await client.chats.updatePresence({
+                number: "5515991957645",
+                presence: "composing",
+                duration: 5000,
+                delay: 5000,
+              });
+              await client.messages.sendText({
+                number: '5515991957645', // || request.body?.data?.key.remoteJid,
+                text: lastPromo || 'teste 123 ',
+              });
+              // const response = await this.openaiService.queryProduct(lastPromo || '', history);
+              // console.log("response da lastPromo", response);
+              // history.push({ role: 'assistant', content: response?.content || '', name: 'assistant' }); // ✅ adiciona input do usuário
+              // this.chatHistoryMap[number] = history;
+            }
+
             const response = await this.openaiService.queryProduct(messageText || '', history);
             console.log("response da messageText", response);
 
