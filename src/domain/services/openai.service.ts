@@ -310,6 +310,8 @@ export class OpenAIService {
         max_tokens: 1200,
       });
   
+
+      
       const content = response.choices[0]?.message?.content || '';
       console.log("searchProductAndCorrelations content", content);
   
