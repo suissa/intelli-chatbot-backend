@@ -205,9 +205,9 @@ export class OpenAIService {
       return 'Desculpe, não foi possível gerar a apresentação no momento.';
     }
   }
-  extractJsonPix(texto: string): { valor: string | undefined, destino: string | undefined } | null {
-    const contemComprovante = texto.toLowerCase().includes('comprovante de transferência');
-    if (!contemComprovante) return null;
+  extractJsonPix(texto: string): { valor: number | undefined, destino: string | undefined } | null {
+    // const contemComprovante = texto.toLowerCase().includes('comprovante de transferência');
+    // if (!contemComprovante) return null;
   
     const regexValor = /(?:R\$)\s?([\d,.]+)/i;
     const regexDestino = /(?:nome|destino)[^a-zA-Z0-9]*([A-Z\s]{5,})/i;
@@ -215,9 +215,11 @@ export class OpenAIService {
     const valorMatch = texto.match(regexValor);
     const destinoMatch = texto.match(regexDestino);
   
+    console.log("extractJsonPix valorMatch", valorMatch);
+    console.log("extractJsonPix destinoMatch", destinoMatch);
     if (valorMatch && destinoMatch) {
       const json = {
-        valor: valorMatch?.[1]?.replace(',', '.'),
+        valor: Number(valorMatch?.[1]?.replace(',', '.')),
         destino: destinoMatch?.[1]?.trim()
       };
       return json;
@@ -254,9 +256,11 @@ export class OpenAIService {
       ],
       max_tokens: 1000,
     });
-    const responseContent = this.extractJsonPix(response.choices[0]?.message?.content || '');
+    const responseContent = response.choices[0]?.message?.content || '';
+    const jsonPix = this.extractJsonPix(responseContent);
+    console.log("extractPixInformation jsonPix", jsonPix);
     console.log("extractPixInformation responseContent", responseContent);
-    return responseContent;
+    return jsonPix;
   }
   async createSpeech(text: string) {
     console.log("createSpeech text", text);
