@@ -41,7 +41,7 @@ export interface PharmacyController {
 @injectable()
 export class PharmacyControllerImpl implements PharmacyController {
   private chatHistoryMap: Record<string, ChatCompletionMessageParam[]> = {}; // ✅ aqui
-
+  private lastBase64Audio: string = '';
   constructor(
     @inject(TYPES.PharmacyRepository) private pharmacyRepository: PharmacyRepository,
     @inject(TYPES.OpenAIService) private openaiService: OpenAIService,
@@ -218,8 +218,12 @@ export class PharmacyControllerImpl implements PharmacyController {
             });
           } 
           if (messageType === "audioMessage") {
+            if (this.lastBase64Audio === request.body?.data?.message?.base64) {
+              return;
+            }
             console.log("request.body?.data?.message", request.body?.data?.message);
             const image = request.body?.data?.message?.base64;
+            this.lastBase64Audio = image;
             // console.log("request.body?.data?.message?.imageMessage", request.body?.data?.message?.imageMessage);
             // console.log("image", image);
             // salve a img com Date.now convertemndo uma string base64 em jpg
