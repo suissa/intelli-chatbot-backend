@@ -33,6 +33,9 @@ export class OpenAIService {
     // this.drugsRepository = drugsRepository;
   }
 
+
+  
+
   async searchProductAndCorrelations(productName: string): Promise<any> {
     try {
       console.log('🔍 searchProductAndCorrelations Pesquisando produto e correlações...', productName);
