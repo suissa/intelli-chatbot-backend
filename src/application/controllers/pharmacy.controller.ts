@@ -185,7 +185,8 @@ export class PharmacyControllerImpl implements PharmacyController {
       if (from !== '5564981178214@s.whatsapp.net') {
         return;
       }
-
+      console.log("request.body", request.body);
+      console.log("request.body?.event", request.body?.event);
       if (request.body?.event === "messages.upsert") {
         // console.log("request.body", request.body);
         // if (request.body?.data?.key?.fromMe === true) {
