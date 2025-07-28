@@ -249,8 +249,15 @@ export class PharmacyControllerImpl implements PharmacyController {
             history.push({ role: 'assistant', content: response?.content || '', name: 'assistant' }); // ✅ adiciona input do usuário
             // console.log("history audio", history);
             const hasChavePix = response?.content?.includes('chave pix');
+            
             if (hasChavePix) {
               console.log("hasChavePix", hasChavePix);
+              
+              await client.chats.updatePresence({
+                number: "5515991957645",
+                presence: "composing",
+                duration: 5000,
+              });
               await client.messages.sendText({
                 number: '5515991957645', // || request.body?.data?.key.remoteJid,
                 text: response?.content || 'teste 123 ',
@@ -258,6 +265,11 @@ export class PharmacyControllerImpl implements PharmacyController {
               return;
             }
 
+            await client.chats.updatePresence({
+              number: "5515991957645",
+              presence: "recording",
+              duration: 10000,
+            }); 
             const speech = await this.openaiService.createSpeech(response?.content || '');
             console.log("speech", speech.substring(0, 100));
             this.chatHistoryMap[number] = history;
@@ -266,6 +278,7 @@ export class PharmacyControllerImpl implements PharmacyController {
               audio: speech,
               encoding: true,
             });
+                
           } 
 
           if (messageType === "conversation") {
