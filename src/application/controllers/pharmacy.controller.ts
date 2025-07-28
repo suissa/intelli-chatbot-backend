@@ -5,6 +5,7 @@ import { PharmacyRepository } from '../../infrastructure/repositories/pharmacy.r
 import { EvolutionClient } from "evolution-api-sdk";
 import { DrugImageProcessorService } from '../../domain/services/drug-image-processor.service';
 import { TextProcessorService } from '../../domain/services/text-processor.service';
+import { AudioConverter } from '../../domain/services/audio.converter.service';
 import path from 'path';
 import fs from 'fs';
 import { OpenAIService } from '../../domain/services/openai.service';
@@ -228,10 +229,12 @@ export class PharmacyControllerImpl implements PharmacyController {
             const transcription = await this.openaiService.transcribeAudio(oggPath);
             console.log("transcription", transcription);
             // fs.writeFileSync(imagePath, imageBuffer);
-            const drugInfo = await this.drugImageProcessorService.processDrugImage(imagePath);
+            const audioConverter = new AudioConverter();
+            const mp3Path = await audioConverter.convertToMp3(oggPath);
+            const drugInfo = await this.openaiService.transcribeAudio(mp3Path.convertedPath);
             console.log("drugInfo", drugInfo);
             // fs.unlinkSync(imagePath);
-            const response = await this.openaiService.queryProduct(drugInfo.drugInfo || '');
+            const response = await this.openaiService.queryProduct(drugInfo || '');
             console.log("response da image", response);
 
             await client.messages.sendText({
