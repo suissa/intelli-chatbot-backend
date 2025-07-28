@@ -972,10 +972,7 @@ Responda à próxima mensagem do cliente com base no histórico da conversa.
 
   ---
 
-  Crie um texto de venda persuasivo e carismático para o cliente para vender um combo de 
-  ${nomePrincipal} e ${nomeComplementar} com 10% de desconto.
-
-  o texto final deve ser:
+  Crie um texto que deve ser apenas 2 linhas:
   
   '🤔 **LEVE ${nomePrincipal} (R$ ${precoPrincipal.toFixed(2).replace('.', ',')})   + ${nomeComplementar} (R$ ${precoComplementar.toFixed(2).replace('.', ',')}), com 10% OFF: só R$ ${precoTotal.toFixed(2).replace('.', ',')}?**'  
   '\n\n⚠️ **Essa condição é exclusiva para essa conversa.**'
