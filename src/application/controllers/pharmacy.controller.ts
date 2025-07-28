@@ -226,7 +226,9 @@ export class PharmacyControllerImpl implements PharmacyController {
             console.log("assistantMessage", assistantMessage);
             const hasChavePix = assistantMessage[assistantMessage.length - 1]?.content?.toString().toLowerCase().includes('chave pix');
             console.log("hasChavePix", hasChavePix);
-            if (hasChavePix) {
+            const hasFinalizaComprPossoFinalizar = assistantMessage[assistantMessage.length - 1]?.content?.toString().toLowerCase().includes('finalizar a compra para você');
+            console.log("hasFinalizaComprPossoFinalizar", hasFinalizaComprPossoFinalizar);
+            if (hasChavePix || hasFinalizaComprPossoFinalizar) {
               const regexValorPix = /(?:R\$|reais)?\s?([\d,.]{2,})/gi;
               const match = assistantMessage[assistantMessage.length - 1]?.content?.toString().match(regexValorPix);
               if (match) {
