@@ -240,10 +240,6 @@ export class PharmacyControllerImpl implements PharmacyController {
             );
             
             console.log("assistantMessage", assistantMessage);
-            // const hasChavePix =  assistantMessage?.content?.toString().toLowerCase().includes('chave pix');
-            // console.log("hasChavePix", hasChavePix);
-            // const hasFinalizaComprPossoFinalizar = assistantMessage?.content?.toString().toLowerCase().includes('R$');
-            // console.log("hasFinalizaComprPossoFinalizar", hasFinalizaComprPossoFinalizar);
             if (assistantMessage) {
               
               const pix = await this.drugImageProcessorService.processPixImage(imagePath);
@@ -254,6 +250,10 @@ export class PharmacyControllerImpl implements PharmacyController {
               if (Number(pixValueImage) === Number(this.pixValue)) {
                 console.log("PIX PAGO CARAIIIII");
                 // history.push({ role: 'user', content: pixInfo.valor, name: 'user' }); // ✅ adiciona input do usuário
+                
+                // dar baixa no estoque
+
+                
                 await client.messages.sendText({
                   number: '5515991957645',
                   text: 'Pagamento confirmado! Valor: R$ ' + pix.pixInfo.valor + '. Muito obrigado.',
