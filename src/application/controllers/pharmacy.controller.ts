@@ -160,12 +160,11 @@ export class PharmacyControllerImpl implements PharmacyController {
               number: request.body?.data?.message?.from?.id,
               text: 'teste 123 ',
             });
-          } else {
-            console.log(request.body?.data?.message);
-            let messageText = request.body?.data?.message?.conversation ||
-              request.body?.data?.message?.extendedTextMessage?.text ||
-              request.body?.data?.message?.ephemeralMessage?.message?.extendedTextMessage?.text;
-            console.log(messageText);
+          } 
+          
+          if (messageType === "conversation") {
+            const messageText = request.body?.data?.message?.conversation;
+            console.log("messageText", messageText);
             
             const response = await this.openaiService.queryProduct(messageText || '');
             console.log("response da messageText", response);
@@ -175,6 +174,22 @@ export class PharmacyControllerImpl implements PharmacyController {
               text: 'teste 123 ',
             });
           }
+          // else {
+            
+          //   console.log(request.body?.data?.message);
+          //   let messageText = request.body?.data?.message?.conversation ||
+          //     request.body?.data?.message?.extendedTextMessage?.text ||
+          //     request.body?.data?.message?.ephemeralMessage?.message?.extendedTextMessage?.text;
+          //   console.log(messageText);
+            
+          //   const response = await this.openaiService.queryProduct(messageText || '');
+          //   console.log("response da messageText", response);
+
+          //   await client.messages.sendText({
+          //     number: request.body?.data?.message?.from?.id,
+          //     text: 'teste 123 ',
+          //   });
+          // }
         }
         // if (messageType === "textMessage") {
         //   const text = request.body?.data?.message?.textMessage;
