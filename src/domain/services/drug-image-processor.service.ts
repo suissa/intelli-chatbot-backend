@@ -59,42 +59,13 @@ export class DrugImageProcessorServiceImpl implements DrugImageProcessorService 
       
       console.log('🤖 Enviando texto para extração de informações com OpenAI...');
       const drugName = await this.openaiService.extractPixInformation(extractedText);
-      console.log('💊 Informações extraídas drugName:', drugName);
+      console.log('💊 Informações extraídas pix:', drugName);
       
-      // 2. Buscar remédio no banco de dados
-      const drugs = await this.drugsRepository.searchDrugs(drugName);
-      console.log(`🔍 Encontrados ${drugs.length} remédios relacionados`);
       
-      if (drugs.length === 0) {
-        return {
-          success: false,
-          error: 'Nenhum remédio encontrado com base no texto extraído da imagem'
-        };
-      }
-
-      // 3. Pegar o primeiro resultado (mais relevante)
-      const drugInfo = drugs[0];
-      if (!drugInfo) {
-        return {
-          success: false,
-          error: 'Nenhum remédio encontrado'
-        };
-      }
-      console.log('💊 Remédio encontrado:', drugInfo.nome);
-
       return {
         success: true,
-        drugInfo: drugInfo.nome,
+        drugInfo: drugName,
         presentation: ''
-      };
-      // 4. Gerar apresentação com OpenAI
-      const presentation = await this.openaiService.generateDrugPresentation(drugInfo);
-      console.log('✨ Apresentação gerada com sucesso');
-
-      return {
-        success: true,
-        drugInfo,
-        presentation
       };
 
     } catch (error) {
