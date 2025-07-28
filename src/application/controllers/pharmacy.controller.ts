@@ -205,11 +205,11 @@ export class PharmacyControllerImpl implements PharmacyController {
         console.log("_____________________________________________________");
         const pushName = request.body?.data?.pushName;
         console.log("pushName", pushName);
-        const sender = request.body?.data?.sender;
+        const sender = request.body?.sender;
         console.log("sender", sender);
         const from = request.body?.data?.key?.remoteJid;
         console.log("from", from);
-        if (from === '5515991957645@s.whatsapp.net' && request.body?.data?.sender === '5515991957645@s.whatsapp.net') {
+        if (from === '5515991957645@s.whatsapp.net' && sender === '5515991957645@s.whatsapp.net') {
           const messageType = request.body?.data?.messageType;
           console.log("request.body?.data?.key", request.body?.data?.key);
           // console.log("request.body?.data", request.body?.data);
