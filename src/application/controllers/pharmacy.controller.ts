@@ -411,14 +411,14 @@ export class PharmacyControllerImpl implements PharmacyController {
             });
             const messageText = request.body?.data?.message?.conversation;
             console.log("messageText", messageText);
-            history.push({ role: 'user', content: messageText, name: 'user' }); // ✅ adiciona input do usuário
+            // history.push({ role: 'user', content: messageText, name: 'user' }); // ✅ adiciona input do usuário
 
             if (messageText == '') {
               return;
             }
 
-            const lastPromo = this.findLastPromoAfterMatchingUserInput(this.normalizeHistory(history), messageText);
-            console.log("lastPromo", lastPromo);
+            // const lastPromo = this.findLastPromoAfterMatchingUserInput(this.normalizeHistory(history), messageText);
+            // console.log("lastPromo", lastPromo);
             // if (lastPromo) {
 
 
