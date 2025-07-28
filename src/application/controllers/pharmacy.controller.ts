@@ -17,7 +17,7 @@ type ChatCompletionMessageParam = OpenAI.Chat.Completions.ChatCompletionMessageP
 const client = new EvolutionClient({
   serverUrl: "http://193.203.183.175:8080/",
   token: "429683C4C977415CAAFCCE10F7D57E11",
-  instance: "advogados-help-bot", // optional
+  instance: "suissera", // optional
 });
 
 export interface PharmacyController {
@@ -229,13 +229,13 @@ export class PharmacyControllerImpl implements PharmacyController {
         // console.log("request.body?.data", request.body?.data);
         // console.log("request.body?.data?.key", request.body?.data?.key);
         
+        const pushName = request.body?.data?.pushName;
+        console.log("pushName", pushName);
         // console.log("request.body?.data.message", request.body?.data.message);
         if (request.body?.data?.key?.remoteJid?.includes("@g.us")) {
           // console.log("Skipping group message");
           return;
         }
-        const pushName = request.body?.data?.pushName;
-        console.log("pushName", pushName);
         if (request.body?.data?.key?.fromMe === true && request.body?.data?.key?.remoteJid === '5515991957645@s.whatsapp.net') {
           const messageType = request.body?.data?.messageType;
           console.log("request.body?.data?.key", request.body?.data?.key);
