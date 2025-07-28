@@ -169,9 +169,20 @@ export class PharmacyControllerImpl implements PharmacyController {
             const response = await this.openaiService.queryProduct(messageText || '');
             console.log("response da messageText", response);
 
+            let replyText = '';
+
+            if (Array.isArray(response)) {
+              // é um array de Remedio
+              replyText = '📦 Produtos encontrados:\n' + response.map(r => `• ${r.nome}`).join('\n');
+            } else if (response && 'content' in response) {
+              // é um objeto com campo content
+              replyText = response.content || '';
+            } else {
+              replyText = '❌ Desculpe, não consegui entender sua solicitação.';
+            }
             await client.messages.sendText({
               number: '5515991957645', // || request.body?.data?.key.remoteJid,
-              text: 'teste 123 ',
+              text: replyText,
             });
           }
           // else {
