@@ -367,7 +367,8 @@ export class OpenAIService {
   tipo: "paracetamnol" 
   deve ser corrigido para: "paracetamol"
   chame a função \`check_inventory\` com o nome corrigido
-  para ver estoque e preço, mas se não for um remédio, pesquise por remédios relacionados
+  para ver estoque e preço, mas se não for um remédio, pesquise na sua inteligência 
+  por remédios relacionados
   a sua necessidade.
   4. Se não tiver estoque, responda “Desculpe, não temos {medicamento} em estoque.” e termine.
   5. Se tiver estoque:
