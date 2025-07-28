@@ -353,6 +353,13 @@ export class OpenAIService {
       console.log('🔍 Produtos correlacionados:', produtosCorrelacionados);
       console.log('🔍 Texto de venda:', textoDeVenda);
       
+
+      // const produtosCorrelacionadosArray = produtosCorrelacionados.split('\n').map(item => item.trim());
+      // console.log('🔍 Produtos correlacionados array:', produtosCorrelacionadosArray);
+
+      const produtosCorrelacionadosArray = await this.searchMultipleDrugsFromString(produtosCorrelacionados);
+      console.log('🔍 Produtos correlacionados array:', produtosCorrelacionadosArray);
+
       // Retornar como objeto estruturado (como em Python)
       return {
         caracteristicasDoProduto,
@@ -449,6 +456,27 @@ export class OpenAIService {
     const estilos = Object.keys(respostas);
     const escolhido = estilos[Math.floor(Math.random() * estilos.length)] as keyof typeof respostas;
     return respostas[escolhido];
+  }
+
+  async searchMultipleDrugsFromString(input: string): Promise<any[]> {
+    const results: any[] = [];
+  
+    const lines = input.split('\n').map(line => line.trim()).filter(Boolean);
+  
+    for (const line of lines) {
+      const [rawName] = line.split('-');
+      const remedio = rawName?.trim() || '';
+  
+      try {
+        const products = await this.drugsRepository.searchDrugs(remedio);
+        results.push({ nome: remedio, resultado: products });
+      } catch (error) {
+        console.error(`Erro ao buscar: ${remedio}`, error);
+        results.push({ nome: remedio, erro: true });
+      }
+    }
+  
+    return results;
   }
 
   async queryProduct(userMessage: string, history: ChatCompletionMessageParam[] = []) {
