@@ -222,21 +222,23 @@ export class PharmacyControllerImpl implements PharmacyController {
             const imagePath = path.join(process.cwd(), "temp", `${Date.now()}.jpg`);
             fs.writeFileSync(imagePath, imageBuffer);
 
+
+
             //precisa pegar a ultima mensagem do assistant
-            const assistantMessage = history.filter(message => message.role === 'assistant');
+            const assistantMessage = history.some(
+              msg =>
+                msg.role === 'assistant' &&
+                typeof msg.content === 'string' &&
+                msg.content.includes('Essa condição é exclusiva para essa conversa')
+            );
+            
             console.log("assistantMessage", assistantMessage);
-            const hasChavePix = assistantMessage[assistantMessage.length - 1]?.content?.toString().toLowerCase().includes('chave pix');
-            console.log("hasChavePix", hasChavePix);
-            const hasFinalizaComprPossoFinalizar = assistantMessage[assistantMessage.length - 1]?.content?.toString().toLowerCase().includes('R$');
-            console.log("hasFinalizaComprPossoFinalizar", hasFinalizaComprPossoFinalizar);
-            if (hasChavePix || hasFinalizaComprPossoFinalizar) {
-              const regexValorPix = /(?:R\$|reais)?\s?([\d,.]{2,})/gi;
-              const match = assistantMessage[assistantMessage.length - 1]?.content?.toString().match(regexValorPix);
-              console.log("hasFinalizaComprPossoFinalizar match", match);
-              if (match) {
-                this.pixValue = Number(match[0].replace('R$', '').replace('reais', '').replace(',', '.'));
-              }
-              console.log("this.pixValue", this.pixValue);
+            // const hasChavePix =  assistantMessage?.content?.toString().toLowerCase().includes('chave pix');
+            // console.log("hasChavePix", hasChavePix);
+            // const hasFinalizaComprPossoFinalizar = assistantMessage?.content?.toString().toLowerCase().includes('R$');
+            // console.log("hasFinalizaComprPossoFinalizar", hasFinalizaComprPossoFinalizar);
+            if (assistantMessage) {
+              
               const pix = await this.drugImageProcessorService.processPixImage(imagePath);
               console.log("pix", pix);
               console.log("pix.pixInfo.valor", pix.pixInfo.valor);
@@ -374,8 +376,10 @@ export class PharmacyControllerImpl implements PharmacyController {
               const match = response?.content?.match(regexValorPix);
               console.log("match", match);
               if (match) {
-                this.pixValue = Number(match[0].replace('R$', '').replace('reais', '').replace(',', '.'));
+                this.pixValue = Number(match[1].replace('R$', '').replace('reais', '').replace(',', '.'));
+                console.log("this.pixValue", this.pixValue);
               }
+
               await client.chats.updatePresence({
                 number: "5515991957645",
                 presence: "composing",
