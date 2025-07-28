@@ -208,10 +208,13 @@ export class PharmacyControllerImpl implements PharmacyController {
             fs.writeFileSync(imagePath, imageBuffer);
             const drugInfo = await this.drugImageProcessorService.processDrugImage(imagePath);
             console.log("drugInfo", drugInfo);
+            history.push({ role: 'user', content: drugInfo.drugInfo || '', name: 'user' }); // ✅ adiciona input do usuário
+            // console.log("history user", history);
             // fs.unlinkSync(imagePath);
-            const response = await this.openaiService.queryProduct(drugInfo.drugInfo || '');
+            const response = await this.openaiService.queryProduct(drugInfo.drugInfo || '', history);
             console.log("response da image", response);
-
+            history.push({ role: 'assistant', content: response?.content || '', name: 'assistant' }); // ✅ adiciona input do usuário
+            console.log("history image", history);
             await client.messages.sendText({
               number: '5515991957645',
               text: response?.content || 'teste 123 ',
@@ -237,10 +240,12 @@ export class PharmacyControllerImpl implements PharmacyController {
             const mp3Path = await audioConverter.convertToMp3(oggPath);
             const drugInfo = await this.openaiService.transcribeAudio(mp3Path.convertedPath);
             console.log("drugInfo", drugInfo);
+            history.push({ role: 'user', content: drugInfo || '', name: 'user' }); // ✅ adiciona input do usuário
             // fs.unlinkSync(imagePath);
-            const response = await this.openaiService.queryProduct(drugInfo || '');
+            const response = await this.openaiService.queryProduct(drugInfo || '', history);
             console.log("response da image", response);
-
+            history.push({ role: 'assistant', content: response?.content || '', name: 'assistant' }); // ✅ adiciona input do usuário
+            console.log("history audio", history);
             await client.messages.sendText({
               number: '5515991957645',
               text: response?.content || 'teste 123 ',
