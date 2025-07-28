@@ -454,7 +454,15 @@ Siga rigorosamente este fluxo em cada mensagem:
             found: true
           };
         }
-        return products;
+        const lista = products
+          .map((p) => `• ${p.nome} – R$ ${p.preco.toFixed(2).replace('.', ',')}`)
+          .join('\n');
+
+        return {
+          role: 'assistant',
+          name: 'assistant',
+          content: `📦 Produtos encontrados:\n${lista}`
+        } satisfies ChatCompletionMessageParam;
 
       }
       const fallbackMessage = `❌ Desculpe, não temos ${nomeRemedio} em estoque.`;
