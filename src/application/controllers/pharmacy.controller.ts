@@ -347,6 +347,12 @@ export class PharmacyControllerImpl implements PharmacyController {
 
           if (messageType === "conversation") {
 
+            await client.chats.updatePresence({
+              number: "5515991957645",
+              presence: "composing",
+              duration: 10000,
+              delay: 10000,
+            });
             const messageText = request.body?.data?.message?.conversation;
             console.log("messageText", messageText);
             history.push({ role: 'user', content: messageText, name: 'user' }); // ✅ adiciona input do usuário

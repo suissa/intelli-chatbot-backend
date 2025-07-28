@@ -213,8 +213,6 @@ export class OpenAIService {
     console.log("extractJsonPix strJson", strJson);
     const json = JSON.parse(strJson);
     console.log("extractJsonPix json", json);
-    json.valor = Number(json.valor.replace(',', '.'));
-    console.log("extractJsonPix json", json.valor);
     return json;
     // const regexValor = /(?:R\$)\s?([\d,.]+)/i;
     // const regexDestino = /(?:nome|destino)[^a-zA-Z0-9]*([A-Z\s]{5,})/i;
