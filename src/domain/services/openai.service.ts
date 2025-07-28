@@ -975,14 +975,9 @@ Responda à próxima mensagem do cliente com base no histórico da conversa.
   Crie um texto de venda persuasivo e carismático para o cliente para vender um combo de 
   ${nomePrincipal} e ${nomeComplementar} com 10% de desconto.
 
-  deve iniciar com:
-  '📢 **Pensando especialmente em você criei essa oferta única:**  
-  que tal levar o **_${nomePrincipal}_ (R$ ${precoPrincipal.toFixed(2).replace('.', ',')})** junto com **_${nomeComplementar}_ (R$ ${precoComplementar.toFixed(2).replace('.', ',')})?**'
+  o texto final deve ser:
   
-  [Explique qual o benefício da combinação entre eles em um texto curto e direto]  
-
-  finalize a mnensagem com o seguinte texto:
-  '🤔 **Você gostaria de aproveitar essa promoção exclusiva e levar o ${nomePrincipal} + ${nomeComplementar}, totalizando R$ ${precoTotal.toFixed(2).replace('.', ',')}?**'  
+  '🤔 **LEVE ${nomePrincipal} (R$ ${precoPrincipal.toFixed(2).replace('.', ',')})   + ${nomeComplementar} (R$ ${precoComplementar.toFixed(2).replace('.', ',')}), com 10% OFF: só R$ ${precoTotal.toFixed(2).replace('.', ',')}?**'  
   '\n\n⚠️ **Essa condição é exclusiva para essa conversa.**'
     `.trim();
 
