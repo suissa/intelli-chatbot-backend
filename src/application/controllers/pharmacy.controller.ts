@@ -221,25 +221,38 @@ export class PharmacyControllerImpl implements PharmacyController {
             const imagePath = path.join(process.cwd(), "temp", `${Date.now()}.jpg`);
             fs.writeFileSync(imagePath, imageBuffer);
 
-            const pix = await this.drugImageProcessorService.processPixImage(imagePath);
-            console.log("pix", pix);
-            console.log("pix.pixInfo.valor", pix.pixInfo.valor);
-            console.log("pixValue", this.pixValue);
-            if (Number(pix.pixInfo.valor) === Number(this.pixValue)) {
-              console.log("PIX PAGO CARAIIIII");
-              // history.push({ role: 'user', content: pixInfo.valor, name: 'user' }); // ✅ adiciona input do usuário
+            //precisa pegar a ultima mensagem do assistant
+            const assistantMessage = history.filter(message => message.role === 'assistant');
+            console.log("assistantMessage", assistantMessage);
+            const hasChavePix = assistantMessage[assistantMessage.length - 1]?.content?.toString().toLowerCase().includes('chave pix');
+            console.log("hasChavePix", hasChavePix);
+            if (hasChavePix) {
+              const regexValorPix = /(?:R\$|reais)?\s?([\d,.]{2,})/gi;
+              const match = assistantMessage[assistantMessage.length - 1]?.content?.toString().match(regexValorPix);
+              if (match) {
+                this.pixValue = Number(match[0].replace('R$', '').replace('reais', '').replace(',', '.'));
+              }
+              
+              const pix = await this.drugImageProcessorService.processPixImage(imagePath);
+              console.log("pix", pix);
+              console.log("pix.pixInfo.valor", pix.pixInfo.valor);
+              console.log("pixValue", this.pixValue);
+              if (Number(pix.pixInfo.valor) === Number(this.pixValue)) {
+                console.log("PIX PAGO CARAIIIII");
+                // history.push({ role: 'user', content: pixInfo.valor, name: 'user' }); // ✅ adiciona input do usuário
+                await client.messages.sendText({
+                  number: '5515991957645',
+                  text: 'Pagamento confirmado! Valor: R$ ' + pix.pixInfo.valor + '. Muito obrigado.',
+                });
+                return;
+              }
+
               await client.messages.sendText({
                 number: '5515991957645',
-                text: 'Pagamento confirmado! Valor: R$ ' + pix.pixInfo.valor + '. Muito obrigado.',
+                text: 'Não foi possível identificar o pagamento. Tente novamente.',
               });
               return;
             }
-
-            await client.messages.sendText({
-              number: '5515991957645',
-              text: 'Não foi possível identificar o pagamento. Tente novamente.',
-            });
-            return;
 
             const drugInfo = await this.drugImageProcessorService.processDrugImage(imagePath);
             console.log("drugInfo", drugInfo);
