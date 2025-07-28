@@ -38,6 +38,8 @@ export interface PharmacyController {
 
 }
 
+let pixValue = 0;
+
 @injectable()
 export class PharmacyControllerImpl implements PharmacyController {
   private chatHistoryMap: Record<string, ChatCompletionMessageParam[]> = {}; // ✅ aqui
@@ -211,14 +213,16 @@ export class PharmacyControllerImpl implements PharmacyController {
             const imagePath = path.join(process.cwd(), "temp", `${Date.now()}.jpg`);
             fs.writeFileSync(imagePath, imageBuffer);
 
-            const pixInfo = await this.drugImageProcessorService.processPixImage(imagePath);
-            console.log("pixInfo", pixInfo);
-
-            if (pixInfo) {
+            const pix = await this.drugImageProcessorService.processPixImage(imagePath);
+            console.log("pix", pix);
+            console.log("pix.pixInfo.valor", pix.pixInfo.valor);
+            console.log("pixValue", pixValue);
+            if (pix.pixInfo.valor === Number(pixValue)) {
+              console.log("PIX PAGO CARAIIIII");
               // history.push({ role: 'user', content: pixInfo.valor, name: 'user' }); // ✅ adiciona input do usuário
               await client.messages.sendText({
                 number: '5515991957645',
-                text: 'Pagamento confirmado! Valor: R$ ' + pixInfo.toString() + '. Muito obrigado.',
+                text: 'Pagamento confirmado! Valor: R$ ' + pix.pixInfo.valor + '. Muito obrigado.',
               });
               return;
             }
@@ -275,7 +279,11 @@ export class PharmacyControllerImpl implements PharmacyController {
             
             console.log("hasChavePix", hasChavePix);
             if (hasChavePix) {
-              
+              const regexValorPix = /(?:R\$|reais)?\s?([\d,.]{2,})/gi;
+              const match = response?.content?.match(regexValorPix);
+              if (match) {
+                pixValue = match[0].replace('R$', '').replace('reais', '').replace(',', '.');
+              }
               await client.chats.updatePresence({
                 number: "5515991957645",
                 presence: "composing",
