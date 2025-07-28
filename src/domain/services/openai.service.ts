@@ -39,41 +39,42 @@ export class OpenAIService {
       
       const prompt = `
         Você é um ótimo vendedor de farmácia, experiente e persuasivo. 
-        
+
         Produto pesquisado: ${productName}
-        
-        
+
         Sua tarefa é:
-        1. Analisar o produto pesquisado e listar suas características principais
-        2. Identificar 1 correlativo que normalmente é comprado junto com o produto pesquisado 
-        (use seu conhecimento sobre farmácia, mas não escolha remédios da mesma categoria).
-        Tente achar um produto que seja complementar ao produto pesquisado, 
-        como um produto que auxilia no uso do produto pesquisado ou para outros 
-        sintomas normalmente associados ao produto pesquisado.
-        3. Criar um texto persuasivo de venda tentando vender o correlativo junto com o produto pesquisado
-        
-        Formato da resposta:
+
+        1. Analisar o item pesquisado e listar suas características principais.
+        2. Identificar 1 item complementar que costuma ser comprado junto com ele. 
+          Evite medicamentos da mesma categoria.
+          Foque em itens que ajudem a potencializar, complementar ou aliviar sintomas associados.
+
+        3. Criar uma frase de venda (sem saudação), usando o seguinte formato:
+
+        ---
+
         **CARACTERÍSTICAS DO PRODUTO:**
-        [Liste as características principais do produto pesquisado]
-        
+
+        [Liste as principais características de forma clara e objetiva]
+
         **PRODUTOS CORRELACIONADOS:**
-        [Liste 1 produto que são comprados em conjunto, com nome, preço e categoria] na seguinte estrutura:
-        [Nome] - [Preço] - [Categoria]
 
-        no Nome retorne apenas o nome do produto sem ordem numerica
-        
+        [Nome do item] - [Preço] - [Categoria]
+
+        (Não use numeração no nome, nem bullet)
+
         **TEXTO DE VENDA:**
-        [Crie um texto persuasivo tentando vender um produto correlacionado 
-        junto com o produto pesquisado, cite o preço dos 2 produtos após citar seus nomes. Utilize o nome do produto pesquisado e o 
-        nome do produto correlacionado no texto. Não use a palavra "correlacionado" 
-        no texto. Não use a palavra "produto" no texto.
-        
-        Seja um ótimo vendedor, use emojis, destaque benefícios, seja convincente mas honesto]
-        
-        Use muitos emojis relevantes e seja muito persuasivo como um excelente vendedor!
 
-        No final pergunte se deseja comprar o produto pesquisado ou o combo dos 2 produtos.
-        indique que na compra dos 2 produtos, o cliente ganha um desconto de 10%.
+        Pensei especialmente em você: que tal levar o ${productName} (R$ [preço do produto pesquisado]) junto com o [nome do item correlato] (R$ [preço do correlato])?
+
+        Eles funcionam super bem juntos e podem acelerar muito a sua melhora.  
+        💡 Essa combinação foi pensada para otimizar seu cuidado com um toque extra de bem-estar.  
+
+        💰 E tem mais: levando os dois agora, você garante **10% de desconto no total**.  
+
+        Você gostaria de aproveitar essa oportunidade e levar o ${productName} + [nome do correlato] com o desconto exclusivo, 
+        totalizando R$ [valor com desconto]? Essa promoção é exclusiva para você! E vale apenas para essa compra.
+
       `;
 
       const response = await this.openai.chat.completions.create({
