@@ -348,11 +348,19 @@ export class OpenAIService {
   }
 
   async queryProduct(userMessage: string, history: ChatCompletionMessageParam[] = []) {
+    const flatHistory = history
+      .map((msg) => `${msg.role === 'user' ? 'Cliente' : 'Atendente'}: ${msg.content}`)
+      .join('\n');
+
+      console.log("flatHistory", flatHistory);
     const systemPrompt: ChatCompletionMessageParam = {
       role: 'system',
       name: 'system',
       content: `
   Você é um vendedor sênior de farmácia. Siga este fluxo: 
+  Você deve lembrar dos medicamentos mencionados anteriormente mesmo se o cliente não repetir o nome.
+  Se o cliente disser algo como "quero ele", use o último medicamento que você sugeriu.
+
   1. Sempre que o cliente falar (saudação ou pergunta), responda adequadamente.
   2. Se perguntar por um remédio, extraia o nome do medicamento.
   3. Se o cliente falar sobre um remédio, mas corrija o nome do remédio caso venha errado
@@ -368,7 +376,11 @@ export class OpenAIService {
   6. Aguarde a resposta do cliente.
   7. Se o cliente confirmar a compra (combo ou item único), gere a chave PIX.
   8. Retorne ao cliente a chave PIX 123456.
-  `.trim()
+  Histórico da conversa até agora:
+${flatHistory}
+
+Agora responda à próxima mensagem do cliente, considerando o histórico acima.
+`.trim()
     };
   
     // Monta o histórico completo

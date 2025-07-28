@@ -175,7 +175,8 @@ export class PharmacyControllerImpl implements PharmacyController {
           if (messageType === "conversation") {
             const messageText = request.body?.data?.message?.conversation;
             console.log("messageText", messageText);
-            
+            history.push({ role: 'user', content: messageText, name: 'user' }); // ✅ adiciona input do usuário
+
             const response = await this.openaiService.queryProduct(messageText || '', history);
             console.log("response da messageText", response);
 
