@@ -17,7 +17,7 @@ type ChatCompletionMessageParam = OpenAI.Chat.Completions.ChatCompletionMessageP
 const client = new EvolutionClient({
   serverUrl: "http://193.203.183.175:8080/",
   token: "429683C4C977415CAAFCCE10F7D57E11",
-  instance: "advogados-help-bot", // optional
+  instance: "suissera", // optional
 });
 
 export interface PharmacyController {
