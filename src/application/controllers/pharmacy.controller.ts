@@ -185,10 +185,10 @@ export class PharmacyControllerImpl implements PharmacyController {
       if (from !== '556481178214@s.whatsapp.net') {
         return;
       }
-      console.log("request.body", request.body);
+      // console.log("request.body", request.body);
       console.log("request.body?.event", request.body?.event);
       if (request.body?.event === "messages.upsert") {
-        // console.log("request.body", request.body);
+        console.log("request.body", request.body);
         // if (request.body?.data?.key?.fromMe === true) {
         //   return;
         // }
@@ -369,7 +369,7 @@ export class PharmacyControllerImpl implements PharmacyController {
           } 
 
           if (messageType === "conversation") {
-
+            console.log("messageType conversation");
             await client.chats.updatePresence({
               number: "5515991957645",
               presence: "composing",
