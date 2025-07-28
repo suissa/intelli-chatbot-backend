@@ -266,7 +266,7 @@ export class PharmacyControllerImpl implements PharmacyController {
               return;
             }
 
-            const delayOfSpeech = SpeechEstimator.estimateTranscriptionTime(response?.content || '');
+            const delayOfSpeech = SpeechEstimator.estimateTranscriptionTime(response?.content || '', 'gpt-4o-transcribe');
             console.log("delayOfSpeech", delayOfSpeech);
 
             await client.chats.updatePresence({
