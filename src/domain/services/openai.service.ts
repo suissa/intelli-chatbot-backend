@@ -347,25 +347,29 @@ export class OpenAIService {
     }
   }
 
-  async queryProduct(userMessage: string) {
-    const systemPrompt = `
-Você é um vendedor sênior de farmácia. Siga este fluxo: 
-1. Sempre que o cliente falar (saudação ou pergunta), responda adequadamente.
-2. Se perguntar por um remédio, extraia o nome do medicamento.
-3. Chame a função \`check_inventory\` para ver estoque e preço.
-4. Se não tiver estoque, responda “Desculpe, não temos {medicamento} em estoque.” e termine.
-5. Se tiver estoque:
-   a) O modelo mesmo deve gerar 10 produtos relacionados, com nome e um preço estimado.
-   b) Envie ao cliente: “Temos {medicamento} por R$ {preco}. Também recomendamos: {rel1} por R$ {preco1}, {rel2} por R$ {preco2}, … Na compra dos 2 (ou 3), oferecemos 10% de desconto. Deseja seguir com esse combo ou apenas {medicamento}?”
-6. Aguarde a resposta do cliente.
-7. Se o cliente confirmar a compra (combo ou item único), gere a chave PIX.
-8. Retorne ao cliente a chave PIX 123456.
-`.trim();
-
-
-    // Monte o histórico da conversa
+  async queryProduct(userMessage: string, history: ChatCompletionMessageParam[] = []) {
+    const systemPrompt: ChatCompletionMessageParam = {
+      role: 'system',
+      name: 'system',
+      content: `
+  Você é um vendedor sênior de farmácia. Siga este fluxo: 
+  1. Sempre que o cliente falar (saudação ou pergunta), responda adequadamente.
+  2. Se perguntar por um remédio, extraia o nome do medicamento.
+  3. Chame a função \`check_inventory\` para ver estoque e preço.
+  4. Se não tiver estoque, responda “Desculpe, não temos {medicamento} em estoque.” e termine.
+  5. Se tiver estoque:
+     a) O modelo mesmo deve gerar 10 produtos relacionados, com nome e um preço estimado.
+     b) Envie ao cliente: “Temos {medicamento} por R$ {preco}. Também recomendamos: {rel1} por R$ {preco1}, {rel2} por R$ {preco2}, … Na compra dos 2 (ou 3), oferecemos 10% de desconto. Deseja seguir com esse combo ou apenas {medicamento}?”
+  6. Aguarde a resposta do cliente.
+  7. Se o cliente confirmar a compra (combo ou item único), gere a chave PIX.
+  8. Retorne ao cliente a chave PIX 123456.
+  `.trim()
+    };
+  
+    // Monta o histórico completo
     const promptMessages: ChatCompletionMessageParam[] = [
-      { role: 'system', content: systemPrompt, name: 'system' },
+      systemPrompt,
+      ...history,
       { role: 'user', content: userMessage, name: 'user' }
     ];
     const functions = [
