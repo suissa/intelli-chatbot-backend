@@ -44,6 +44,7 @@ export class PharmacyControllerImpl implements PharmacyController {
   private chatHistoryMap: Record<string, ChatCompletionMessageParam[]> = {}; // ✅ aqui
   private lastBase64Audio: string = '';
   private pixValue: number = 0;
+  private testNumber: string = '5515991957645';
   constructor(
     @inject(TYPES.PharmacyRepository) private pharmacyRepository: PharmacyRepository,
     @inject(TYPES.OpenAIService) private openaiService: OpenAIService,
@@ -51,6 +52,7 @@ export class PharmacyControllerImpl implements PharmacyController {
     @inject(TYPES.TextProcessorService) private textProcessorService: TextProcessorService
   ) {
     this.pixValue = 20.00;
+    this.testNumber = '5515991957645';
   }
 
   // async processPixImage(imagePath: string): Promise<void> {
@@ -200,8 +202,13 @@ export class PharmacyControllerImpl implements PharmacyController {
           console.log("Skipping group message");
           return;
         } 
+        console.log("_____________________________________________________");
         const pushName = request.body?.data?.pushName;
         console.log("pushName", pushName);
+        const sender = request.body?.data?.sender;
+        console.log("sender", sender);
+        const from = request.body?.data?.key?.remoteJid;
+        console.log("from", from);
         if (from === '5515991957645@s.whatsapp.net' && request.body?.data?.sender === '5515991957645@s.whatsapp.net') {
           const messageType = request.body?.data?.messageType;
           console.log("request.body?.data?.key", request.body?.data?.key);
@@ -262,14 +269,14 @@ export class PharmacyControllerImpl implements PharmacyController {
 
                 
                 await client.messages.sendText({
-                  number: '5515991957645',
+                  number: this.testNumber,
                   text: '👩🏻‍🦰 Pagamento confirmado! Valor: R$ ' + pix.pixInfo.valor + '. Muito obrigado.',
                 });
                 return;
               }
 
               await client.messages.sendText({
-                number: '5515991957645',
+                number: this.testNumber,
                 text: '👩🏻‍🦰 Não foi possível identificar o pagamento. Tente novamente.',
               });
               return;
@@ -277,23 +284,28 @@ export class PharmacyControllerImpl implements PharmacyController {
               
               const drugInfo = await this.drugImageProcessorService.processDrugImage(imagePath);
               console.log("drugInfo", drugInfo);
-              history.push({ role: 'user', content: drugInfo.drugInfo || '', name: 'user' }); // ✅ adiciona input do usuário
               // console.log("history user", history);
               // fs.unlinkSync(imagePath);
               const response = await this.openaiService.queryProduct(drugInfo.drugInfo || '', history);
               console.log("response da image", response);
               
 
-              history.push({ role: 'assistant', content: response?.content || '', name: 'assistant' }); // ✅ adiciona input do usuário
-              // console.log("history image", history);
+
+              if (response && 'content' in response) {
+                history.push({ role: 'user', content: drugInfo.drugInfo || 'sem informação da imagem', name: 'user' }); // ✅ adiciona input do usuário
               
-              this.chatHistoryMap[number] = history;
-              await client.messages.sendText({
-                number: '5515991957645',
-                text: "👩🏻‍🦰 " + response?.content || 'teste 123 ',
-              });
+                history.push({ role: 'assistant', content: response?.content || '', name: 'assistant' }); // ✅ adiciona input do usuário
+                // console.log("history image", history);
+                
+                this.chatHistoryMap[number] = history;
+                  await client.messages.sendText({
+                    number: this.testNumber,
+                    text: "👩🏻‍🦰 " + response?.content,
+                  });
+                }
+                
+              }
               return;
-            }
 
           } 
           if (messageType === "audioMessage") {
@@ -316,52 +328,58 @@ export class PharmacyControllerImpl implements PharmacyController {
             const mp3Path = await audioConverter.convertToMp3(oggPath);
             const drugInfo = await this.openaiService.transcribeAudio(mp3Path.convertedPath);
             console.log("audioMessage drugInfo", drugInfo);
-            history.push({ role: 'user', content: drugInfo || '', name: 'user' }); // ✅ adiciona input do usuário
             // fs.unlinkSync(imagePath);
             const response = await this.openaiService.queryProduct(drugInfo || '', history);
+            console.log("response da audio", response);// ✅ adiciona input do usuário
             // console.log("response da image", response);
-            
-            history.push({ role: 'assistant', content: response?.content || '', name: 'assistant' }); // ✅ adiciona input do usuário
-            // console.log("history audio", history);
-            const hasChavePix = response?.content?.toLowerCase().includes('chave pix');
-            
-            console.log("hasChavePix", hasChavePix);
-            if (hasChavePix) {
-              const regexValorPix = /(?:R\$|reais)?\s?([\d,.]{2,})/gi;
-              const match = response?.content?.match(regexValorPix);
-              if (match) {
-                this.pixValue = Number(match[0].replace('R$', '').replace('reais', '').replace(',', '.'));
+            if (response && 'content' in response) {
+              
+              history.push({ role: 'user', content: drugInfo || 'sem informação da imagem', name: 'user' }); 
+              history.push({ role: 'assistant', content: response?.content || '', name: 'assistant' }); // ✅ adiciona input do usuário
+              // console.log("history audio", history);
+              const hasChavePix = response?.content?.toLowerCase().includes('chave pix');
+              
+              console.log("hasChavePix", hasChavePix);
+              if (hasChavePix) {
+                const regexValorPix = /(?:R\$|reais)?\s?([\d,.]{2,})/gi;
+                const match = response?.content?.match(regexValorPix);
+                if (match) {
+                  this.pixValue = Number(match[0].replace('R$', '').replace('reais', '').replace(',', '.'));
+                }
+                await client.chats.updatePresence({
+                  number: number,
+                  presence: "composing",
+                  duration: 5000,
+                  delay: 5000,
+                });
+                await client.messages.sendText({
+                  number: this.testNumber, // || request.body?.data?.key.remoteJid,
+                  text: "👩🏻‍🦰 " + response?.content,
+                });
+                return;
               }
+
+              const delayOfSpeech = SpeechEstimator.estimateTranscriptionTime(response?.content || '', 'gpt-4o-transcribe');
+              console.log("delayOfSpeech", delayOfSpeech);
+
               await client.chats.updatePresence({
                 number: number,
-                presence: "composing",
-                duration: 5000,
-                delay: 5000,
+                presence: "recording",
+                duration: delayOfSpeech*1000,
+                delay: delayOfSpeech*1000,
+              }); 
+              const speech = await this.openaiService.createSpeech(response?.content || '');
+              console.log("speech", speech.substring(0, 100));
+              this.chatHistoryMap[number] = history;
+              await client.messages.sendVoice({
+                number: this.testNumber,
+                audio: speech,
+                encoding: true,
               });
-              await client.messages.sendText({
-                number: '5515991957645', // || request.body?.data?.key.remoteJid,
-                text: "👩🏻‍🦰 " + response?.content || 'teste 123 ',
-              });
-              return;
             }
 
-            const delayOfSpeech = SpeechEstimator.estimateTranscriptionTime(response?.content || '', 'gpt-4o-transcribe');
-            console.log("delayOfSpeech", delayOfSpeech);
 
-            await client.chats.updatePresence({
-              number: number,
-              presence: "recording",
-              duration: delayOfSpeech*1000,
-              delay: delayOfSpeech*1000,
-            }); 
-            const speech = await this.openaiService.createSpeech(response?.content || '');
-            console.log("speech", speech.substring(0, 100));
-            this.chatHistoryMap[number] = history;
-            await client.messages.sendVoice({
-              number: '5515991957645',
-              audio: speech,
-              encoding: true,
-            });
+            
                 
           } 
 
@@ -407,8 +425,8 @@ export class PharmacyControllerImpl implements PharmacyController {
 
             
             await client.messages.sendText({
-              number: '5515991957645', // || request.body?.data?.key.remoteJid,
-              text: "👩🏻‍🦰 " + replyText || 'teste 123 ',
+              number: this.testNumber, // || request.body?.data?.key.remoteJid,
+              text: "👩🏻‍🦰 " + replyText,
             });
           }
         }

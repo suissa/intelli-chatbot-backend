@@ -321,7 +321,12 @@ export class OpenAIService {
         language: "pt",
         response_format: "json",
         temperature: 0.3,
-        prompt: "Use o portugês brasileiro. Transcreva o áudio para texto, sempre tente buscar algum nome de remédio ou algum número inteiro, para o áudio, sem nenhum outro texto antes ou depois. Se não conseguir transcrever, retorne 'Não foi possível transcrever o áudio'.",
+        prompt: `Use o portugês brasileiro. 
+        Transcreva o áudio para texto, sempre tente buscar algum nome de remédio ou algum número inteiro, 
+        sem nenhum outro texto antes ou depois. 
+        Valores monetários estão em R$ (reais).
+        Converta ML para mililitros, g para gramas, mg para miligramas, cps para cápsulas, etc.
+        Se não conseguir transcrever, retorne 'Não foi possível transcrever o áudio'.`,
       });
       console.log('🔍 Transcription:', transcription);
       let transcribedText = transcription.text;
