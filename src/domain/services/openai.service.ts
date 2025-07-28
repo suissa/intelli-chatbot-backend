@@ -209,21 +209,28 @@ export class OpenAIService {
     // const contemComprovante = texto.toLowerCase().includes('comprovante de transferência');
     // if (!contemComprovante) return null;
   
-    const regexValor = /(?:R\$)\s?([\d,.]+)/i;
-    const regexDestino = /(?:nome|destino)[^a-zA-Z0-9]*([A-Z\s]{5,})/i;
+    const strJson = texto.replace(/```json\n|```/g, '');
+    console.log("extractJsonPix strJson", strJson);
+    const json = JSON.parse(strJson);
+    console.log("extractJsonPix json", json);
+    json.valor = Number(json.valor.replace(',', '.'));
+    console.log("extractJsonPix json", json.valor);
+    return json;
+    // const regexValor = /(?:R\$)\s?([\d,.]+)/i;
+    // const regexDestino = /(?:nome|destino)[^a-zA-Z0-9]*([A-Z\s]{5,})/i;
   
-    const valorMatch = texto.match(regexValor);
-    const destinoMatch = texto.match(regexDestino);
+    // const valorMatch = texto.match(regexValor);
+    // const destinoMatch = texto.match(regexDestino);
   
-    console.log("extractJsonPix valorMatch", valorMatch);
-    console.log("extractJsonPix destinoMatch", destinoMatch);
-    if (valorMatch && destinoMatch) {
-      const json = {
-        valor: Number(valorMatch?.[1]?.replace(',', '.')),
-        destino: destinoMatch?.[1]?.trim()
-      };
-      return json;
-    }
+    // console.log("extractJsonPix valorMatch", valorMatch);
+    // console.log("extractJsonPix destinoMatch", destinoMatch);
+    // if (valorMatch && destinoMatch) {
+    //   const json = {
+    //     valor: Number(valorMatch?.[1]?.replace(',', '.')),
+    //     destino: destinoMatch?.[1]?.trim()
+    //   };
+    //   return json;
+    // }
   
     return null;
   }
