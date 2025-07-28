@@ -21,6 +21,19 @@ const DrugsInformationExtraction = z.object({
   observations: z.string(),
 });
 
+const palavrasParaNumeros: Record<string, number> = {
+  'um': 1, 'uma': 1,
+  'dois': 2, 'duas': 2,
+  'três': 3, 'tres': 3,
+  'quatro': 4,
+  'cinco': 5,
+  'seis': 6,
+  'sete': 7,
+  'oito': 8,
+  'nove': 9,
+  'dez': 10,
+};
+
 @injectable()
 export class OpenAIService {
   private openai: OpenAI;
@@ -219,8 +232,17 @@ export class OpenAIService {
         response_format: "json",
       });
       console.log('🔍 Transcription:', transcription);
-      const transcribedText = transcription.text;
-      
+      let transcribedText = transcription.text;
+      const textoLimpo = transcribedText
+        .toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // remove acento
+        .replace(/[^\w\s]/g, '') // remove pontuação
+
+      const numero = palavrasParaNumeros[textoLimpo.trim()] ?? null;
+      if (numero !== null) {
+        console.log(`🔢 Palavra reconhecida como número: ${numero}`);
+        transcribedText = numero.toString(); // ou return numero se quiser número inteiro
+      }
       console.log('✅ Transcrição concluída com sucesso');
       console.log(`📝 Texto transcrito: ${transcribedText.substring(0, 100)}...`);
       
