@@ -182,7 +182,7 @@ export class PharmacyControllerImpl implements PharmacyController {
       const from = request.body?.data?.key?.remoteJid;
       console.log("from", from);
 
-      if (from !== '5564981178214@s.whatsapp.net') {
+      if (from == '556481178214@s.whatsapp.net') {
         return;
       }
       console.log("request.body", request.body);
