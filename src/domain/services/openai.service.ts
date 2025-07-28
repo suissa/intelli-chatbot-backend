@@ -35,7 +35,7 @@ export class OpenAIService {
 
   async searchProductAndCorrelations(productName: string): Promise<any> {
     try {
-      console.log('🔍 Pesquisando produto e correlações...');
+      console.log('🔍 Pesquisando produto e correlações...', productName);
       
       const prompt = `
         Você é um excelente vendedor de farmácia, experiente, carismático e muito persuasivo.
@@ -521,12 +521,12 @@ Responda à próxima mensagem do cliente com base no histórico da conversa.
         const lista = products
           .map((p) => `• ${p.nome} – R$ ${p.preco.toFixed(2).replace('.', ',')}`)
           .join('\n');
-
+        console.log("products", products);
         if (products[0]?.nome) {
           const productsCorrelacionados = await this.searchProductAndCorrelations(products[0]?.nome || '');
-          products[0]!.produtosCorrelacionados = productsCorrelacionados;
+          // products[0]!.produtosCorrelacionados = productsCorrelacionados;
           const produto = products[0];
-          const correlacionado = produto?.produtosCorrelacionados[0]; // Pega o primeiro correlacionado para o exemplo
+          // const correlacionado = produto?.produtosCorrelacionados[0]; // Pega o primeiro correlacionado para o exemplo
           
           const textoVenda = productsCorrelacionados.textoDeVenda;
           console.log("VENHAA textoVenda2", textoVenda);
