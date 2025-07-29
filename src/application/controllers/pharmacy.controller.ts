@@ -182,7 +182,7 @@ export class PharmacyControllerImpl implements PharmacyController {
       // console.log(request.body);
       // const pharmacy = await this.pharmacyRepository.getPharmacyByCNPJ(cnpj);
       const from = request.body?.data?.key?.remoteJid;
-      console.log("request.body?.data?.key", request.body?.data?.key);
+      console.log("1) request.body?.data?.key", request.body?.data?.key);
 
       if (!this.testNumbers.includes(from)) {
         return;
@@ -209,9 +209,10 @@ export class PharmacyControllerImpl implements PharmacyController {
         console.log("sender", sender);
         const from = request.body?.data?.key?.remoteJid;
         console.log("from", from);
-        if (from === '5515991957645@s.whatsapp.net' && sender === '5515991957645@s.whatsapp.net') {
+        if (from === '556499238287@s.whatsapp.net') {
+          console.log("MENSAGEM DO CAIO", from);
           const messageType = request.body?.data?.messageType;
-          console.log("request.body?.data?.key", request.body?.data?.key);
+          console.log("2) request.body?.data?.key", request.body?.data?.key);
           // console.log("request.body?.data", request.body?.data);
           // console.log("request.body?.data?.key", request.body?.data?.key);
           
