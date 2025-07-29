@@ -50,16 +50,13 @@ export function getCaption(request: any) {
   return request.body?.data?.message?.imageMessage?.caption;
 }
 export async function handleImageMessage(request: any, 
-  client: any, 
   history: Array<any>,
   chatHistoryMap: ChatCompletionMessageParam[] | undefined,
   pharmacyClient: any) {
   const number = getNumber(request);
   const from = getFrom(request);
-  await client.chats.updatePresence({
-    number: number,
+  await clientEvo.chats.updatePresence(number, {
     presence: "composing",
-    duration: 10000,
     delay: 10000,
   });
   // console.log("request.body?.data?.message", request.body?.data?.message);
@@ -97,14 +94,14 @@ export async function handleImageMessage(request: any,
       // dar baixa no estoque
 
       
-      await client.messages.sendText({
+      await clientEvo.messages.sendText({
         number: from,
         text: '👩🏻‍🦰 Pagamento confirmado! Valor: R$ ' + pix.pixInfo.valor + '. Muito obrigado.',
       });
       return;
     }
 
-    await client.messages.sendText({
+    await clientEvo.messages.sendText({
       number: from,
       text: '👩🏻‍🦰 Não foi possível identificar o pagamento. Tente novamente.',
     });
@@ -129,7 +126,7 @@ export async function handleImageMessage(request: any,
       if (chatHistoryMap) {
           chatHistoryMap = history as ChatCompletionMessageParam[];
       }
-        await client.messages.sendText({
+        await clientEvo.messages.sendText({
           number: from,
           text: "👩🏻‍🦰 " + response?.content,
         });
@@ -142,7 +139,6 @@ export async function handleImageMessage(request: any,
 
 
 export async function handleTextMessage(request: any, 
-  client: any, 
   history: Array<any>,
   chatHistoryMap: ChatCompletionMessageParam[] | undefined,
   pharmacyClient: any) {
@@ -238,7 +234,6 @@ export async function saveOggFile(base64String: string): Promise<string> {
 
 
 export async function handleAudioMessage(request: any, 
-  client: any, 
   history: Array<any>,
   chatHistoryMap: ChatCompletionMessageParam[] | undefined,
   pharmacyClient: any) {

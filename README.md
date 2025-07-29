@@ -5,6 +5,16 @@
 
 ![](https://github.com/JaidedAI/EasyOCR/blob/master/examples/easyocr_framework.jpeg?raw=true)
 
+
+
+- busca de cada remédio da imagem primeiramente na lista do estoque
+  - remoção desses remédios desse  texto extraído
+  - envio desse texto para a LLM extrair o nome dos remédios do texto
+  - pedindo para que ela sugira outros remédios que podem ser substitutos dos remédios que ela extraiu no texto
+  - pois esses remédios não temos em estoque
+  - sugestão: salvar cada remédio substituto no banco de dados, eu usaria o Neo4J colocando cada remédio como um nó sendo as aresta o valor = substituto (com peso alto)
+  - pois a próxima vez que um cliente pedir um remédio que não em estoque basta buscar todos os rmédios conectados, via aresta substituto, quais deles temos em estoque, economizando requests na LLM
+
 ## Algoritmos de Matching
 
 Tendo em vista que a interação textual é nossa fonte da verdade, precisamos de mecanismos de entendimento textual mesmo ele não estando corretamente escrito, não podemos ficar questionando o cliente apenas por um erro simples.
@@ -17,10 +27,10 @@ Para isso eu defini 4 formas difentes de encontra palavras similares, podemos en
 
 - Threshold-Based Similarity Matching: faz a busca pela porcentagem mínima de similaridade, ex: 75%. Se eu enviar BEPAN vai retornar BEPANTRIZ (ele é utilizado pelo ElasticSeach)
 - Matching Fuzzy: mede a distância entre as strings e calcula número mínimo de edições (inserções, exclusões ou substituições) necessárias para transformar uma string em outra. 
-- Damerau-Levenshtein Distance: faz a , iremos utilizar ele para deduplicar dados da base das conversas dos clientes para unificar palavras iguais escritas diferente, graças a operação de transposição podemos até dar pesos diferentes para erros como: nas bordas onde pe mais difícil ter erros o peso deve ser mais alto
+- Damerau-Levenshtein Distance: faz a , iremos utilizar ele para deduplicar dados da base das conversas dos clientes para unificar palavras iguais escritas diferente, graças a operação de transposição podemos até dar pesos diferentes para erros, penalizando mais erros incomuns e priorizando as palavras com menor distância, ou seja, as com erros costumeiros.
 - Soundex
 
-Um algoritmo usado pelo ElasticSearch e chatbots é o Threshold-Based Similarity Matching. E implementeio o Matching Fuzzy, que a faz a busca aproximada e também pode ser usado para deduplicação dos dados, algo deveras para a normalização das palavbras aumentando assim sua correlação semântica, pois a correlação se dá pela distância dos vetores, a mesma palavra escrita de formas diferentes geram vetores diferentes. Para sermos mais tolerantes a erros precisamos de forma obrigatória implementar um algoritmo que leva em conta erros de digitação, parecido com os que existem nos teclados de celular, nesse projeto escolhi o , que faz a busca "eliminado" erros de digitação. E o que eu gosto muito de usar o Soundex. 
+Um algoritmo usado pelo ElasticSearch e chatbots é o Threshold-Based Similarity Matching. E implementei o Matching Fuzzy, que a faz a busca aproximada e também pode ser usado para deduplicação dos dados, algo deveras para a normalização das palavbras aumentando assim sua correlação semântica, pois a correlação se dá pela distância dos vetores, a mesma palavra escrita de formas diferentes geram vetores diferentes. Para sermos mais tolerantes a erros precisamos de forma obrigatória implementar um algoritmo que leva em conta erros de digitação, parecido com os que existem nos teclados de celular, nesse projeto escolhi o , que faz a busca "eliminado" erros de digitação. E o que eu gosto muito de usar o Soundex. 
 
 Até reusei um código que eu forkei em JS, de um amigo meu, de 13 anos atrás, que usava muito por ele ser deveras elegante, tanto sua implementação com REGEX que pode ser reusada em qualquer linguagem de programação, com o algorítmo em si:
 https://gist.github.com/suissa/2493801
