@@ -182,7 +182,7 @@ export class PharmacyControllerImpl implements PharmacyController {
       // console.log(request.body);
       // const pharmacy = await this.pharmacyRepository.getPharmacyByCNPJ(cnpj);
       const from = request.body?.data?.key?.remoteJid;
-      console.log("from", from);
+      console.log("request.body?.data?.key", request.body?.data?.key);
 
       if (!this.testNumbers.includes(from)) {
         return;
