@@ -23,6 +23,7 @@ const client = new EvolutionClient({
   instance: "suissera", // optional
 });
 
+console.log("client", client);
 export interface PharmacyController {
   getAllPharmacies(request: FastifyRequest, reply: FastifyReply): Promise<void>;
   getPharmacyById(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply): Promise<void>;
