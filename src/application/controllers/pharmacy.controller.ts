@@ -179,11 +179,10 @@ export class PharmacyControllerImpl implements PharmacyController {
     reply: FastifyReply
   ): Promise<void> {
     try {
-      console.log(request.body);
       // const pharmacy = await this.pharmacyRepository.getPharmacyByCNPJ(cnpj);
       const from = request.body?.data?.key?.remoteJid;
 
-      if (!this.testNumbers.includes(from) || !from) {
+      if (from !== '556499238287@s.whatsapp.net'  && from !== '55991957645@s.whatsapp.net') {
         return;
       }
       console.log("1) request.body?.data?.key", request.body?.data?.key);
