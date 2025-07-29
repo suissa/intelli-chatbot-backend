@@ -9,6 +9,14 @@ import { OCRService } from "../services/ocr";
 import { OpenAIService } from "../services/openai.service";
 import {ChatCompletionMessageParam} from "openai/resources/chat/completions";
 import { AudioConverter } from '../services/audio.converter.service';
+import { EvolutionClient } from "evolution-api-sdk";
+
+
+export const clientEvo = new EvolutionClient({
+  serverUrl: "http://193.203.183.175:8080/",
+  token: "429683C4C977415CAAFCCE10F7D57E11",
+  instance: "suissera", // optional
+});
 
 const drugImageProcessorService = new DrugImageProcessorServiceImpl(
   new DrugsRepository(), new OCRService(), new OpenAIService(new DrugsRepository()));
@@ -142,10 +150,8 @@ export async function handleTextMessage(request: any,
   const from = getFrom(request);
   const message = getMessage(request);
   console.log("message", message);
-  await client.chats.updatePresence({
-    number: number,
-    presence: "composing",
-    duration: 10000,
+  await clientEvo.chats.updatePresence(number, {
+      presence: "composing",
     delay: 10000,
   });
   const messageText = getMessage(request);
@@ -184,7 +190,7 @@ export async function handleTextMessage(request: any,
   }
 
   
-  await client.messages.sendText({
+  await clientEvo.messages.sendText({
     number: from, // || request.body?.data?.key.remoteJid,
     text: "👩🏻‍🦰 " + replyText,
   });
@@ -277,13 +283,11 @@ export async function handleAudioMessage(request: any,
       if (match) {
         pharmacyClient.pixValue = Number(match[0].replace('R$', '').replace('reais', '').replace(',', '.'));
       }
-      await client.chats.updatePresence({
-        number: number,
+      await clientEvo.chats.updatePresence(number, {
         presence: "composing",
-        duration: 5000,
         delay: 5000,
       });
-      await client.messages.sendText({
+      await clientEvo.messages.sendText({
         number: from, // || request.body?.data?.key.remoteJid,
         text: "👩🏻‍🦰 " + response?.content,
       });
@@ -293,10 +297,8 @@ export async function handleAudioMessage(request: any,
     const delayOfSpeech = SpeechEstimator.estimateTranscriptionTime(response?.content || '', 'gpt-4o-transcribe');
     console.log("delayOfSpeech", delayOfSpeech);
 
-    await client.chats.updatePresence({
-      number: number,
+    await clientEvo.chats.updatePresence(number,      {
       presence: "recording",
-      duration: delayOfSpeech*1000,
       delay: delayOfSpeech*1000,
     }); 
     const speech = await openaiService.createSpeech(response?.content || '');
@@ -304,7 +306,7 @@ export async function handleAudioMessage(request: any,
     if (chatHistoryMap) {
       chatHistoryMap = history as ChatCompletionMessageParam[];
     }
-    await client.messages.sendVoice({
+    await clientEvo.messages.sendVoice({
       number: from,
       audio: speech,
       encoding: true,
