@@ -182,11 +182,11 @@ export class PharmacyControllerImpl implements PharmacyController {
       // console.log(request.body);
       // const pharmacy = await this.pharmacyRepository.getPharmacyByCNPJ(cnpj);
       const from = request.body?.data?.key?.remoteJid;
-      console.log("1) request.body?.data?.key", request.body?.data?.key);
 
-      if (!this.testNumbers.includes(from)) {
+      if (!this.testNumbers.includes(from) || !from) {
         return;
       }
+      console.log("1) request.body?.data?.key", request.body?.data?.key);
       // console.log("request.body", request.body);
       console.log("request.body?.event", request.body?.event);
       if (request.body?.event === "messages.upsert") {
