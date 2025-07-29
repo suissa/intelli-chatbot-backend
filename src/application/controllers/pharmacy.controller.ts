@@ -44,7 +44,7 @@ export class PharmacyControllerImpl implements PharmacyController {
   private chatHistoryMap: Record<string, ChatCompletionMessageParam[]> = {}; // ✅ aqui
   private lastBase64Audio: string = '';
   private pixValue: number = 0;
-  private testNumber: string = '5515991957645';
+  private testNumbers: string[] = ['5515991957645', '556481178214', '556499238287'];
   constructor(
     @inject(TYPES.PharmacyRepository) private pharmacyRepository: PharmacyRepository,
     @inject(TYPES.OpenAIService) private openaiService: OpenAIService,
@@ -52,7 +52,7 @@ export class PharmacyControllerImpl implements PharmacyController {
     @inject(TYPES.TextProcessorService) private textProcessorService: TextProcessorService
   ) {
     this.pixValue = 20.00;
-    this.testNumber = '5515991957645';
+    this.testNumbers = ['5515991957645', '556481178214', '556499238287'];
   }
 
   // async processPixImage(imagePath: string): Promise<void> {
@@ -184,7 +184,7 @@ export class PharmacyControllerImpl implements PharmacyController {
       const from = request.body?.data?.key?.remoteJid;
       console.log("from", from);
 
-      if (from !== '5515991957645@s.whatsapp.net' && from !== '556481178214@s.whatsapp.net' ) {
+      if (!this.testNumbers.includes(from)) {
         return;
       }
       // console.log("request.body", request.body);
@@ -221,7 +221,7 @@ export class PharmacyControllerImpl implements PharmacyController {
           const number = request.body?.data?.key?.remoteJid?.replace('@s.whatsapp.net', '');
           const history = this.chatHistoryMap[number] || [];
           if (history.length > 20) {
-            history.splice(0, history.length - 20); // mantém só as últimas 20
+            history.splice(0, history.length - 50); // mantém só as últimas 20
           }
           
           console.log('🧠 Histórico carregado:', this.chatHistoryMap[number]);
@@ -250,7 +250,7 @@ export class PharmacyControllerImpl implements PharmacyController {
               msg =>
                 msg.role === 'assistant' &&
                 typeof msg.content === 'string' &&
-                msg.content.includes('Essa condição é exclusiva para essa conversa')
+                msg.content.toLowerCase().includes('basta enviar o pix para a chave')
             );
             
             console.log("assistantMessage", assistantMessage);
@@ -269,14 +269,14 @@ export class PharmacyControllerImpl implements PharmacyController {
 
                 
                 await client.messages.sendText({
-                  number: this.testNumber,
+                  number: from,
                   text: '👩🏻‍🦰 Pagamento confirmado! Valor: R$ ' + pix.pixInfo.valor + '. Muito obrigado.',
                 });
                 return;
               }
 
               await client.messages.sendText({
-                number: this.testNumber,
+                number: from,
                 text: '👩🏻‍🦰 Não foi possível identificar o pagamento. Tente novamente.',
               });
               return;
@@ -299,7 +299,7 @@ export class PharmacyControllerImpl implements PharmacyController {
                 
                 this.chatHistoryMap[number] = history;
                   await client.messages.sendText({
-                    number: this.testNumber,
+                    number: from,
                     text: "👩🏻‍🦰 " + response?.content,
                   });
                 }
@@ -353,7 +353,7 @@ export class PharmacyControllerImpl implements PharmacyController {
                   delay: 5000,
                 });
                 await client.messages.sendText({
-                  number: this.testNumber, // || request.body?.data?.key.remoteJid,
+                  number: from, // || request.body?.data?.key.remoteJid,
                   text: "👩🏻‍🦰 " + response?.content,
                 });
                 return;
@@ -372,7 +372,7 @@ export class PharmacyControllerImpl implements PharmacyController {
               console.log("speech", speech.substring(0, 100));
               this.chatHistoryMap[number] = history;
               await client.messages.sendVoice({
-                number: this.testNumber,
+                number: from,
                 audio: speech,
                 encoding: true,
               });
@@ -395,12 +395,14 @@ export class PharmacyControllerImpl implements PharmacyController {
             console.log("messageText", messageText);
 
             if (messageText == '') {
+              console.log("messageText vazio");
               return;
             }
             const response = await this.openaiService.queryProduct(messageText || '', history);
             console.log("response da messageText", response);
 
             if (response === false) {
+              console.log("textMessage response false");
               return;
             }
 
@@ -411,13 +413,12 @@ export class PharmacyControllerImpl implements PharmacyController {
               replyText = '👩🏻‍🦰 Produtos encontrados:\n' + response.map(r => `• ${r.nome}`).join('\n');
             } else if (response && 'content' in response) {
               // é um objeto com campo content
-              replyText = response.content || '';
+              replyText = response.content;
               
             } else {
               replyText = '👩🏻‍🦰 Desculpe, não consegui entender sua solicitação.';
             }
             history.push({ role: 'user', content: messageText, name: 'user' }); // ✅ adiciona input do usuário
-
             history.push({ role: 'assistant', content: replyText, name: 'assistant' });
             // console.log("history", history);
             console.log("replyText", replyText);
@@ -425,7 +426,7 @@ export class PharmacyControllerImpl implements PharmacyController {
 
             
             await client.messages.sendText({
-              number: this.testNumber, // || request.body?.data?.key.remoteJid,
+              number: from, // || request.body?.data?.key.remoteJid,
               text: "👩🏻‍🦰 " + replyText,
             });
           }
