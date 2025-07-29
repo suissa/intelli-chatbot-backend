@@ -162,7 +162,7 @@ export class PharmacyControllerImpl implements PharmacyController {
       if (request.body?.event === "messages.upsert") {
         console.log("request.body?.data", request.body?.data);
         const from = request.body?.data?.key?.remoteJid;
-        if (from === '55991957645@s.whatsapp.net') {
+        if (request.body?.data?.key?.remoteJid === '5515991957645@s.whatsapp.net') {
           this.pharmacyClients[from] = this.pharmacyClients[from] || {
             pixValue: 0,
             history: [],
