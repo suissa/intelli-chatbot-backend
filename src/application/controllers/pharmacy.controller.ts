@@ -187,7 +187,7 @@ export class PharmacyControllerImpl implements PharmacyController {
           const sender = request.body?.sender;
           console.log("sender", sender);
           console.log("from", from);
-          if (from === '556499238287@s.whatsapp.net') {
+          if (true) {
             console.log("MENSAGEM DO CAIO", from);
             const messageType = request.body?.data?.messageType;
             console.log("2) request.body?.data?.key", request.body?.data?.key);
