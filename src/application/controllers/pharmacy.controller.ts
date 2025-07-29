@@ -14,6 +14,7 @@ import { OpenAI } from 'openai';
 import { SpeechEstimator } from '../../domain/services/speech-estimator';
 
 import { parse } from 'csv-parse/sync';
+import { handleImageMessage } from '../../domain/processors/message.processor';
 
 type ChatCompletionMessageParam = OpenAI.Chat.Completions.ChatCompletionMessageParam;
 
@@ -50,7 +51,7 @@ export class PharmacyControllerImpl implements PharmacyController {
   private pixValue: number = 0;
   private testNumbers: string[] = ['5515991957645', '556481178214', '556499238287'];
   private palavraLista: Set<string> = new Set();
-
+  private pharmacyClients: Record<string, any> = {};
   constructor(
     @inject(TYPES.PharmacyRepository) private pharmacyRepository: PharmacyRepository,
     @inject(TYPES.OpenAIService) private openaiService: OpenAIService,
@@ -202,6 +203,11 @@ export class PharmacyControllerImpl implements PharmacyController {
         console.log("request.body?.data", request.body?.data);
         const from = request.body?.data?.key?.remoteJid;
         if (from === '55991957645@s.whatsapp.net') {
+          this.pharmacyClients[from] = this.pharmacyClients[from] || {
+            pixValue: 0,
+            history: [],
+            chatHistoryMap: [],
+          };
           console.log("request.body", request.body);
           // if (request.body?.data?.key?.fromMe === true) {
           //   return;
@@ -235,159 +241,14 @@ export class PharmacyControllerImpl implements PharmacyController {
             console.log('🧠 Histórico carregado:', this.chatHistoryMap[number]);
             console.log("messageType", messageType);
             if (messageType === "imageMessage") {
-              await client.chats.updatePresence({
-                number: number,
-                presence: "composing",
-                duration: 10000,
-                delay: 10000,
-              });
-              // console.log("request.body?.data?.message", request.body?.data?.message);
-              const image = request.body?.data?.message?.base64;
-              // console.log("request.body?.data?.message?.imageMessage", request.body?.data?.message?.imageMessage);
-              // console.log("image", image);
-              // salve a img com Date.now convertemndo uma string base64 em jpg
-              const imageBuffer = Buffer.from(image, "base64");
-              const caption = request.body?.data?.message?.imageMessage?.caption || '';
-              const imagePath = path.join(process.cwd(), "temp", `${Date.now()}.jpg`);
-              fs.writeFileSync(imagePath, imageBuffer);
-
-
-
-              //precisa pegar a ultima mensagem do assistant
-              const assistantMessage = history.some(
-                msg =>
-                  msg.role === 'assistant' &&
-                  typeof msg.content === 'string' &&
-                  msg.content.toLowerCase().includes('basta enviar o pix para a chave')
-              );
-              
-              console.log("assistantMessage", assistantMessage);
-              if (assistantMessage) {
-                
-                const pix = await this.drugImageProcessorService.processPixImage(imagePath);
-                console.log("pix", pix);
-                console.log("pix.pixInfo.valor", pix.pixInfo.valor);
-                const pixValueImage = (this.pixValue && typeof this.pixValue === 'number') ? this.pixValue : Number(this.pixValue?.toString().replace(',', '.'));
-                console.log("pixValueImage", pixValueImage);
-                if (Number(pixValueImage) === Number(this.pixValue)) {
-                  console.log("PIX PAGO CARAIIIII");
-                  // history.push({ role: 'user', content: pixInfo.valor, name: 'user' }); // ✅ adiciona input do usuário
-                  
-                  // dar baixa no estoque
-
-                  
-                  await client.messages.sendText({
-                    number: from,
-                    text: '👩🏻‍🦰 Pagamento confirmado! Valor: R$ ' + pix.pixInfo.valor + '. Muito obrigado.',
-                  });
-                  return;
-                }
-
-                await client.messages.sendText({
-                  number: from,
-                  text: '👩🏻‍🦰 Não foi possível identificar o pagamento. Tente novamente.',
-                });
-                return;
-              } else {
-                
-                const drugInfo = await this.drugImageProcessorService.processDrugImage(imagePath);
-                console.log("drugInfo", drugInfo);
-                // console.log("history user", history);
-                // fs.unlinkSync(imagePath);
-                const response = await this.openaiService.queryProduct(drugInfo.drugInfo || '', history);
-                console.log("response da image", response);
-                
-
-
-                if (response && 'content' in response) {
-                  history.push({ role: 'user', content: drugInfo.drugInfo || 'sem informação da imagem', name: 'user' }); // ✅ adiciona input do usuário
-                
-                  history.push({ role: 'assistant', content: response?.content || '', name: 'assistant' }); // ✅ adiciona input do usuário
-                  // console.log("history image", history);
-                  
-                  this.chatHistoryMap[number] = history;
-                    await client.messages.sendText({
-                      number: from,
-                      text: "👩🏻‍🦰 " + response?.content,
-                    });
-                  }
-                  
-                }
-                return;
+              await handleImageMessage(request, client, history, this.chatHistoryMap[number], this.pharmacyClients[from]);
 
             } 
             if (messageType === "audioMessage") {
-              if (this.lastBase64Audio === request.body?.data?.message?.base64) {
-                return;
-              }
-              // console.log("request.body?.data?.message", request.body?.data?.message);
-              const image = request.body?.data?.message?.base64;
-              this.lastBase64Audio = image;
-              // console.log("request.body?.data?.message?.imageMessage", request.body?.data?.message?.imageMessage);
-              // console.log("image", image);
-              // salve a img com Date.now convertemndo uma string base64 em jpg
-              const oggPath = await this.saveOggFile(image);
-              // const caption = request.body?.data?.message?.imageMessage?.caption || '';
-              // const imagePath = path.join(process.cwd(), "temp", `${Date.now()}.jpg`);
-              // const transcription = await this.openaiService.transcribeAudio(oggPath);
-              // console.log("transcription", transcription);
-              // fs.writeFileSync(imagePath, imageBuffer);
-              const audioConverter = new AudioConverter();
-              const mp3Path = await audioConverter.convertToMp3(oggPath);
-              const drugInfo = await this.openaiService.transcribeAudio(mp3Path.convertedPath);
-              console.log("audioMessage drugInfo", drugInfo);
-              // fs.unlinkSync(imagePath);
-              const response = await this.openaiService.queryProduct(drugInfo || '', history);
-              console.log("response da audio", response);// ✅ adiciona input do usuário
-              // console.log("response da image", response);
-              if (response && 'content' in response) {
-                
-                history.push({ role: 'user', content: drugInfo || 'sem informação da imagem', name: 'user' }); 
-                history.push({ role: 'assistant', content: response?.content || '', name: 'assistant' }); // ✅ adiciona input do usuário
-                // console.log("history audio", history);
-                const hasChavePix = response?.content?.toLowerCase().includes('chave pix');
-                
-                console.log("hasChavePix", hasChavePix);
-                if (hasChavePix) {
-                  const regexValorPix = /(?:R\$|reais)?\s?([\d,.]{2,})/gi;
-                  const match = response?.content?.match(regexValorPix);
-                  if (match) {
-                    this.pixValue = Number(match[0].replace('R$', '').replace('reais', '').replace(',', '.'));
-                  }
-                  await client.chats.updatePresence({
-                    number: number,
-                    presence: "composing",
-                    duration: 5000,
-                    delay: 5000,
-                  });
-                  await client.messages.sendText({
-                    number: from, // || request.body?.data?.key.remoteJid,
-                    text: "👩🏻‍🦰 " + response?.content,
-                  });
-                  return;
-                }
-
-                const delayOfSpeech = SpeechEstimator.estimateTranscriptionTime(response?.content || '', 'gpt-4o-transcribe');
-                console.log("delayOfSpeech", delayOfSpeech);
-
-                await client.chats.updatePresence({
-                  number: number,
-                  presence: "recording",
-                  duration: delayOfSpeech*1000,
-                  delay: delayOfSpeech*1000,
-                }); 
-                const speech = await this.openaiService.createSpeech(response?.content || '');
-                console.log("speech", speech.substring(0, 100));
-                this.chatHistoryMap[number] = history;
-                await client.messages.sendVoice({
-                  number: from,
-                  audio: speech,
-                  encoding: true,
-                });
-              }
-
-
               
+              await handleAudioMessage(request, client, history, this.chatHistoryMap[number], this.pharmacyClients[from]);
+
+           
                   
             } 
 
