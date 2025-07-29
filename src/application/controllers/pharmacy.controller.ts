@@ -5,7 +5,6 @@ import { PharmacyRepository } from '../../infrastructure/repositories/pharmacy.r
 import { EvolutionClient } from "evolution-api-sdk";
 import { DrugImageProcessorService } from '../../domain/services/drug-image-processor.service';
 import { TextProcessorService } from '../../domain/services/text-processor.service';
-import { AudioConverter } from '../../domain/services/audio.converter.service';
 import path from 'path';
 import fs from 'fs';
 import { OpenAIService } from '../../domain/services/openai.service';
@@ -14,7 +13,7 @@ import { OpenAI } from 'openai';
 import { SpeechEstimator } from '../../domain/services/speech-estimator';
 
 import { parse } from 'csv-parse/sync';
-import { handleImageMessage } from '../../domain/processors/message.processor';
+import { handleImageMessage, handleAudioMessage, handleTextMessage } from '../../domain/processors/message.processor';
 
 type ChatCompletionMessageParam = OpenAI.Chat.Completions.ChatCompletionMessageParam;
 
@@ -147,45 +146,6 @@ export class PharmacyControllerImpl implements PharmacyController {
       });
     }
   }
-
-  async saveOggFile(base64String: string): Promise<string> {
-    try {
-      const fs = await import('fs');
-      const path = await import('path');
-      const tempDir = path.join(process.cwd(), 'temp');
-      const filename = `${Date.now()}.ogg`;
-      // Criar diretório temp se não existir
-      if (!fs.existsSync(tempDir)) {
-        fs.mkdirSync(tempDir, { recursive: true });
-      }
-      
-      const tempFilePath = path.join(tempDir, filename);
-      
-
-      // Verifique se base64String é uma string válida
-      if (!base64String || typeof base64String !== 'string') {
-        throw new Error('base64String inválido ou indefinido');
-      }
-  
-      // Verifique se filePath é uma string válida
-      if (!tempFilePath || typeof tempFilePath !== 'string') {
-        throw new Error('filePath inválido ou indefinido');
-      }
-  
-  
-      // Converta a string base64 para Buffer
-      const buffer = Buffer.from(base64String, 'base64');
-  
-      // Salve o arquivo
-      await fs.writeFileSync(tempFilePath, buffer);
-      console.log('Arquivo .ogg salvo com sucesso em', tempFilePath);
-      return tempFilePath;
-    } catch (err) {
-      console.error('Erro ao salvar o arquivo:', err);
-      return '';
-    }
-  }
-
   async webhook(
     request: FastifyRequest<{ Body: Record<string, any> }>,
     reply: FastifyReply
@@ -207,8 +167,9 @@ export class PharmacyControllerImpl implements PharmacyController {
             pixValue: 0,
             history: [],
             chatHistoryMap: [],
+            lastBase64Audio: '',
           };
-          console.log("request.body", request.body);
+          console.log("ENTREI NJO FONE", request.body);
           // if (request.body?.data?.key?.fromMe === true) {
           //   return;
           // }
@@ -239,7 +200,7 @@ export class PharmacyControllerImpl implements PharmacyController {
             }
             
             console.log('🧠 Histórico carregado:', this.chatHistoryMap[number]);
-            console.log("messageType", messageType);
+            console.log("messageType:", messageType);
             if (messageType === "imageMessage") {
               await handleImageMessage(request, client, history, this.chatHistoryMap[number], this.pharmacyClients[from]);
 
@@ -254,50 +215,7 @@ export class PharmacyControllerImpl implements PharmacyController {
 
             if (messageType === "conversation") {
               console.log("messageType conversation");
-              await client.chats.updatePresence({
-                number: number,
-                presence: "composing",
-                duration: 10000,
-                delay: 10000,
-              });
-              const messageText = request.body?.data?.message?.conversation;
-              console.log("messageText", messageText);
-
-              if (messageText == '') {
-                console.log("messageText vazio");
-                return;
-              }
-              const response = await this.openaiService.queryProduct(messageText || '', history);
-              console.log("response da messageText", response);
-
-              if (response === false) {
-                console.log("textMessage response false");
-                return;
-              }
-
-              let replyText = '';
-
-              if (Array.isArray(response)) {
-                // é um array de Remedio
-                replyText = '👩🏻‍🦰 Produtos encontrados:\n' + response.map(r => `• ${r.nome}`).join('\n');
-              } else if (response && 'content' in response) {
-                // é um objeto com campo content
-                replyText = response.content;
-                
-              } else {
-                replyText = '👩🏻‍🦰 Desculpe, não consegui entender sua solicitação.';
-              }
-              history.push({ role: 'user', content: messageText, name: 'user' }); // ✅ adiciona input do usuário
-              history.push({ role: 'assistant', content: replyText, name: 'assistant' });
-              // console.log("history", history);
-              console.log("replyText", replyText);
-              this.chatHistoryMap[number] = history;
-
-              
-              await client.messages.sendText({
-                number: from, // || request.body?.data?.key.remoteJid,
-                text: "👩🏻‍🦰 " + replyText,
-              });
+              await handleTextMessage(request, client, history, this.chatHistoryMap[number], this.pharmacyClients[from]);
             }
           }
           
