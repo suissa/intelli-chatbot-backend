@@ -12,6 +12,9 @@ import { OpenAIService } from '../../domain/services/openai.service';
 import axios from 'axios';
 import { OpenAI } from 'openai';
 import { SpeechEstimator } from '../../domain/services/speech-estimator';
+
+import { parse } from 'csv-parse/sync';
+
 type ChatCompletionMessageParam = OpenAI.Chat.Completions.ChatCompletionMessageParam;
 
 const client = new EvolutionClient({
@@ -45,6 +48,8 @@ export class PharmacyControllerImpl implements PharmacyController {
   private lastBase64Audio: string = '';
   private pixValue: number = 0;
   private testNumbers: string[] = ['5515991957645', '556481178214', '556499238287'];
+  private palavraLista: Set<string> = new Set();
+
   constructor(
     @inject(TYPES.PharmacyRepository) private pharmacyRepository: PharmacyRepository,
     @inject(TYPES.OpenAIService) private openaiService: OpenAIService,
@@ -53,6 +58,10 @@ export class PharmacyControllerImpl implements PharmacyController {
   ) {
     this.pixValue = 20.00;
     this.testNumbers = ['5515991957645', '556481178214', '556499238287'];
+    this.palavraLista = new Set(parse(fs.readFileSync('remedios_distinct.csv', 'utf8'), {
+      columns: true,
+      skip_empty_lines: true,
+    }).map((row: any) => row?.nome?.toLowerCase()));
   }
 
   // async processPixImage(imagePath: string): Promise<void> {
@@ -60,6 +69,7 @@ export class PharmacyControllerImpl implements PharmacyController {
   //   console.log("drugInfo", drugInfo);
   // }
 
+  
   async setWebhook(request: FastifyRequest, reply: FastifyReply): Promise<void> {
     try {
       await client.webhook.set({
@@ -180,252 +190,255 @@ export class PharmacyControllerImpl implements PharmacyController {
   ): Promise<void> {
     try {
       // const pharmacy = await this.pharmacyRepository.getPharmacyByCNPJ(cnpj);
-      const from = request.body?.data?.key?.remoteJid;
 
-      if (from !== '556499238287@s.whatsapp.net'  && from !== '55991957645@s.whatsapp.net') {
-        return;
-      }
+      // if (from !== '556499238287@s.whatsapp.net'  && from !== '55991957645@s.whatsapp.net') {
+      //   return;
+      // }
       console.log("1) request.body?.data?.key", request.body?.data?.key);
       // console.log("request.body", request.body);
       console.log("request.body?.event", request.body?.event);
       if (request.body?.event === "messages.upsert") {
-        console.log("request.body", request.body);
-        // if (request.body?.data?.key?.fromMe === true) {
-        //   return;
-        // }
-        // console.log("request.body?.data", request.body?.data);
-        // console.log("request.body?.data?.key", request.body?.data?.key);
         
-        // console.log("request.body?.data.message", request.body?.data.message);
-        if (request.body?.data?.key?.remoteJid?.includes("@g.us")) {
-          console.log("Skipping group message");
-          return;
-        } 
-        console.log("_____________________________________________________");
-        const pushName = request.body?.data?.pushName;
-        console.log("pushName", pushName);
-        const sender = request.body?.sender;
-        console.log("sender", sender);
         const from = request.body?.data?.key?.remoteJid;
-        console.log("from", from);
-        if (from === '556499238287@s.whatsapp.net') {
-          console.log("MENSAGEM DO CAIO", from);
-          const messageType = request.body?.data?.messageType;
-          console.log("2) request.body?.data?.key", request.body?.data?.key);
-
-          const number = request.body?.data?.key?.remoteJid?.replace('@s.whatsapp.net', '');
-          const history = this.chatHistoryMap[number] || [];
-          const historySize = 50;
-          if (history.length > historySize) {
-            history.splice(0, history.length - historySize);
-          }
+        if (from === '55991957645@s.whatsapp.net') {
+          console.log("request.body", request.body);
+          // if (request.body?.data?.key?.fromMe === true) {
+          //   return;
+          // }
+          // console.log("request.body?.data", request.body?.data);
+          // console.log("request.body?.data?.key", request.body?.data?.key);
           
-          console.log('🧠 Histórico carregado:', this.chatHistoryMap[number]);
-          console.log("messageType", messageType);
-          if (messageType === "imageMessage") {
-            await client.chats.updatePresence({
-              number: number,
-              presence: "composing",
-              duration: 10000,
-              delay: 10000,
-            });
-            // console.log("request.body?.data?.message", request.body?.data?.message);
-            const image = request.body?.data?.message?.base64;
-            // console.log("request.body?.data?.message?.imageMessage", request.body?.data?.message?.imageMessage);
-            // console.log("image", image);
-            // salve a img com Date.now convertemndo uma string base64 em jpg
-            const imageBuffer = Buffer.from(image, "base64");
-            const caption = request.body?.data?.message?.imageMessage?.caption || '';
-            const imagePath = path.join(process.cwd(), "temp", `${Date.now()}.jpg`);
-            fs.writeFileSync(imagePath, imageBuffer);
-
-
-
-            //precisa pegar a ultima mensagem do assistant
-            const assistantMessage = history.some(
-              msg =>
-                msg.role === 'assistant' &&
-                typeof msg.content === 'string' &&
-                msg.content.toLowerCase().includes('basta enviar o pix para a chave')
-            );
-            
-            console.log("assistantMessage", assistantMessage);
-            if (assistantMessage) {
-              
-              const pix = await this.drugImageProcessorService.processPixImage(imagePath);
-              console.log("pix", pix);
-              console.log("pix.pixInfo.valor", pix.pixInfo.valor);
-              const pixValueImage = (this.pixValue && typeof this.pixValue === 'number') ? this.pixValue : Number(this.pixValue?.toString().replace(',', '.'));
-              console.log("pixValueImage", pixValueImage);
-              if (Number(pixValueImage) === Number(this.pixValue)) {
-                console.log("PIX PAGO CARAIIIII");
-                // history.push({ role: 'user', content: pixInfo.valor, name: 'user' }); // ✅ adiciona input do usuário
-                
-                // dar baixa no estoque
-
-                
-                await client.messages.sendText({
-                  number: from,
-                  text: '👩🏻‍🦰 Pagamento confirmado! Valor: R$ ' + pix.pixInfo.valor + '. Muito obrigado.',
-                });
-                return;
-              }
-
-              await client.messages.sendText({
-                number: from,
-                text: '👩🏻‍🦰 Não foi possível identificar o pagamento. Tente novamente.',
-              });
-              return;
-            } else {
-              
-              const drugInfo = await this.drugImageProcessorService.processDrugImage(imagePath);
-              console.log("drugInfo", drugInfo);
-              // console.log("history user", history);
-              // fs.unlinkSync(imagePath);
-              const response = await this.openaiService.queryProduct(drugInfo.drugInfo || '', history);
-              console.log("response da image", response);
-              
-
-
-              if (response && 'content' in response) {
-                history.push({ role: 'user', content: drugInfo.drugInfo || 'sem informação da imagem', name: 'user' }); // ✅ adiciona input do usuário
-              
-                history.push({ role: 'assistant', content: response?.content || '', name: 'assistant' }); // ✅ adiciona input do usuário
-                // console.log("history image", history);
-                
-                this.chatHistoryMap[number] = history;
-                  await client.messages.sendText({
-                    number: from,
-                    text: "👩🏻‍🦰 " + response?.content,
-                  });
-                }
-                
-              }
-              return;
-
+          // console.log("request.body?.data.message", request.body?.data.message);
+          if (request.body?.data?.key?.remoteJid?.includes("@g.us")) {
+            console.log("Skipping group message");
+            return;
           } 
-          if (messageType === "audioMessage") {
-            if (this.lastBase64Audio === request.body?.data?.message?.base64) {
-              return;
+          console.log("_____________________________________________________");
+          const pushName = request.body?.data?.pushName;
+          console.log("pushName", pushName);
+          const sender = request.body?.sender;
+          console.log("sender", sender);
+          console.log("from", from);
+          if (from === '556499238287@s.whatsapp.net') {
+            console.log("MENSAGEM DO CAIO", from);
+            const messageType = request.body?.data?.messageType;
+            console.log("2) request.body?.data?.key", request.body?.data?.key);
+
+            const number = request.body?.data?.key?.remoteJid?.replace('@s.whatsapp.net', '');
+            const history = this.chatHistoryMap[number] || [];
+            const historySize = 50;
+            if (history.length > historySize) {
+              history.splice(0, history.length - historySize);
             }
-            // console.log("request.body?.data?.message", request.body?.data?.message);
-            const image = request.body?.data?.message?.base64;
-            this.lastBase64Audio = image;
-            // console.log("request.body?.data?.message?.imageMessage", request.body?.data?.message?.imageMessage);
-            // console.log("image", image);
-            // salve a img com Date.now convertemndo uma string base64 em jpg
-            const oggPath = await this.saveOggFile(image);
-            // const caption = request.body?.data?.message?.imageMessage?.caption || '';
-            // const imagePath = path.join(process.cwd(), "temp", `${Date.now()}.jpg`);
-            // const transcription = await this.openaiService.transcribeAudio(oggPath);
-            // console.log("transcription", transcription);
-            // fs.writeFileSync(imagePath, imageBuffer);
-            const audioConverter = new AudioConverter();
-            const mp3Path = await audioConverter.convertToMp3(oggPath);
-            const drugInfo = await this.openaiService.transcribeAudio(mp3Path.convertedPath);
-            console.log("audioMessage drugInfo", drugInfo);
-            // fs.unlinkSync(imagePath);
-            const response = await this.openaiService.queryProduct(drugInfo || '', history);
-            console.log("response da audio", response);// ✅ adiciona input do usuário
-            // console.log("response da image", response);
-            if (response && 'content' in response) {
-              
-              history.push({ role: 'user', content: drugInfo || 'sem informação da imagem', name: 'user' }); 
-              history.push({ role: 'assistant', content: response?.content || '', name: 'assistant' }); // ✅ adiciona input do usuário
-              // console.log("history audio", history);
-              const hasChavePix = response?.content?.toLowerCase().includes('chave pix');
-              
-              console.log("hasChavePix", hasChavePix);
-              if (hasChavePix) {
-                const regexValorPix = /(?:R\$|reais)?\s?([\d,.]{2,})/gi;
-                const match = response?.content?.match(regexValorPix);
-                if (match) {
-                  this.pixValue = Number(match[0].replace('R$', '').replace('reais', '').replace(',', '.'));
-                }
-                await client.chats.updatePresence({
-                  number: number,
-                  presence: "composing",
-                  duration: 5000,
-                  delay: 5000,
-                });
-                await client.messages.sendText({
-                  number: from, // || request.body?.data?.key.remoteJid,
-                  text: "👩🏻‍🦰 " + response?.content,
-                });
-                return;
-              }
-
-              const delayOfSpeech = SpeechEstimator.estimateTranscriptionTime(response?.content || '', 'gpt-4o-transcribe');
-              console.log("delayOfSpeech", delayOfSpeech);
-
+            
+            console.log('🧠 Histórico carregado:', this.chatHistoryMap[number]);
+            console.log("messageType", messageType);
+            if (messageType === "imageMessage") {
               await client.chats.updatePresence({
                 number: number,
-                presence: "recording",
-                duration: delayOfSpeech*1000,
-                delay: delayOfSpeech*1000,
-              }); 
-              const speech = await this.openaiService.createSpeech(response?.content || '');
-              console.log("speech", speech.substring(0, 100));
+                presence: "composing",
+                duration: 10000,
+                delay: 10000,
+              });
+              // console.log("request.body?.data?.message", request.body?.data?.message);
+              const image = request.body?.data?.message?.base64;
+              // console.log("request.body?.data?.message?.imageMessage", request.body?.data?.message?.imageMessage);
+              // console.log("image", image);
+              // salve a img com Date.now convertemndo uma string base64 em jpg
+              const imageBuffer = Buffer.from(image, "base64");
+              const caption = request.body?.data?.message?.imageMessage?.caption || '';
+              const imagePath = path.join(process.cwd(), "temp", `${Date.now()}.jpg`);
+              fs.writeFileSync(imagePath, imageBuffer);
+
+
+
+              //precisa pegar a ultima mensagem do assistant
+              const assistantMessage = history.some(
+                msg =>
+                  msg.role === 'assistant' &&
+                  typeof msg.content === 'string' &&
+                  msg.content.toLowerCase().includes('basta enviar o pix para a chave')
+              );
+              
+              console.log("assistantMessage", assistantMessage);
+              if (assistantMessage) {
+                
+                const pix = await this.drugImageProcessorService.processPixImage(imagePath);
+                console.log("pix", pix);
+                console.log("pix.pixInfo.valor", pix.pixInfo.valor);
+                const pixValueImage = (this.pixValue && typeof this.pixValue === 'number') ? this.pixValue : Number(this.pixValue?.toString().replace(',', '.'));
+                console.log("pixValueImage", pixValueImage);
+                if (Number(pixValueImage) === Number(this.pixValue)) {
+                  console.log("PIX PAGO CARAIIIII");
+                  // history.push({ role: 'user', content: pixInfo.valor, name: 'user' }); // ✅ adiciona input do usuário
+                  
+                  // dar baixa no estoque
+
+                  
+                  await client.messages.sendText({
+                    number: from,
+                    text: '👩🏻‍🦰 Pagamento confirmado! Valor: R$ ' + pix.pixInfo.valor + '. Muito obrigado.',
+                  });
+                  return;
+                }
+
+                await client.messages.sendText({
+                  number: from,
+                  text: '👩🏻‍🦰 Não foi possível identificar o pagamento. Tente novamente.',
+                });
+                return;
+              } else {
+                
+                const drugInfo = await this.drugImageProcessorService.processDrugImage(imagePath);
+                console.log("drugInfo", drugInfo);
+                // console.log("history user", history);
+                // fs.unlinkSync(imagePath);
+                const response = await this.openaiService.queryProduct(drugInfo.drugInfo || '', history);
+                console.log("response da image", response);
+                
+
+
+                if (response && 'content' in response) {
+                  history.push({ role: 'user', content: drugInfo.drugInfo || 'sem informação da imagem', name: 'user' }); // ✅ adiciona input do usuário
+                
+                  history.push({ role: 'assistant', content: response?.content || '', name: 'assistant' }); // ✅ adiciona input do usuário
+                  // console.log("history image", history);
+                  
+                  this.chatHistoryMap[number] = history;
+                    await client.messages.sendText({
+                      number: from,
+                      text: "👩🏻‍🦰 " + response?.content,
+                    });
+                  }
+                  
+                }
+                return;
+
+            } 
+            if (messageType === "audioMessage") {
+              if (this.lastBase64Audio === request.body?.data?.message?.base64) {
+                return;
+              }
+              // console.log("request.body?.data?.message", request.body?.data?.message);
+              const image = request.body?.data?.message?.base64;
+              this.lastBase64Audio = image;
+              // console.log("request.body?.data?.message?.imageMessage", request.body?.data?.message?.imageMessage);
+              // console.log("image", image);
+              // salve a img com Date.now convertemndo uma string base64 em jpg
+              const oggPath = await this.saveOggFile(image);
+              // const caption = request.body?.data?.message?.imageMessage?.caption || '';
+              // const imagePath = path.join(process.cwd(), "temp", `${Date.now()}.jpg`);
+              // const transcription = await this.openaiService.transcribeAudio(oggPath);
+              // console.log("transcription", transcription);
+              // fs.writeFileSync(imagePath, imageBuffer);
+              const audioConverter = new AudioConverter();
+              const mp3Path = await audioConverter.convertToMp3(oggPath);
+              const drugInfo = await this.openaiService.transcribeAudio(mp3Path.convertedPath);
+              console.log("audioMessage drugInfo", drugInfo);
+              // fs.unlinkSync(imagePath);
+              const response = await this.openaiService.queryProduct(drugInfo || '', history);
+              console.log("response da audio", response);// ✅ adiciona input do usuário
+              // console.log("response da image", response);
+              if (response && 'content' in response) {
+                
+                history.push({ role: 'user', content: drugInfo || 'sem informação da imagem', name: 'user' }); 
+                history.push({ role: 'assistant', content: response?.content || '', name: 'assistant' }); // ✅ adiciona input do usuário
+                // console.log("history audio", history);
+                const hasChavePix = response?.content?.toLowerCase().includes('chave pix');
+                
+                console.log("hasChavePix", hasChavePix);
+                if (hasChavePix) {
+                  const regexValorPix = /(?:R\$|reais)?\s?([\d,.]{2,})/gi;
+                  const match = response?.content?.match(regexValorPix);
+                  if (match) {
+                    this.pixValue = Number(match[0].replace('R$', '').replace('reais', '').replace(',', '.'));
+                  }
+                  await client.chats.updatePresence({
+                    number: number,
+                    presence: "composing",
+                    duration: 5000,
+                    delay: 5000,
+                  });
+                  await client.messages.sendText({
+                    number: from, // || request.body?.data?.key.remoteJid,
+                    text: "👩🏻‍🦰 " + response?.content,
+                  });
+                  return;
+                }
+
+                const delayOfSpeech = SpeechEstimator.estimateTranscriptionTime(response?.content || '', 'gpt-4o-transcribe');
+                console.log("delayOfSpeech", delayOfSpeech);
+
+                await client.chats.updatePresence({
+                  number: number,
+                  presence: "recording",
+                  duration: delayOfSpeech*1000,
+                  delay: delayOfSpeech*1000,
+                }); 
+                const speech = await this.openaiService.createSpeech(response?.content || '');
+                console.log("speech", speech.substring(0, 100));
+                this.chatHistoryMap[number] = history;
+                await client.messages.sendVoice({
+                  number: from,
+                  audio: speech,
+                  encoding: true,
+                });
+              }
+
+
+              
+                  
+            } 
+
+            if (messageType === "conversation") {
+              console.log("messageType conversation");
+              await client.chats.updatePresence({
+                number: number,
+                presence: "composing",
+                duration: 10000,
+                delay: 10000,
+              });
+              const messageText = request.body?.data?.message?.conversation;
+              console.log("messageText", messageText);
+
+              if (messageText == '') {
+                console.log("messageText vazio");
+                return;
+              }
+              const response = await this.openaiService.queryProduct(messageText || '', history);
+              console.log("response da messageText", response);
+
+              if (response === false) {
+                console.log("textMessage response false");
+                return;
+              }
+
+              let replyText = '';
+
+              if (Array.isArray(response)) {
+                // é um array de Remedio
+                replyText = '👩🏻‍🦰 Produtos encontrados:\n' + response.map(r => `• ${r.nome}`).join('\n');
+              } else if (response && 'content' in response) {
+                // é um objeto com campo content
+                replyText = response.content;
+                
+              } else {
+                replyText = '👩🏻‍🦰 Desculpe, não consegui entender sua solicitação.';
+              }
+              history.push({ role: 'user', content: messageText, name: 'user' }); // ✅ adiciona input do usuário
+              history.push({ role: 'assistant', content: replyText, name: 'assistant' });
+              // console.log("history", history);
+              console.log("replyText", replyText);
               this.chatHistoryMap[number] = history;
-              await client.messages.sendVoice({
-                number: from,
-                audio: speech,
-                encoding: true,
+
+              
+              await client.messages.sendText({
+                number: from, // || request.body?.data?.key.remoteJid,
+                text: "👩🏻‍🦰 " + replyText,
               });
             }
-
-
-            
-                
-          } 
-
-          if (messageType === "conversation") {
-            console.log("messageType conversation");
-            await client.chats.updatePresence({
-              number: number,
-              presence: "composing",
-              duration: 10000,
-              delay: 10000,
-            });
-            const messageText = request.body?.data?.message?.conversation;
-            console.log("messageText", messageText);
-
-            if (messageText == '') {
-              console.log("messageText vazio");
-              return;
-            }
-            const response = await this.openaiService.queryProduct(messageText || '', history);
-            console.log("response da messageText", response);
-
-            if (response === false) {
-              console.log("textMessage response false");
-              return;
-            }
-
-            let replyText = '';
-
-            if (Array.isArray(response)) {
-              // é um array de Remedio
-              replyText = '👩🏻‍🦰 Produtos encontrados:\n' + response.map(r => `• ${r.nome}`).join('\n');
-            } else if (response && 'content' in response) {
-              // é um objeto com campo content
-              replyText = response.content;
-              
-            } else {
-              replyText = '👩🏻‍🦰 Desculpe, não consegui entender sua solicitação.';
-            }
-            history.push({ role: 'user', content: messageText, name: 'user' }); // ✅ adiciona input do usuário
-            history.push({ role: 'assistant', content: replyText, name: 'assistant' });
-            // console.log("history", history);
-            console.log("replyText", replyText);
-            this.chatHistoryMap[number] = history;
-
-            
-            await client.messages.sendText({
-              number: from, // || request.body?.data?.key.remoteJid,
-              text: "👩🏻‍🦰 " + replyText,
-            });
           }
+          
         }
       }
     } catch (error) {
