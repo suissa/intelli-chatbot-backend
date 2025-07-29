@@ -179,7 +179,7 @@ export class PharmacyControllerImpl implements PharmacyController {
     reply: FastifyReply
   ): Promise<void> {
     try {
-      // console.log(request.body);
+      console.log(request.body);
       // const pharmacy = await this.pharmacyRepository.getPharmacyByCNPJ(cnpj);
       const from = request.body?.data?.key?.remoteJid;
 
@@ -213,16 +213,12 @@ export class PharmacyControllerImpl implements PharmacyController {
           console.log("MENSAGEM DO CAIO", from);
           const messageType = request.body?.data?.messageType;
           console.log("2) request.body?.data?.key", request.body?.data?.key);
-          // console.log("request.body?.data", request.body?.data);
-          // console.log("request.body?.data?.key", request.body?.data?.key);
-          
-          // console.log("request.body?.data.message", request.body?.data.message);
-          // console.log("request.body?.data.messageType", request.body?.data.messageType);
 
           const number = request.body?.data?.key?.remoteJid?.replace('@s.whatsapp.net', '');
           const history = this.chatHistoryMap[number] || [];
-          if (history.length > 20) {
-            history.splice(0, history.length - 50); // mantém só as últimas 20
+          const historySize = 50;
+          if (history.length > historySize) {
+            history.splice(0, history.length - historySize);
           }
           
           console.log('🧠 Histórico carregado:', this.chatHistoryMap[number]);
