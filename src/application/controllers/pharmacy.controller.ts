@@ -156,9 +156,9 @@ export class PharmacyControllerImpl implements PharmacyController {
       // if (from !== '556499238287@s.whatsapp.net'  && from !== '55991957645@s.whatsapp.net') {
       //   return;
       // }
-      console.log("1) request.body?.data?.key", request.body?.data?.key);
+      // console.log("1) request.body?.data?.key", request.body?.data?.key);
       // console.log("request.body", request.body);
-      console.log("request.body?.event", request.body?.event);
+      // console.log("request.body?.event", request.body?.event);
       if (request.body?.event === "messages.upsert") {
         console.log("request.body?.data", request.body?.data);
         const from = request.body?.data?.key?.remoteJid;
@@ -202,12 +202,12 @@ export class PharmacyControllerImpl implements PharmacyController {
             console.log('🧠 Histórico carregado:', this.chatHistoryMap[number]);
             console.log("messageType:", messageType);
             if (messageType === "imageMessage") {
-              await handleImageMessage(request, client, history, this.chatHistoryMap[number], this.pharmacyClients[from]);
+              await handleImageMessage(request, history, this.chatHistoryMap[number], this.pharmacyClients[from]);
 
             } 
             if (messageType === "audioMessage") {
               
-              await handleAudioMessage(request, client, history, this.chatHistoryMap[number], this.pharmacyClients[from]);
+              await handleAudioMessage(request, history, this.chatHistoryMap[number], this.pharmacyClients[from]);
 
            
                   
@@ -215,7 +215,7 @@ export class PharmacyControllerImpl implements PharmacyController {
 
             if (messageType === "conversation") {
               console.log("messageType conversation");
-              await handleTextMessage(request, client, history, this.chatHistoryMap[number], this.pharmacyClients[from]);
+              await handleTextMessage(request, history, this.chatHistoryMap[number], this.pharmacyClients[from]);
             }
           }
           
