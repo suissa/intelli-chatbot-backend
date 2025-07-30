@@ -55,10 +55,10 @@ export async function handleImageMessage(request: any,
   pharmacyClient: any) {
   const number = getNumber(request);
   const from = getFrom(request);
-  await clientEvo.chats.updatePresence(number, {
-    presence: "composing",
-    delay: 10000,
-  });
+  // await clientEvo.chats.updatePresence(number, {
+  //   presence: "composing",
+  //   delay: 10000,
+  // });
   // console.log("request.body?.data?.message", request.body?.data?.message);
   const image = request.body?.data?.message?.base64;
   // console.log("request.body?.data?.message?.imageMessage", request.body?.data?.message?.imageMessage);
@@ -146,10 +146,10 @@ export async function handleTextMessage(request: any,
   const from = getFrom(request);
   const message = getMessage(request);
   console.log("message", message);
-  await clientEvo.chats.updatePresence(number, {
-      presence: "composing",
-    delay: 10000,
-  });
+  // await clientEvo.chats.updatePresence(number, {
+  //     presence: "composing",
+  //   delay: 10000,
+  // });
   const messageText = getMessage(request);
   console.log("messageText", messageText);
 
@@ -278,10 +278,10 @@ export async function handleAudioMessage(request: any,
       if (match) {
         pharmacyClient.pixValue = Number(match[0].replace('R$', '').replace('reais', '').replace(',', '.'));
       }
-      await clientEvo.chats.updatePresence(number, {
-        presence: "composing",
-        delay: 5000,
-      });
+      // await clientEvo.chats.updatePresence(number, {
+      //   presence: "composing",
+      //   delay: 5000,
+      // });
       await clientEvo.messages.sendText({
         number: from, // || request.body?.data?.key.remoteJid,
         text: "👩🏻‍🦰 " + response?.content,
@@ -292,10 +292,10 @@ export async function handleAudioMessage(request: any,
     const delayOfSpeech = SpeechEstimator.estimateTranscriptionTime(response?.content || '', 'gpt-4o-transcribe');
     console.log("delayOfSpeech", delayOfSpeech);
 
-    await clientEvo.chats.updatePresence(number,      {
-      presence: "recording",
-      delay: delayOfSpeech*1000,
-    }); 
+    // await clientEvo.chats.updatePresence(number,      {
+    //   presence: "recording",
+    //   delay: delayOfSpeech*1000,
+    // }); 
     const speech = await openaiService.createSpeech(response?.content || '');
     console.log("speech", speech.substring(0, 100));
     if (chatHistoryMap) {
